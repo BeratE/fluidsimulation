@@ -5,7 +5,7 @@ double learnSPH::Kernel::kernel(Eigen::Vector3d x_i, Eigen::Vector3d x_j,
 {
     double q = (x_j - x_i).norm() / h;
 
-    return pow(h, -3) * cubicSpline(q);}
+    return (1/pow(h, 3)) * cubicSpline(q);}
 
 double learnSPH::Kernel::cubicSpline(const double q)
 {
