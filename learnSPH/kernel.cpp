@@ -11,13 +11,10 @@ double learnSPH::Kernel::kernel(Eigen::Vector3d x_i, Eigen::Vector3d x_j,
 Eigen::Vector3d learnSPH::Kernel::kernelGrad(Eigen::Vector3d x_i,
                                              Eigen::Vector3d x_j, double h)
 {
-    Eigen::Vector3d dist = (x_i - x_j);
-    Eigen::Vector3d diff = 2*dist;
-    for (int i = 0; i < 3; i++)
-        diff[i] = 1/sqrt(diff[i]);
-
+    Eigen::Vector3d dist = (x_j - x_i);
     double q = dist.norm() / h;
-    return pow(h, -3) * cubicSplineGrad(q) * 0.5*h * diff;
+    
+    return pow(h, -4) * cubicSplineGrad(q) * dist.normalized();
 }
 
 double learnSPH::Kernel::cubicSpline(const double q)
@@ -48,7 +45,7 @@ double learnSPH::Kernel::cubicSplineGrad(const double q)
         value = (3.0/2.0)*q*q - 2*q;
     }
     else if (q < 2.0) {
-        value = -(1.0/2.0)*(2-q)*(2-q);
+        value = -0.5*(2-q)*(2-q);
     }
         
     return alpha * value;
