@@ -1,4 +1,11 @@
+# Folders
 res
 build
+
+# Build files
+.ccls
 .ccls-cache
 compile_commands.json
+
+# Emacs
+.#*
