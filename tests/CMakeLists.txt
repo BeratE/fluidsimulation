@@ -9,4 +9,4 @@ set(SOURCE_FILES
 add_executable(learnSPH_tests ${SOURCE_FILES})
 add_dependencies(learnSPH_tests learnSPH)
 target_link_libraries(learnSPH_tests learnSPH)
-target_include_directories(learnSPH_tests PUBLIC ${PROJECT_SOURCE_DIR}/learnSPH)
+target_include_directories(learnSPH_tests PUBLIC ${PROJECT_SOURCE_DIR}/learnSPH )

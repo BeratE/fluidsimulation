@@ -103,15 +103,17 @@ TEST_CASE("Cubic kernel gradient", "[kernel]") {
     }
 
     for (int i = 0; i < NUM_PARTICLES-1; i++) {
-      for (int j = i + 1; j < NUM_PARTICLES; j++) {
-          Eigen::Vector3d gradApprox = cubicKernelGradApprox(particles[i], particles[j], h, eps);
-          Eigen::Vector3d gradCubic = Kernel::kernelGrad(particles[i], particles[j], h);
+        for (int j = i + 1; j < NUM_PARTICLES; j++) {
+            Eigen::Vector3d gradApprox = cubicKernelGradApprox(particles[i], particles[j], h, eps);
+            Eigen::Vector3d gradCubic = Kernel::kernelGrad(particles[i], particles[j], h);
 
-          for (int k = 0; k < 3; k++) {
-              std::cout << "q = "<< (particles[i]-particles[j]).norm()/h
-                        << " Grad = "<< gradCubic[k] << " Approx~ " << gradApprox[k] << std::endl;
-              REQUIRE(gradCubic[k] == Approx(gradApprox[k]).epsilon(0.01));
-          }
-      }
+            for (int k = 0; k < 3; k++) {
+                std::cout << "q = "<< (particles[i]-particles[j]).norm()/h
+                          << " Grad = "<< gradCubic[k] << " Approx~ " << gradApprox[k]
+                          << " Diff: " << fabs(gradCubic[k] - gradApprox[k]) << std::endl;
+               
+                REQUIRE(gradCubic[k] == Approx(gradApprox[k]).epsilon(0.01));
+            }
+        }
     }
 }
