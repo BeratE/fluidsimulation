@@ -18,6 +18,8 @@ set(SOURCE_FILES
 	util/obj_reader.h
 	util/vtk_writer.cpp
 	util/vtk_writer.h
+        particlesystem.cpp
+        particlesystem.h
 	kernel.cpp
 	kernel.h)
     
