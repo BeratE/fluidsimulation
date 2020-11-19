@@ -1,5 +1,6 @@
 #include "kernel.h"
-
+#define _USE_MATH_DEFINES
+#include <math.h>
 using namespace learnSPH::Kernel;
 
 double CubicSpline::support(double h)
@@ -24,7 +25,7 @@ double CubicSpline::cubicSpline(const double q)
 {
     assert(q >= 0.0);
         
-    constexpr double alpha = 3.0 / (2.0 * PI);
+    constexpr double alpha = 3.0 / (2.0 * M_PI);
     double value = 0.0;
         
     if (q < 1.0) {
@@ -41,7 +42,7 @@ double CubicSpline::cubicSplineGrad(const double q)
 {
     assert(q >= 0.0);
         
-    constexpr double alpha = 3.0 / (2.0 * PI);
+    constexpr double alpha = 3.0 / (2.0 * M_PI);
     double value = 0.0;
         
     if (q < 1.0) {
