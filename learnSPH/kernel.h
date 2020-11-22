@@ -14,11 +14,9 @@ namespace learnSPH {
         namespace CubicSpline {
             double support(double h);
             double weight(Eigen::Vector3d x_i, Eigen::Vector3d x_j, double h);
-            Eigen::Vector3d gradWeight(Eigen::Vector3d x_i, Eigen::Vector3d x_j,
-                                       double h);
-
+            Eigen::Vector3d gradWeight(Eigen::Vector3d x_i, Eigen::Vector3d x_j, double h);
             double cubicSpline(const double q);
-            double cubicSplineGrad(const double q);
+            double gradCubicSpline(const double q);
         } // namespace CubicSpline
     } // namespace Kernel
 } // namespace learnSPH

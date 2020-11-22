@@ -7,19 +7,19 @@ namespace learnSPH {
     namespace ParticleSystem {
 
         struct ParticleSystem {
-            unsigned int id;        // CompactNSearch PointSet ID
-            double restDensity;
+            long id = -1; // CompactNSearch PointSet ID
+            double restDensity = 0.0;
+            double particleRadius = 0.0; // (cubic root of volume) / 2
             std::vector<Eigen::Vector3d> positions; // Particle Positions
         };
 
         struct FluidSystem : ParticleSystem {
-            double particleRadius;
-            double particleMass;           // Constant particle density for all fluid particles
+            double particleMass = 0.0; // Constant particle density for all fluid particles
             std::vector<double> densities; // Estimated particle densities
         };
 
         struct BoundarySystem : ParticleSystem{
-            std::vector<double> particleMasses;
+            std::vector<double> particleMasses; // Each particle has its own mass
         };
 
 
@@ -38,9 +38,11 @@ namespace learnSPH {
          * @param &fluid      - Fluid system struct. Densitiy is written back into the struct.
          * @param &boundaries - list of boundary systems.
          * @param &nsearch    - CompactNSearch neighbourhood information. */
-        void estimateDensity(FluidSystem& fluid, std::vector<BoundarySystem>& boundaries,
-                             CompactNSearch::NeighborhoodSearch &nsearch);
-        void estimateDensity(FluidSystem& fluid, CompactNSearch::NeighborhoodSearch &nsearch);
+        void estimateDensity(FluidSystem& fluid,
+                             const std::vector<BoundarySystem>& boundaries,
+                             const CompactNSearch::NeighborhoodSearch &nsearch);
+        void estimateDensity(FluidSystem& fluid,
+                             const CompactNSearch::NeighborhoodSearch &nsearch);
         
     } // namespace ParticleSystem
 } // namespace learnSPH

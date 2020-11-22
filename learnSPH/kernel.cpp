@@ -18,7 +18,7 @@ Eigen::Vector3d CubicSpline::gradWeight(Eigen::Vector3d x_i, Eigen::Vector3d x_j
 {
     Eigen::Vector3d dist = (x_j - x_i);
     double q = dist.norm() / h;
-    return pow(h, -4) * cubicSplineGrad(q) * dist.normalized();
+    return pow(h, -4) * gradCubicSpline(q) * dist.normalized();
 }
 
 double CubicSpline::cubicSpline(const double q)
@@ -38,7 +38,7 @@ double CubicSpline::cubicSpline(const double q)
     return alpha * value;
 }
 
-double CubicSpline::cubicSplineGrad(const double q)
+double CubicSpline::gradCubicSpline(const double q)
 {
     assert(q >= 0.0);
         
