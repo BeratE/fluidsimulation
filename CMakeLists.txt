@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.1)
 project(learnSPH)
 set(CMAKE_CXX_STANDARD 17)
 
+configure_file (
+    "${PROJECT_SOURCE_DIR}/learnSPH/config.h.in"
+    "${PROJECT_SOURCE_DIR}/learnSPH/config.h"
+)
+
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # Parallel compilation in Visual Studio
 endif()

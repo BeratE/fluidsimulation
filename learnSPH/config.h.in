@@ -1,0 +1,3 @@
+#pragma once
+
+#define SOURCE_DIR "@PROJECT_SOURCE_DIR@"

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <CompactNSearch/CompactNSearch.h>
 
 namespace learnSPH {
@@ -30,18 +31,32 @@ namespace learnSPH {
          * @param samplingDistance - distance between particle samples. 
          *                           Effective particle diameter.
          * @return FuidSystem particles in the axis aligned box. */        
-        FluidSystem sampleBox(Eigen::Vector3d bottomLeft, Eigen::Vector3d topRight,
-                              double fluidRestDensity, double samplingDistance);
+        FluidSystem sampleFluidBox(Eigen::Vector3d bottomLeft, Eigen::Vector3d topRight,
+                                   double fluidRestDensity, double samplingDistance);
+
+        /* Sample positions in a triangle specified by 3d points a, b , c with sampling 
+         * distance apart from each other. 
+         * @param a, b , c         - 3d points of the triangle. 
+         * @param samplingDistance - distance the sample points are apart. 
+         * @return Vector of sampled 3d points within the triangle. */
+        std::vector<Eigen::Vector3d> samplePositionsTriangle(Eigen::Vector3d a,
+                                                             Eigen::Vector3d b,
+                                                             Eigen::Vector3d c,
+                                                             double samplingDistance);
+        
+        std::vector<Eigen::Vector3d> samplePositionsBox(Eigen::Vector3d bottomLeft,
+                                                        Eigen::Vector3d topRight,
+                                                        double samplingDistance);
         
         /* Estimate the densitiy of all fluid particles including the given boundaries
          *  with the given neighbourhood information.
          * @param &fluid      - Fluid system struct. Densitiy is written back into the struct.
          * @param &boundaries - list of boundary systems.
          * @param &nsearch    - CompactNSearch neighbourhood information. */
-        void estimateDensity(FluidSystem& fluid,
+        void estimateFluidDensity(FluidSystem& fluid,
                              const std::vector<BoundarySystem>& boundaries,
                              const CompactNSearch::NeighborhoodSearch &nsearch);
-        void estimateDensity(FluidSystem& fluid,
+        void estimateFluidDensity(FluidSystem& fluid,
                              const CompactNSearch::NeighborhoodSearch &nsearch);
         
     } // namespace ParticleSystem
