@@ -13,7 +13,7 @@ learnSPH::ParticleSystem::sampleFluidBox(Eigen::Vector3d bottomLeft,
                                          double samplingDistance)
 {
     const Eigen::Vector3d diagonal = topRight - bottomLeft;
-    const Eigen::Vector3d diagonalSign = diagonal.array() / diagonal.array();
+    const Eigen::Vector3d diagonalSign = diagonal.array() / diagonal.array().abs();
     const Eigen::Vector3d samplingDir = samplingDistance * diagonalSign;
     const Eigen::Vector3d numSamples = Eigen::floor(Eigen::abs(diagonal.array())/samplingDistance);
     
