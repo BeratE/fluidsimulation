@@ -26,7 +26,6 @@ set(SOURCE_FILES
 	kernel.h)
     
 # Create a library version so it can be linked with other modules
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_library(learnSPH ${SOURCE_FILES})
 target_link_libraries(learnSPH CompactNSearch)
 target_include_directories(learnSPH PUBLIC ${EIGEN3_INCLUDE_DIR} )

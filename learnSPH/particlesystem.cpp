@@ -32,6 +32,8 @@ learnSPH::ParticleSystem::sampleFluidBox(Eigen::Vector3d bottomLeft,
                 samplingPos += bottomLeft;
 
                 fluidParticles.positions.push_back(samplingPos);
+                fluidParticles.velocities.push_back(Eigen::Vector3d::Zero());
+                fluidParticles.accelerations.push_back(Eigen::Vector3d::Zero());
             }
         }
     }
@@ -199,4 +201,9 @@ double FluidSystem::getTimeCFL() {
     std::vector<Eigen::Vector3d>::iterator maxVelocity = std::max_element(velocities.begin(), velocities.end(), [](Eigen::Vector3d v1, Eigen::Vector3d v2) {
         return v1.norm() < v2.norm(); });
     return 0.5 * (particleRadius / (*maxVelocity).norm());
+}
+
+void FluidSystem::setAccelerationsToGravity() {
+    std::transform(accelerations.begin(), accelerations.end(), accelerations.begin(), [](Eigen::Vector3d a) {
+        return Eigen::Vector3d(0.0, -9.80665, 0.0);});
 }

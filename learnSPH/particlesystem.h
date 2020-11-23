@@ -21,6 +21,7 @@ namespace learnSPH {
             std::vector<Eigen::Vector3d> accelerations; // Partic   le Accelerations
 
             double getTimeCFL();
+            void setAccelerationsToGravity();
         };
 
         struct BoundarySystem : ParticleSystem{

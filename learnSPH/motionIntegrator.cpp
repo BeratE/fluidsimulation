@@ -1,3 +1,4 @@
+#include <Eigen/Dense>
 #include "motionIntegrator.h"
 #include "kernel.h"
 
@@ -17,20 +18,23 @@ learnSPH::MotionIntegrator::semiImplicitEulerIntegrator(ParticleSystem::FluidSys
 	fluid.velocities.resize(fluidPS.n_points());
 	fluid.accelerations.resize(fluidPS.n_points());
 
+	for (size_t fpI = 0; fpI < fluidPS.n_points(); fpI++) {
+		fluid.velocities[fpI] = fluid.velocities[fpI] + timeStep * fluid.accelerations[fpI];
+	}
+
 	// iterate fluid particles 
 	for (size_t fpI = 0; fpI < fluidPS.n_points(); fpI++) {
-		const Eigen::Vector3d fpPos = fluid.positions[fpI];
-		const Eigen::Vector3d newFpVel = fluid.velocities[fpI] + timeStep * fluid.accelerations[fpI];
-		Eigen::Vector3d fpVelStar = newFpVel;
-		Eigen::Vector3d fpVelSumOverNeighbors;
+		Eigen::Vector3d fpPos = fluid.positions[fpI];
+		Eigen::Vector3d fpVelStar = Eigen::Vector3d::Zero();
+		fpVelStar += fluid.velocities[fpI];
+		Eigen::Vector3d fpVelSumOverNeighbors = Eigen::Vector3d::Zero();
 		/* 
 		 * No need to pay attention to the particle itself when calculating fpSmoothedVelSum,
 		 * because vj - vi == 0 if i == j
 		 */
 		for (size_t fpN = 0; fpN < fluidPS.n_neighbors(fluid.id, fpI); fpN++) {
 			const unsigned int fnI = fluidPS.neighbor(fluid.id, fpI, fpN);
-			const Eigen::Vector3d fNVelEstimation = fluid.velocities[fnI] + timeStep * fluid.accelerations[fnI];
-			fpVelSumOverNeighbors += 2 * fluid.particleMass * pow(fluid.densities[fpI] + fluid.densities[fnI], -1) * (fNVelEstimation - newFpVel) * Kernel::CubicSpline::weight(fpPos, fluid.positions[fnI], h);
+			fpVelSumOverNeighbors += 2 * fluid.particleMass * pow(fluid.densities[fpI] + fluid.densities[fnI], -1) * Kernel::CubicSpline::weight(fpPos, fluid.positions[fnI], h) * (fluid.velocities[fnI] - fluid.velocities[fpI]);
 		}
 
 		fpVelSumOverNeighbors *= epsilon;
@@ -38,6 +42,6 @@ learnSPH::MotionIntegrator::semiImplicitEulerIntegrator(ParticleSystem::FluidSys
 
 		const Eigen::Vector3d newFpPos = fpPos + timeStep * fpVelStar;
 		fluid.positions[fpI] = newFpPos;
-		fluid.velocities[fpI] = newFpVel;
+		fluid.velocities[fpI] = fluid.velocities[fpI];
 	}
 }

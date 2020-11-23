@@ -1,6 +1,5 @@
 #pragma once
 #include "particlesystem.h"
-#include <Eigen/Dense>
 #include <CompactNSearch/CompactNSearch.h>
 
 

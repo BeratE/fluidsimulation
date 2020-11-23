@@ -38,7 +38,7 @@ TEST_CASE("Generate fluid particles in a box", "[box]")
 
     std::cout << "completed!" << std::endl;
     std::cout << "The scene files have been saved in the folder "
-        "`<build_folder>/res`. You can visualize them with Paraview."
+        "`<source_folder>/res`. You can visualize them with Paraview."
               << std::endl;
 }
 
@@ -55,7 +55,7 @@ TEST_CASE("Sample positions in a triangle", "[pos_triangle]")
 
     std::cout << "completed!" << std::endl;
     std::cout << "The scene files have been saved in the folder "
-        "`<build_folder>/res`. You can visualize them with Paraview."
+        "`<source_folder>/res`. You can visualize them with Paraview."
               << std::endl;
 }
 
@@ -71,6 +71,6 @@ TEST_CASE("Sample hollow boundary box", "[pos_box]")
 
     std::cout << "completed!" << std::endl;
     std::cout << "The scene files have been saved in the folder "
-        "`<build_folder>/res`. You can visualize them with Paraview."
+        "`<source_folder>/res`. You can visualize them with Paraview."
               << std::endl;
 }
