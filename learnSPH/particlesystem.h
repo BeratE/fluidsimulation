@@ -17,6 +17,10 @@ namespace learnSPH {
         struct FluidSystem : ParticleSystem {
             double particleMass = 0.0; // Constant particle density for all fluid particles
             std::vector<double> densities; // Estimated particle densities
+            std::vector<Eigen::Vector3d> velocities; // Particle Velocities
+            std::vector<Eigen::Vector3d> accelerations; // Partic   le Accelerations
+
+            double getTimeCFL();
         };
 
         struct BoundarySystem : ParticleSystem{

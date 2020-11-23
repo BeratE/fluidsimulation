@@ -25,6 +25,7 @@ learnSPH::ParticleSystem::sampleFluidBox(Eigen::Vector3d bottomLeft,
     for (size_t x = 0; x < (size_t)numSamples[0]; x++) {
         for (size_t y = 0; y < (size_t)numSamples[1]; y++) {
             for (size_t z = 0; z < (size_t)numSamples[2]; z++) {
+                // NOTE(DENNIS) - Kommen die letzten Samples hier nicht manchmal auch von außerhalb des Volumens?
                 Eigen::Vector3d samplingPos ((x + 0.5) * samplingDir[0],
                                              (y + 0.5) * samplingDir[1],
                                              (z + 0.5) * samplingDir[2]);
@@ -129,8 +130,8 @@ learnSPH::ParticleSystem::samplePositionsBox(Eigen::Vector3d bottomLeft,
     vertices.push_back(Eigen::Vector3d(bottomLeft(0)+dir(0), bottomLeft(1)+dir(1), bottomLeft(2)+dir(1)));
 
     std::vector<std::vector<Eigen::Vector3d>> v;
-    v.push_back(samplePositionsTriangle(vertices[0], vertices[1], vertices[2], samplingDistance));
     v.push_back(samplePositionsTriangle(vertices[2], vertices[1], vertices[3], samplingDistance));
+    v.push_back(samplePositionsTriangle(vertices[0], vertices[1], vertices[2], samplingDistance));
     v.push_back(samplePositionsTriangle(vertices[0], vertices[4], vertices[2], samplingDistance));
     v.push_back(samplePositionsTriangle(vertices[2], vertices[4], vertices[6], samplingDistance));
     v.push_back(samplePositionsTriangle(vertices[0], vertices[4], vertices[1], samplingDistance));
@@ -192,4 +193,10 @@ learnSPH::ParticleSystem::estimateFluidDensity(FluidSystem& fluid,
 
         fluid.densities[fpI] = particleDensity;
     }  
+}
+
+double FluidSystem::getTimeCFL() {
+    std::vector<Eigen::Vector3d>::iterator maxVelocity = std::max_element(velocities.begin(), velocities.end(), [](Eigen::Vector3d v1, Eigen::Vector3d v2) {
+        return v1.norm() < v2.norm(); });
+    return 0.5 * (particleRadius / (*maxVelocity).norm());
 }
