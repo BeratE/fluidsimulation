@@ -18,10 +18,22 @@ namespace learnSPH {
             double particleMass = 0.0; // Constant particle density for all fluid particles
             std::vector<double> densities; // Estimated particle densities
             std::vector<Eigen::Vector3d> velocities; // Particle Velocities
-            std::vector<Eigen::Vector3d> accelerations; // Partic   le Accelerations
+            std::vector<Eigen::Vector3d> accelerations; // Particle Accelerations
 
+            /*
+             * @return Calculates a timestep which satisfies the Courant Friedrich Levy (CFL) condition 
+             */
             double getTimeCFL();
+
+            /*
+             * Set the acceleration for every particle to g:= (0.0, -9.80665, 0.0)  
+             */
             void setAccelerationsToGravity();
+
+            /*
+             * Placeholder  
+             */
+            void calculateAccelerations();
         };
 
         struct BoundarySystem : ParticleSystem{
@@ -63,6 +75,17 @@ namespace learnSPH {
                              const CompactNSearch::NeighborhoodSearch &nsearch);
         void estimateFluidDensity(FluidSystem& fluid,
                              const CompactNSearch::NeighborhoodSearch &nsearch);
+
+        /*
+         * Estimates the positions of particles at desiredTime by interpolating the positions at prevTime and curTime
+         * @param &prevPositions - Previous positions of the particles
+         * @param &curPositions - Current positions of the particles
+         * @param prevTime - Time at which the prevPositions were determined
+         * @param curTime - Time at which the curPositions were determined
+         * @param desiredTime - Time at which the positions of the particles should be estimated. Requires prevTime <= desiredTime <= curTime.
+         * @returns interpolated positions of particles at desiredTime
+         */
+        std::vector<Eigen::Vector3d> interpolatePositions(const std::vector<Eigen::Vector3d>& prevPositions, const std::vector<Eigen::Vector3d>& curPositions, const double prevTime, const double curTime, const double desiredTime);
         
     } // namespace ParticleSystem
 } // namespace learnSPH

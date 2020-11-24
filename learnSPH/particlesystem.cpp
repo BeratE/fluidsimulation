@@ -22,9 +22,9 @@ learnSPH::ParticleSystem::sampleFluidBox(Eigen::Vector3d bottomLeft,
     fluidParticles.particleRadius = samplingDistance/2;
     fluidParticles.particleMass = pow(samplingDistance, 3) * fluidRestDensity;
 
-    for (size_t x = 0; x < (size_t)numSamples[0]; x++) {
-        for (size_t y = 0; y < (size_t)numSamples[1]; y++) {
-            for (size_t z = 0; z < (size_t)numSamples[2]; z++) {
+    for (size_t x = 0; x < (size_t)numSamples[0] - 1; x++) {
+        for (size_t y = 0; y < (size_t)numSamples[1] - 1; y++) {
+            for (size_t z = 0; z < (size_t)numSamples[2] - 1; z++) {
                 // NOTE(DENNIS) - Kommen die letzten Samples hier nicht manchmal auch von außerhalb des Volumens?
                 Eigen::Vector3d samplingPos ((x + 0.5) * samplingDir[0],
                                              (y + 0.5) * samplingDir[1],
@@ -206,4 +206,20 @@ double FluidSystem::getTimeCFL() {
 void FluidSystem::setAccelerationsToGravity() {
     std::transform(accelerations.begin(), accelerations.end(), accelerations.begin(), [](Eigen::Vector3d a) {
         return Eigen::Vector3d(0.0, -9.80665, 0.0);});
+}
+
+void FluidSystem::calculateAccelerations() {
+    return;
+}
+
+std::vector<Eigen::Vector3d> learnSPH::ParticleSystem::interpolatePositions(const std::vector<Eigen::Vector3d>& prevPositions, const std::vector<Eigen::Vector3d>& curPositions, const double prevTime, const double curTime, const double desiredTime) {
+    double timeBtwnCurAndPrev = curTime - prevTime;
+    double timeBtwnDesiredAndPrev = desiredTime - prevTime;
+    double beta = timeBtwnDesiredAndPrev / timeBtwnCurAndPrev;
+    double alpha = 1.0 - beta;
+
+    std::vector<Eigen::Vector3d> interpolation(prevPositions);
+    std::transform(prevPositions.begin(), prevPositions.end(), curPositions.begin(), interpolation.begin(), [alpha, beta](Eigen::Vector3d prevPos, Eigen::Vector3d curPos) {
+        return alpha * prevPos + beta * curPos; });
+    return interpolation;
 }

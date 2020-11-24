@@ -6,7 +6,7 @@ set(SOURCE_FILES
     test_main.cpp
     test_kernel.cpp
     test_sampling.cpp
-    test_integration.cpp)
+    test_simulation.cpp)
     
 add_executable(learnSPH_tests ${SOURCE_FILES})
 add_dependencies(learnSPH_tests learnSPH)
