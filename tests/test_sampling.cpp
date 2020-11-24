@@ -35,6 +35,7 @@ TEST_CASE("FluidBox", "Generate fluid particles in a box")
     save_particles_to_vtk(filename.str(), particles.positions, particles.densities);
 }
 
+
 TEST_CASE("FluidBoxBoundary", "Generate fluid particles enclosed in a boundary box")
 {
     // Generate particles
@@ -70,6 +71,7 @@ TEST_CASE("FluidBoxBoundary", "Generate fluid particles enclosed in a boundary b
     std::stringstream f2;
     f2 << SOURCE_DIR  << "/res/test_boundary_box.vtk";
     save_particles_to_vtk(f2.str(), boundaries[0].positions);
+
 }
 
 TEST_CASE("SampleTriangle", "Sample positions in a triangle")

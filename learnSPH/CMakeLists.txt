@@ -20,6 +20,8 @@ set(SOURCE_FILES
 	util/vtk_writer.h
         particlesystem.cpp
         particlesystem.h
+        simulator.cpp
+        simulator.h
 	kernel.cpp
 	kernel.h)
     
