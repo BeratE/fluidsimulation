@@ -38,6 +38,55 @@ learnSPH::ParticleSystem::sampleFluidBox(Eigen::Vector3d bottomLeft,
     return fluidParticles;
 }
 
+void
+learnSPH::ParticleSystem::estimateFluidDensity(FluidSystem &fluid,
+                                               const CompactNSearch::NeighborhoodSearch &nsearch)
+{
+    estimateFluidDensity(fluid, std::vector<BoundarySystem>(), nsearch);
+}
+
+
+void
+learnSPH::ParticleSystem::estimateFluidDensity(FluidSystem& fluid,
+                                               const std::vector<BoundarySystem>& boundaries,
+                                               const CompactNSearch::NeighborhoodSearch& nsearch)
+{
+    // smoothing length
+    const double h = Kernel::Parameter::TUNING * fluid.particleRadius * 2;
+    // get neighborhood information of fluid particle point set
+    CompactNSearch::PointSet const& fluidPS = nsearch.point_set(fluid.id);
+    fluid.densities.resize(fluidPS.n_points());
+    // iterate fluid particles
+    for (size_t fpI = 0; fpI < fluidPS.n_points(); fpI++) {
+        const Eigen::Vector3d &fpPos = fluid.positions[fpI];
+
+        // Fluid contribution
+        /* Note: The current fluid particle itself is part of its own neighborhood. */
+        double fluidDensity = 0.0;
+        fluidDensity += Kernel::CubicSpline::weight(fpPos, fpPos, h);
+        for (size_t fpN = 0; fpN < fluidPS.n_neighbors(fluid.id, fpI); fpN++) {
+            const unsigned int fnI = fluidPS.neighbor(fluid.id, fpI, fpN);
+            fluidDensity += Kernel::CubicSpline::weight(fpPos, fluid.positions[fnI], h);
+        }
+        fluidDensity *= fluid.particleMass;
+
+        // Boundary contribution
+        double boundaryDensity = 0.0;
+        for (const BoundarySystem &boundary : boundaries) {
+            double density = 0.0;
+            for (size_t bpI = 0; bpI < fluidPS.n_neighbors(boundary.id, fpI); bpI++) {
+                const unsigned int bnI = fluidPS.neighbor(boundary.id, fpI, bpI);
+                density += boundary.volumes[bnI]
+                    * Kernel::CubicSpline::weight(fpPos, boundary.positions[bnI], h);
+            }
+            density *= boundary.restDensity;
+            boundaryDensity += density;
+        }
+
+        fluid.densities[fpI] = fluidDensity + boundaryDensity;
+    }  
+}
+
 
 std::vector<Eigen::Vector3d>
 learnSPH::ParticleSystem::samplePositionsTriangle(Eigen::Vector3d a,
@@ -63,7 +112,8 @@ learnSPH::ParticleSystem::samplePositionsTriangle(Eigen::Vector3d a,
     // offset by half the sampling distance from the opposite triangle point o.
     auto constructEdge = [samplingDistance](Eigen::Vector2d a,
                                             Eigen::Vector2d b,
-                                            Eigen::Vector2d o) -> std::function<double(Eigen::Vector2d)> {
+                                            Eigen::Vector2d o)
+        -> std::function<double(Eigen::Vector2d)> {
         Eigen::Vector2d normal = (b-a);
         double tmp = normal(0);
         normal(0) = normal(1);
@@ -89,12 +139,14 @@ learnSPH::ParticleSystem::samplePositionsTriangle(Eigen::Vector3d a,
     rectMax(0) += (x(0) > y(0)) ? (x(0) > z(0) ? x(0) : z(0)) : (y(0) > z(0) ? y(0) : z(0));
     rectMax(1) += (x(1) > y(1)) ? (x(1) > z(1) ? x(1) : z(1)) : (y(1) > z(1) ? y(1) : z(1));
 
-    // Sample points in a raster of integer steps of sampling distance
+    // Sample points in a hexagonal raster of
+    // integer steps of sampling distance in j direction and sampling distance/sqrt(2) in i direction
     std::vector<Eigen::Vector2d> samples;
-    for (size_t i = 0; i < std::floor((rectMax(0) - rectMin(0)) / samplingDistance); i++) {
+    for (size_t i = 0; i < std::floor((rectMax(0) - rectMin(0)) / (samplingDistance/sqrt(2))); i++) {
         for (size_t j = 0; j < std::floor((rectMax(1) - rectMin(1)) / samplingDistance); j++) {
-            Eigen::Vector2d sample(rectMin(0) + i * samplingDistance,
+            Eigen::Vector2d sample(rectMin(0) + i * (samplingDistance/sqrt(2)),
                                    rectMin(1) + j * samplingDistance);
+            sample(1) += ((i%2) * samplingDistance*sqrt(2));
             if (edgeXY(sample) <= 0 && edgeYZ(sample) <= 0 && edgeZX(sample) <= 0)
                 samples.push_back(sample);
         }
@@ -149,47 +201,43 @@ learnSPH::ParticleSystem::samplePositionsBox(Eigen::Vector3d bottomLeft,
     return positions;
 }
 
-void
-learnSPH::ParticleSystem::estimateFluidDensity(FluidSystem &fluid,
-                                               const CompactNSearch::NeighborhoodSearch &nsearch)
+BoundarySystem
+learnSPH::ParticleSystem::createBoundary(const std::vector<Eigen::Vector3d> &positions,
+                                         double restDensity,
+                                         double particleMass,
+                                         double particleRadius)
+
 {
-    estimateFluidDensity(fluid, std::vector<BoundarySystem>(), nsearch);
+    BoundarySystem boundary;
+    boundary.restDensity = restDensity;
+    boundary.particleMass = particleMass;
+    boundary.particleRadius = particleRadius;
+    boundary.positions.insert(boundary.positions.end(), positions.begin(), positions.end());
+    correctBoundaryVolume(boundary);
+    return boundary;
 }
 
-
 void
-learnSPH::ParticleSystem::estimateFluidDensity(FluidSystem& fluid,
-                                               const std::vector<BoundarySystem>& boundaries,
-                                               const CompactNSearch::NeighborhoodSearch& nsearch)
+learnSPH::ParticleSystem::correctBoundaryVolume(BoundarySystem &boundary)
 {
-    // smoothing length
-    const double h = Kernel::Parameter::TUNING * fluid.particleRadius * 2;
-    // get neighborhood information of fluid particle point set
-    CompactNSearch::PointSet const& fluidPS = nsearch.point_set(fluid.id);
-    fluid.densities.resize(fluidPS.n_points());
-    // iterate fluid particles
-    for (size_t fpI = 0; fpI < fluidPS.n_points(); fpI++) {
-        const Eigen::Vector3d &fpPos = fluid.positions[fpI];
-        double particleDensity = 0.0;
+    // Get max distance between particles
+    const std::vector<Eigen::Vector3d> &pos = boundary.positions;
+    double d = Kernel::Parameter::TUNING * boundary.particleRadius * 2;
+    
+    CompactNSearch::NeighborhoodSearch nsearch(Kernel::CubicSpline::support(d));
 
-        // Fluid contribution
-        /* Note: The current fluid particle itself is part of its own neighborhood. */
-        particleDensity += Kernel::CubicSpline::weight(fpPos, fpPos, h);
-        for (size_t fpN = 0; fpN < fluidPS.n_neighbors(fluid.id, fpI); fpN++) {
-            const unsigned int fnI = fluidPS.neighbor(fluid.id, fpI, fpN);
-            particleDensity += Kernel::CubicSpline::weight(fpPos, fluid.positions[fnI], h);
+    unsigned int id  = nsearch.add_point_set(pos.front().data(), pos.size());
+    nsearch.find_neighbors();
+
+    CompactNSearch::PointSet const& ps = nsearch.point_set(id);
+    boundary.volumes.resize(ps.n_points());
+    
+    for (size_t i = 0; i < ps.n_points(); i++) {
+        double vol = Kernel::CubicSpline::weight(pos[i], pos[i], d);                                
+        for (size_t j = 0; j < ps.n_neighbors(id, i); j++) {
+            const size_t nid = ps.neighbor(id, i, j);
+            vol += Kernel::CubicSpline::weight(pos[i], pos[nid], d);                                
         }
-        particleDensity *= fluid.particleMass;
-
-        // Boundary contribution
-        for (const BoundarySystem &boundary : boundaries) {
-            for (size_t bpI = 0; bpI < fluidPS.n_neighbors(boundary.id, fpI); bpI++) {
-                const unsigned int bnI = fluidPS.neighbor(boundary.id, fpI, bpI);
-                particleDensity += boundary.particleMasses[bnI]
-                    * Kernel::CubicSpline::weight(fpPos, boundary.positions[bnI], h);
-            }
-        }
-
-        fluid.densities[fpI] = particleDensity;
-    }  
+        boundary.volumes[i] = 1.0 / vol;
+    }
 }

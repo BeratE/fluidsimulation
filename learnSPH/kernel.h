@@ -7,7 +7,7 @@
 namespace learnSPH {
     namespace Kernel {
         namespace Parameter {
-            constexpr double TUNING = 1.2;
+            constexpr double TUNING = 1.4;
         } 
 
         // Cubic Spline Kernel
