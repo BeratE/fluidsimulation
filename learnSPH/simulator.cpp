@@ -1,12 +1,12 @@
 #include <Eigen/Dense>
-#include "motionIntegrator.h"
+#include "simulator.h"
 #include "kernel.h"
 
 using namespace learnSPH;
-using namespace learnSPH::MotionIntegrator;
+using namespace learnSPH::Simulator;
 
 void
-learnSPH::MotionIntegrator::semiImplicitEulerIntegrator(ParticleSystem::FluidSystem& fluid, const double minimumTimeStep, const CompactNSearch::NeighborhoodSearch& nsearch, double epsilon) {
+learnSPH::Simulator::semiImplicitEuler(ParticleSystem::FluidSystem& fluid, const double minimumTimeStep, const CompactNSearch::NeighborhoodSearch& nsearch, double epsilon) {
 	// smoothin length 
 	const double h = Kernel::Parameter::TUNING * fluid.particleRadius * 2;
 	const double timeStepCFL = fluid.getTimeCFL();
@@ -45,3 +45,5 @@ learnSPH::MotionIntegrator::semiImplicitEulerIntegrator(ParticleSystem::FluidSys
 		fluid.velocities[fpI] = fluid.velocities[fpI];
 	}
 }
+
+

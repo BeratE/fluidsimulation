@@ -4,7 +4,7 @@
 
 
 namespace learnSPH {
-	namespace MotionIntegrator {
+	namespace Simulator {
 		/*
 		 * Estimate the new motion state of all the particles of a fluid using the semi-implicit Euler.
 		 * @param &fluid - Fluid for whose particles the motion update should be calculated.
@@ -12,6 +12,6 @@ namespace learnSPH {
 		 * @param &nsearch - Compact neighborhood information.
 		 * @param epsilon - Scaling factor for velocity estimation in XSPH. 
 		 */
-		void semiImplicitEulerIntegrator(ParticleSystem::FluidSystem& fluid, const double minimumTimeStep, const CompactNSearch::NeighborhoodSearch& nsearch, double epsilon);
+		void semiImplicitEuler(ParticleSystem::FluidSystem& fluid, const double minimumTimeStep, const CompactNSearch::NeighborhoodSearch& nsearch, double epsilon);
 	}
 }
