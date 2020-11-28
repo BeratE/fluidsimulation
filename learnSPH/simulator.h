@@ -21,6 +21,6 @@ namespace learnSPH {
 		 * @param epsilon - Scaling factor for velocity estimation in XSPH.
 		 * @param filename - Base name for the files that should store the particle position at different timesteps.
 		 */
-		void simulate(ParticleSystem::FluidSystem& fluid, const double defaultTimeStep, const int simulationSteps,  const std::string fileBaseName);
+		void simulate(ParticleSystem::FluidSystem& fluid, std::vector<ParticleSystem::BoundarySystem>& boundaries, const double defaultTimeStep, const int simulationSteps, const int zSortSkip, const std::string fileBaseName);
 	}
 }

@@ -45,12 +45,12 @@ TEST_CASE("Test semi-implicit Euler for a cube of particles with gravity only", 
     std::cout << "The scene files have been saved in the folder `<source_folder>/res/integration`. You can visualize them with Paraview." << std::endl;
 }
 
-TEST_CASE("Test time constant simulation for a cube of particles with gravity only", "[simulation]") {
+TEST_CASE("Test time constant simulation for a cube of particles with gravity in a box", "[simulation]") {
     std::cout << "Testing time constant simulation.." << std::endl;
 
     // Generate particles
-    const double restDensity = 1.0;
-    const double particleDiameter = 0.1;
+    const double restDensity = 1000;
+    const double particleDiameter = 0.2;
     const double smoothingLength = particleDiameter * Kernel::Parameter::TUNING;
 
     // Sample Particles in a Box
@@ -60,6 +60,12 @@ TEST_CASE("Test time constant simulation for a cube of particles with gravity on
             restDensity, particleDiameter);
 
     particles.setAccelerationsToGravity();
-
-    simulate(particles, 0.1, 10, std::string("time_consistent_simulation"));
+    particles.viscosity = 0.1;
+    std::vector<BoundarySystem> boundaries;
+    std::vector<Eigen::Vector3d> boundaryPositions = samplePositionsBox(Eigen::Vector3d(-0.1, -0.1, -0.1), Eigen::Vector3d(2, 2, 2), particleDiameter * 0.5);
+    BoundarySystem boundary = createBoundary(boundaryPositions, 2600, 1000, particleDiameter);
+    boundary.viscosity = 1;
+    boundaries.push_back(boundary);
+    
+    simulate(particles, boundaries, 0.02, 10, 50, std::string("time_consistent_simulation"));
 }

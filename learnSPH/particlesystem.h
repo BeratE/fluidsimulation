@@ -6,13 +6,20 @@
 
 namespace learnSPH {
     namespace ParticleSystem {
-
+        namespace Parameter {
+            constexpr double B = 5000.0; // B form calculation of pressure for particles (see Assignment 2, Exercise 4)
+        } //namespace Parameter
         struct ParticleSystem {
             long id = -1; // CompactNSearch PointSet ID
             double restDensity = 0.0;
             double particleMass = 0.0; // Constant particle density for all particles
             double particleRadius = 0.0; // (cubic root of volume) / 2
+            double viscosity = 0.0; // Viscosity, should be different for fluid and boundary
             std::vector<Eigen::Vector3d> positions; // Particle Positions
+        };
+
+        struct BoundarySystem : ParticleSystem{
+            std::vector<double> volumes; // Corrected particle volume
         };
 
         struct FluidSystem : ParticleSystem {
@@ -30,15 +37,21 @@ namespace learnSPH {
              */
             void setAccelerationsToGravity();
 
-            /*
-             * Placeholder  
-             */
-            void calculateAccelerations();
+            Eigen::Vector3d calculateAccelerationPressure(std::vector<BoundarySystem> boundaries, const CompactNSearch::NeighborhoodSearch& nsearch, const size_t fpI);
+
+            Eigen::Vector3d calculateAccelerationPressureFF(const CompactNSearch::NeighborhoodSearch& nsearch, const size_t fpI, const double particleDensityRatio);
+
+            Eigen::Vector3d calculateAccelerationPressureFS(std::vector<BoundarySystem> boundaries, const CompactNSearch::NeighborhoodSearch& nsearch, const size_t fpI, const double particleDensityRatio);
+
+            Eigen::Vector3d calculateAccelerationViscosity(std::vector<BoundarySystem> boundaries, const CompactNSearch::NeighborhoodSearch& nsearch, const size_t fpI);
+
+            Eigen::Vector3d calculateAccelerationViscosityFF(const CompactNSearch::NeighborhoodSearch& nsearch, const size_t fpI);
+
+            Eigen::Vector3d calculateAccelerationViscosityFS(std::vector<BoundarySystem> boundaries, const CompactNSearch::NeighborhoodSearch& nsearch, const size_t fpI);
+            
+            void updateAccelerations(std::vector<BoundarySystem> boundaries, const CompactNSearch::NeighborhoodSearch& nsearch);
         };
 
-        struct BoundarySystem : ParticleSystem{
-            std::vector<double> volumes; // Corrected particle volume
-        };
 
 
         /* Uniformly sample an axis box with fluid particles. 
@@ -100,5 +113,7 @@ namespace learnSPH {
          */
         std::vector<Eigen::Vector3d> interpolatePositions(const std::vector<Eigen::Vector3d>& prevPositions, const std::vector<Eigen::Vector3d>& curPositions, const double prevTime, const double curTime, const double desiredTime);
         
+        double calculatePressure(const double particleDensity, const double restDensity);
+
     } // namespace ParticleSystem
 } // namespace learnSPH

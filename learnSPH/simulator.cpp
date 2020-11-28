@@ -5,6 +5,7 @@
 #include "util/vtk_writer.h"
 #include "config.h"
 
+
 using namespace learnSPH;
 using namespace learnSPH::Simulator;
 using namespace learnSPH::ParticleSystem;
@@ -51,7 +52,14 @@ learnSPH::Simulator::semiImplicitEuler(ParticleSystem::FluidSystem& fluid, const
 }
 
 void
-learnSPH::Simulator::simulate(ParticleSystem::FluidSystem& fluid, const double defaultTimeStep, const int simulationSteps, const std::string fileBaseName) {
+learnSPH::Simulator::simulate(ParticleSystem::FluidSystem& fluid, std::vector<BoundarySystem>& boundaries, const double defaultTimeStep, const int simulationSteps, const int zSortSkip, const std::string fileBaseName) {
+	for (const BoundarySystem& boundary : boundaries) {
+		int boundaryIdx = 0;
+		std::vector<Eigen::Vector3d> boundaryPositions = boundary.positions;
+		save_particles_to_vtk(SOURCE_DIR + std::string("/res/simulation/") + fileBaseName + std::string("_boundary") + std::to_string(boundaryIdx) + std::string(".vtk"), boundaryPositions);
+		boundaryIdx++;
+	}
+	
 	std::vector<Eigen::Vector3d> prevPositions = fluid.positions;
 	save_particles_to_vtk(SOURCE_DIR + std::string("/res/simulation/") + fileBaseName + std::string("0.vtk"), prevPositions);
 	double timeStep = std::min(defaultTimeStep, fluid.getTimeCFL());
@@ -59,14 +67,35 @@ learnSPH::Simulator::simulate(ParticleSystem::FluidSystem& fluid, const double d
 	double simulatedTime = 0.0;
 	double prevTime = 0.0;
 	int fileNr = 1;
+	int simulationStep = 0;
 
 	CompactNSearch::NeighborhoodSearch nsearch(Kernel::CubicSpline::support(2.0 * fluid.particleRadius * Kernel::Parameter::TUNING));
 	fluid.id = nsearch.add_point_set(fluid.positions.front().data(), fluid.positions.size());
+	for (BoundarySystem& boundary : boundaries) {
+		boundary.id = nsearch.add_point_set(boundary.positions.front().data(), boundary.positions.size());
+	}
+
+	nsearch.find_neighbors();
+	estimateFluidDensity(fluid, nsearch);
 
 	while (fileNr <= simulationSteps) {
+		std::cout << simulatedTime << std::endl;
+		if (simulationStep % zSortSkip == 0) {
+			nsearch.z_sort();
+			auto const& fluidPS = nsearch.point_set(fluid.id);
+			fluidPS.sort_field(fluid.positions.data());
+			fluidPS.sort_field(fluid.densities.data());
+			fluidPS.sort_field(fluid.velocities.data());
+			fluidPS.sort_field(fluid.accelerations.data());
+			for (BoundarySystem& boundary : boundaries) {
+				auto const& boundaryPS = nsearch.point_set(boundary.id);
+				boundaryPS.sort_field(boundary.positions.data());
+				boundaryPS.sort_field(boundary.volumes.data());
+			}
+		}
 		nsearch.find_neighbors();
 		estimateFluidDensity(fluid, nsearch);
-		fluid.calculateAccelerations();
+		fluid.updateAccelerations(boundaries, nsearch);
 		semiImplicitEuler(fluid, defaultTimeStep, nsearch, Kernel::Parameter::EPSILON);
 		simulatedTime += timeStep;
 		if (simulatedTime >= nextStopTime) {
@@ -80,13 +109,8 @@ learnSPH::Simulator::simulate(ParticleSystem::FluidSystem& fluid, const double d
 		prevTime += timeStep;
 
 		timeStep = std::min(defaultTimeStep, fluid.getTimeCFL());
-
-
-		
+		simulationStep++;
 	}
-
-
-	
 }
 
 
