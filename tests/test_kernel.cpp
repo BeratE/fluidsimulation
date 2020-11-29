@@ -6,7 +6,7 @@
 
 using namespace learnSPH::Kernel;
 
-TEST_CASE("Cubic kernel function", "[kernel]" )
+TEST_CASE("Cubic", "[kernel]")
 {    
     const double h = 0.3;
     SECTION("ApproxInt", "[Approximate integral of s(q) using Simpson rule]") {
@@ -89,7 +89,7 @@ Eigen::Vector3d cubicKernelGradApprox(Eigen::Vector3d x_i, Eigen::Vector3d x_j,
     return grad;
 }
 
-TEST_CASE("Cubic kernel gradient", "[kernel]") {
+TEST_CASE("CubicGradient", "[kernel][gradient]") {
     const double eps = pow(10, -6);
     const double h = 0.4;
 
