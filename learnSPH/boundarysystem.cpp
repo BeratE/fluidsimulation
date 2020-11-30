@@ -8,19 +8,17 @@ using namespace CompactNSearch;
 void BoundarySystem::correctVolume()
 {   
     NeighborhoodSearch nsearch(CubicSpline::support(smoothingLength()));
-
-    unsigned int id  = nsearch.add_point_set(m_positions.front().data(),
-                                             m_positions.size());
+    addToNeighborhood(nsearch);
     nsearch.find_neighbors();
 
-    PointSet const& ps = nsearch.point_set(id);
+    PointSet const& ps = nsearch.point_set(getPointSetID());
     m_volumes.resize(ps.n_points());
     
     for (size_t i = 0; i < ps.n_points(); i++) {
         double vol = CubicSpline::weight(m_positions[i], m_positions[i],
                                          smoothingLength());
-        for (size_t j = 0; j < ps.n_neighbors(id, i); j++) {
-            const size_t nid = ps.neighbor(id, i, j);
+        for (size_t j = 0; j < ps.n_neighbors(getPointSetID(), i); j++) {
+            const size_t nid = ps.neighbor(getPointSetID(), i, j);
             vol += CubicSpline::weight(m_positions[i], m_positions[nid],
                                        smoothingLength());
         }

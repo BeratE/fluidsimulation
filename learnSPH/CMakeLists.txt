@@ -20,6 +20,12 @@ set(SOURCE_FILES
 	util/vtk_writer.h
         particlesystem.cpp
         particlesystem.h
+        fluidsystem.cpp
+        fluidsystem.h
+        boundarysystem.cpp
+        boundarysystem.h        
+        emitter.cpp
+        emitter.h
         #simulator.cpp
         #simulator.h
 	kernel.cpp

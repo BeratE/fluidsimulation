@@ -7,13 +7,13 @@ using namespace learnSPH::Kernel;
 using namespace CompactNSearch;
 
 
-void FluidSystem::estimateDensity(const NeighborhoodSearch &nsearch)
+void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch)
 {
-    estimateDensity(std::vector<BoundarySystem>(), nsearch);
+    estimateDensity(nsearch, std::vector<BoundarySystem>());
 }
 
-void FluidSystem::estimateDensity(const std::vector<BoundarySystem> &boundaries,
-                                  const NeighborhoodSearch &nsearch)
+void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch,
+                                  const std::vector<BoundarySystem> &boundaries)
 {
     // get neighborhood information of fluid particle point set
     CompactNSearch::PointSet const& fluidPS = nsearch.point_set(m_pointSetID);
@@ -33,7 +33,7 @@ void FluidSystem::estimateDensity(const std::vector<BoundarySystem> &boundaries,
             fluidDensity += CubicSpline::weight(fpPos, m_positions[fnI],
                                                 smoothingLength());
         }
-        fluidDensity *= m_particleMass;
+        fluidDensity *= particleMass();
 
         // Boundary contribution
         double boundaryDensity = 0.0;

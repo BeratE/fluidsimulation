@@ -5,19 +5,23 @@
 namespace learnSPH {
     class BoundarySystem;
     class FluidSystem : public ParticleSystem {
-        friend class Emitter;
+        friend class ParticleEmitter;
         
     private:
         FluidSystem() {}
 
     public:
-        /* Estimate the densitiy of all fluid particles including the given boundaries
-         *  with the given neighbourhood information.
+        /* Estimate the densitiy of all fluid particles including the given
+         * boundaries with the given neighbourhood information.
          * @param &boundaries - list of boundary systems.
          * @param &nsearch    - CompactNSearch neighbourhood information. */
-        void estimateDensity(const std::vector<BoundarySystem> &boundaries,
-                             const CompactNSearch::NeighborhoodSearch &nsearch);
-        void estimateDensity(const CompactNSearch::NeighborhoodSearch &nsearch);
+        void estimateDensity(CompactNSearch::NeighborhoodSearch &nsearch,
+                             const std::vector<BoundarySystem> &boundaries);
+        void estimateDensity(CompactNSearch::NeighborhoodSearch &nsearch);
+
+
+        // Setter & Getter
+        std::vector<double> getDensities() const { return m_densities; }
 
 
     private:

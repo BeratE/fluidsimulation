@@ -17,4 +17,5 @@ namespace learnSPH::Kernel {
         double cubicSpline(const double q);
         double gradCubicSpline(const double q);
     } // namespace CubicSpline
+    
 } // namespace learnSPH::Kernel

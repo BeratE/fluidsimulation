@@ -4,31 +4,38 @@
 #include <Eigen/Geometry>
 #include <CompactNSearch/CompactNSearch.h>
 
+
 namespace learnSPH {
     class ParticleSystem {
-        friend class Emitter;
+        friend class ParticleEmitter;
 
-    protected: ParticleSystem() {}
+    protected:
+        ParticleSystem() {}
         
     public:
-        static constexpr double B = 5000.0;
+        static constexpr double B = 5000.0;        
 
-        double smoothingLength();
-        size_t getSize() { return m_positions.size(); }
-        double getRestDensity() { return m_restDensity; }
-        double getParticleMass() { return m_particleMass; }
-        double getParticleRadius() { return m_particleRadius; }
-        double getPointSetID() { return m_pointSetID; }
-        Eigen::Vector3d getParticlePosition(size_t i) {return m_positions[i];}
-        std::vector<Eigen::Vector3d> getPositions() { return m_positions; }
+        double smoothingLength() const;
+        double particleMass() const;
+        
+        void addToNeighborhood(CompactNSearch::NeighborhoodSearch &nsearch);
 
+        // Setter & Getter
+        size_t getSize() const { return m_positions.size(); }
+        double getRestDensity() const { return m_restDensity; }
+        double getParticleRadius() const { return m_particleRadius; }
+       
+        long getPointSetID() const { return m_pointSetID; }
         void setPointSetID(double id) { m_pointSetID = id; }
-        void setParticlePosition(size_t i, Eigen::Vector3d pos) {m_positions[i] = pos;}
 
-      protected:
+        Eigen::Vector3d getParticlePos(size_t i) const {return m_positions[i];}
+        void setParticlePos(size_t i, Eigen::Vector3d pos) {m_positions[i] = pos;}
+
+        const std::vector<Eigen::Vector3d>& getPositions() const { return m_positions; }
+
+    protected:
         long m_pointSetID = -1; // CompactNSearch PointSet ID
         double m_restDensity = 1.0;
-        double m_particleMass = 1.0;   // Constant particle density for all particles
         double m_particleRadius = 1.0; // (cubic root of volume) / 2
         double m_viscosity = 0.0; // Viscosity, different for fluid and boundary
         std::vector<Eigen::Vector3d> m_positions; // Particle Positions
@@ -38,29 +45,11 @@ namespace learnSPH {
 
 
 
-// /* Sample positions in a triangle specified by 3d points a, b , c with
-//  * sampling distance apart from each other (hexagonal).
-//  * @param a, b , c         - 3d points of the triangle.
-//  * @param samplingDistance - distance the sample points are apart.
-//  * @return Vector of sampled 3d points within the triangle. */
-// std::vector<Eigen::Vector3d> samplePositionsTriangle(Eigen::Vector3d a,
-//                                                      Eigen::Vector3d b,
-//                                                      Eigen::Vector3d c,
-//                                                      double samplingDistance);
 
-// /* Sample a hollow box spanning from the bottom left to the top right corner.
-//  * @param bottomLeft - bottom left box corner.
-//  * @param topRight   - top right box corner diagonal to bottom left.
-//  * @param samplingDistance - particles are sampling distance apart.
-//  * @return vector of positions of sample points. */
-// std::vector<Eigen::Vector3d> samplePositionsBox(Eigen::Vector3d bottomLeft,
-//                                                 Eigen::Vector3d topRight,
-//                                                 double samplingDistance);
 
-// /* Construct a boundary from the given positions, rest density and mass */
-// BoundarySystem createBoundary(const std::vector<Eigen::Vector3d> &positions,
-//                               double restDensity, double particleMass,
-//                               double particleRadius);
+
+
+
 
 // /* Estimates the positions of particles at desiredTime by interpolating the
 //  * positions at prevTime and curTime
