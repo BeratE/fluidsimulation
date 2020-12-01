@@ -79,19 +79,19 @@ TEST_CASE("SolverRun", "[simulation]") {
                                                      particleDiameter);
 
     SolverSPH solver(particles);
-    solver.setSnapShotAfterMS(5);
+    solver.setSnapShotAfterMS(40);
     solver.setParameterStiffness(0.0);
     solver.setParameterViscosity(0.0);
     solver.enableGravity(false);
     solver.enableSmoothing(false);
     
     SECTION("SimpleSolverI") {      
-        solver.run("solver_test_I", 50);
+        solver.run("solver_test_I", 1000);
     }
 
     SECTION("SimpleSolverII") {
         solver.enableGravity(true);
         solver.setParameterStiffness(1000);
-        solver.run("solver_test_II", 50);
+        solver.run("solver_test_II", 1000);
     }   
 }

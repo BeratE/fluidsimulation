@@ -34,7 +34,7 @@ namespace learnSPH {
         double m_snapShotMS = 20;
 
         double m_smoothEps = 0.5;
-        
+        double m_minTimeStep = 0.002;
         bool m_gravityEnable = true;
         bool m_smoothingEnable = true;
         

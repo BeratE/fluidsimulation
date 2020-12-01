@@ -48,11 +48,13 @@ double SolverSPH::timeStepCFL()
     const double lambda = 0.5;
 
     auto const &velocities = m_system.getVelocities();
-    double maxVelNorm = m_system.getParticleRadius();
+    double maxVelNorm = 0.0;
     for (const auto &vel : velocities) 
         maxVelNorm = maxVelNorm > vel.norm() ? maxVelNorm : vel.norm();
+    if (maxVelNorm <= 0.0)
+        return m_minTimeStep;
     
-    return lambda * (2*m_system.getParticleRadius() / maxVelNorm);
+    return std::max(m_minTimeStep, lambda * (2*m_system.getParticleRadius() / maxVelNorm));
 }
 
 double SolverSPH::integrationStep()
@@ -135,38 +137,46 @@ void SolverSPH::run(std::string file, double milliseconds)
     
     std::vector<Eigen::Vector3d> previousPos(m_system.getPositions());
 
-    double runTime = 0.0;
+    double runTime_s = 0.0;
     size_t iteration = 0;
     size_t snapShotNr = 0;
-
-    const double MS = std::floor(milliseconds / m_snapShotMS) * m_snapShotMS;
+    double prevSnapShotTime_s = 0.0;
+    double nextSnapShotTime_s = 0.0;
+    
+    const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
+        * m_snapShotMS * pow(10, -3);
     
     // Single iteration step
-    double deltaT = integrationStep();
-    runTime += deltaT;
-    // Snapshot of first iteration
-    filename.str(std::string());
-    filename <<  SOURCE_DIR << "/res/simulation/" << file << snapShotNr << ".vtk";
-    save_particles_to_vtk(filename.str(), m_system.getPositions(), m_system.getDensities());
-    snapShotNr++;
-    std::cout << "save results to " << filename.str() << std::endl;
+    // double deltaT_s = integrationStep();
+    // runTime_s += deltaT;
     
-    while (runTime <= MS) {
-        double deltaT = integrationStep();
-        runTime += deltaT;
+    // // Snapshot of first iteration
+    // filename.str(std::string());
+    // filename <<  SOURCE_DIR << "/res/simulation/" << file << snapShotNr << ".vtk";
+    // save_particles_to_vtk(filename.str(), m_system.getPositions(), m_system.getDensities());
+    // snapShotNr++;
+    // nextSnapShotTime_s = snapShotNr * m_snapShotMS * pow(10, -3);
+    // std::cout << "save results to " << filename.str() << std::endl;
+    
+    while (runTime_s <= END_TIME_s && ++iteration) {
+        std::cout << iteration << " " << runTime_s <<std::endl;
+        double deltaT_s = integrationStep();
+        runTime_s += deltaT_s;
         
         // Snapshot
-        if (runTime > snapShotNr * m_snapShotMS) {
+        if (runTime_s > nextSnapShotTime_s) {
             filename.str(std::string());
             filename <<  SOURCE_DIR << "/res/simulation/" << file << snapShotNr << ".vtk";
             std::vector<Eigen::Vector3d> interpolPos
                 = interpolateVector<Eigen::Vector3d>(previousPos,
                                                      m_system.getPositions(),
-                                                     m_snapShotMS*(snapShotNr-1),
-                                                     runTime,
-                                                     m_snapShotMS*snapShotNr);
+                                                     prevSnapShotTime_s,
+                                                     runTime_s,
+                                                     nextSnapShotTime_s);
             save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
-            snapShotNr++;
+
+            prevSnapShotTime_s = nextSnapShotTime_s;
+            nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS * pow(10, -3);
             
             std::cout << "save results to " << filename.str() << std::endl;
         }
