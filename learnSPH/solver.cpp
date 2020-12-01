@@ -4,8 +4,6 @@
 #include "util/vtk_writer.h"
 #include <iostream>
 
-#define VECTOR_GRAVITY Eigen::Vector3d(0.0, -9.80665, 0.0)
-
 template<typename T>
 std::vector<T> interpolateVector(const std::vector<T>& previous,
                                  const std::vector<T>& current,
@@ -48,13 +46,11 @@ double SolverSPH::timeStepCFL()
     const double lambda = 0.5;
 
     auto const &velocities = m_system.getVelocities();
-    double maxVelNorm = 0.0;
+    double maxVelNorm = m_system.getParticleRadius();
     for (const auto &vel : velocities) 
         maxVelNorm = maxVelNorm > vel.norm() ? maxVelNorm : vel.norm();
-    if (maxVelNorm <= 0.0)
-        return m_minTimeStep;
     
-    return std::max(m_minTimeStep, lambda * (2*m_system.getParticleRadius() / maxVelNorm));
+    return std::min(m_maxTimeStep, lambda * (2*m_system.getParticleRadius() / maxVelNorm));
 }
 
 double SolverSPH::integrationStep()
@@ -62,15 +58,16 @@ double SolverSPH::integrationStep()
     const double deltaT = timeStepCFL();
     
     m_nsearch.find_neighbors();
-    m_system.estimateDensity(m_nsearch);
+    m_system.estimateDensity(m_nsearch, m_boundaries);
     m_system.updatePressure();
     m_system.updateAcceleration(m_nsearch, m_boundaries);
     
     // Add  gravity
     if (m_gravityEnable) {
-        auto &acc = m_system.getAccelerations();
         for (size_t i = 0; i < m_system.getSize(); i++) {
-            m_system.setParticleAcc(i, acc[i] + VECTOR_GRAVITY);
+            Eigen::Vector3d acc = m_system.getParticleAcc(i)
+                + Eigen::Vector3d(0.0, -0.980665, 0.0);
+            m_system.setParticleAcc(i, acc);
         }
     }
     
@@ -146,17 +143,6 @@ void SolverSPH::run(std::string file, double milliseconds)
     const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
         * m_snapShotMS * pow(10, -3);
     
-    // Single iteration step
-    // double deltaT_s = integrationStep();
-    // runTime_s += deltaT;
-    
-    // // Snapshot of first iteration
-    // filename.str(std::string());
-    // filename <<  SOURCE_DIR << "/res/simulation/" << file << snapShotNr << ".vtk";
-    // save_particles_to_vtk(filename.str(), m_system.getPositions(), m_system.getDensities());
-    // snapShotNr++;
-    // nextSnapShotTime_s = snapShotNr * m_snapShotMS * pow(10, -3);
-    // std::cout << "save results to " << filename.str() << std::endl;
     
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s <<std::endl;

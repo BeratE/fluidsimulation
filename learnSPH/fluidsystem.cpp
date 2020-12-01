@@ -45,7 +45,7 @@ void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch,
         fluidDensity += m_kernelTable.weight(fpPos, fpPos);
         for (size_t fpN = 0; fpN < fluidPS.n_neighbors(m_pointSetID, fpI); fpN++) {
             const unsigned int fnI = fluidPS.neighbor(m_pointSetID, fpI, fpN);
-            fluidDensity += m_kernelTable.weight(fpPos, m_positions[fnI]);
+            fluidDensity += CubicSpline::weight(fpPos, m_positions[fnI], smoothingLength());
         }
         fluidDensity *= particleMass();
 
@@ -58,7 +58,7 @@ void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch,
                 const unsigned int bnI = fluidPS.neighbor(boundary.getPointSetID(),
                                                           fpI, bpI);
                 density += boundary.getParticleVolume(bnI)
-                    * m_kernelTable.weight(fpPos, boundary.getParticlePos(bnI));
+                    * CubicSpline::weight(fpPos, boundary.getParticlePos(bnI), smoothingLength());
             }
             density *= boundary.getRestDensity();
             boundaryDensity += density;
@@ -102,6 +102,8 @@ Eigen::Vector3d FluidSystem::particlePressureAcc(size_t index,
     
     // Fluid contribution
     Eigen::Vector3d fluidContrib(0.0, 0.0, 0.0);
+    fluidContrib += particleMass * 2 * particleDensityRatio
+        * CubicSpline::gradWeight(pos, pos, smoothingLength());
     for (size_t j = 0; j < fluidPS.n_neighbors(id, index); j++) {
         const unsigned int k = fluidPS.neighbor(id, index, j);
 
@@ -109,7 +111,7 @@ Eigen::Vector3d FluidSystem::particlePressureAcc(size_t index,
             + (m_pressures[k] / pow(m_densities[k], 2));
         
         fluidContrib += particleMass * pressureTerm
-            * m_kernelTable.gradWeight(pos, m_positions[k]);
+            * CubicSpline::gradWeight(pos, m_positions[k], smoothingLength());
     }
 
     // Boundary contribution
@@ -121,7 +123,7 @@ Eigen::Vector3d FluidSystem::particlePressureAcc(size_t index,
             
             boundaryContrib += m_restDensity * boundary.getParticleVolume(k)
                 * particleDensityRatio
-                * m_kernelTable.gradWeight(pos, boundary.getParticlePos(k));
+                * CubicSpline::gradWeight(pos, boundary.getParticlePos(k), smoothingLength());
         }
     }
     
@@ -148,7 +150,7 @@ Eigen::Vector3d FluidSystem::particleViscosityAcc(size_t index,
             fluidContrib +=
                 (particleMass / getParticleDensity(k)) *
                 (getParticleVel(index) - getParticleVel(k)) *
-                posDiff.dot(m_kernelTable.gradWeight(pos, getParticlePos(k))) /
+                posDiff.dot(CubicSpline::gradWeight(pos, getParticlePos(k), smoothingLength())) /
                 (pow(posDiff.norm(), 2) + 0.01 * pow(smoothingLength(), 2));
         }
         fluidContrib *= getViscosity();
@@ -168,7 +170,7 @@ Eigen::Vector3d FluidSystem::particleViscosityAcc(size_t index,
             
             boundaryContrib += boundary.getViscosity() 
                 * boundary.getParticleVolume(k) * getParticleVel(index)
-                * posDiff.dot(m_kernelTable.gradWeight(pos, boundary.getParticlePos(k)))
+                * posDiff.dot(CubicSpline::gradWeight(pos, boundary.getParticlePos(k), smoothingLength()))
                 * (pow(posDiff.norm(), 2) + 0.01 * pow(smoothingLength(), 2));
         }
     }

@@ -21,6 +21,7 @@ TEST_CASE("semiEuler", "Test semi-implicit Euler for a cube of particles with gr
 
     std::stringstream filename;
     SolverSPH solver(particles);
+    solver.enableGravity(false);
     
     SECTION("EulerSmoothON") {
         solver.enableSmoothing(true);
@@ -74,8 +75,8 @@ TEST_CASE("SolverRun", "[simulation]") {
     const double particleDiameter = 0.1;
 
     // Sample Particles in a Box
-    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
-                                                     Eigen::Vector3d(1, 1, 1),
+    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0.2, 0),
+                                                     Eigen::Vector3d(1, 1.2, 1),
                                                      particleDiameter);
 
     SolverSPH solver(particles);
@@ -90,8 +91,19 @@ TEST_CASE("SolverRun", "[simulation]") {
     }
 
     SECTION("SimpleSolverII") {
-        solver.enableGravity(true);
+        //solver.enableGravity(true);
         solver.setParameterStiffness(1000);
         solver.run("solver_test_II", 1000);
+    }
+
+    SECTION("SimpleSolverIII") {
+        solver.enableGravity(true);
+        solver.addBoundary(Emitter().sampleBoundaryPlane(Eigen::Vector3d(0.0, 0.0, 0.0),
+                                                         Eigen::Vector3d(1.0, 0.0, 0.0),
+                                                         Eigen::Vector3d(0.0, 0.0, 1.0),
+                                                         Eigen::Vector3d(1.0, 0.0, 1.0),
+                                                         particleDiameter));
+        solver.setParameterStiffness(1000);
+        solver.run("solver_test_III", 8000);
     }   
 }

@@ -42,6 +42,13 @@ namespace learnSPH {
                                                double restDensity = 1000.0);
 
         
+        BoundarySystem sampleBoundaryPlane(Eigen::Vector3d bottomLeft,
+                                           Eigen::Vector3d bottomRight,
+                                           Eigen::Vector3d topLeft,
+                                           Eigen::Vector3d topRight,
+                                           double samplingDistance,
+                                           double restDensity = 1000.0);
+        
         /* Sample positions in a triangle specified by 3d points a, b , c with
          * sampling distance apart from each other (hexagonal).
          * @param a, b , c         - 3d points of the triangle.

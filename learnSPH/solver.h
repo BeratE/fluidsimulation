@@ -26,7 +26,7 @@ namespace learnSPH {
         void setParameterStiffness(double value) {m_system.setStiffness(value); }
         void setParameterViscosity(double value) {m_system.setViscosity(value); }
         void enableGravity(bool value) { m_gravityEnable = value; }
-        void enableSmoothing(bool value) {m_smoothingEnable = value; }
+        void enableSmoothing(bool value) { m_smoothingEnable = value; }
 
       private:
         void semiImplicitEulerStep(double deltaT);
@@ -34,7 +34,7 @@ namespace learnSPH {
         double m_snapShotMS = 20;
 
         double m_smoothEps = 0.5;
-        double m_minTimeStep = 0.002;
+        double m_maxTimeStep = 0.002;
         bool m_gravityEnable = true;
         bool m_smoothingEnable = true;
         

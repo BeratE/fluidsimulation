@@ -55,6 +55,25 @@ BoundarySystem ParticleEmitter::sampleBoundaryHollowBox(Vector3d bottomLeft,
     return boundary;
 }
 
+BoundarySystem ParticleEmitter::sampleBoundaryPlane(Eigen::Vector3d bottomLeft,
+                                                    Eigen::Vector3d bottomRight,
+                                                    Eigen::Vector3d topLeft,
+                                                    Eigen::Vector3d topRight,
+                                                    double samplingDistance,
+                                                    double restDensity)
+{
+    auto triangle1 = samplePosTriangle(bottomLeft, bottomRight, topRight, samplingDistance*0.8);
+    auto triangle2 = samplePosTriangle(topRight, topLeft, bottomLeft, samplingDistance*0.8);
+    triangle1.insert(triangle1.end(), triangle2.begin(), triangle2.end());
+    
+    BoundarySystem boundary(triangle1.size());
+    boundary.m_restDensity = restDensity;
+    boundary.m_particleRadius = samplingDistance/2;
+    boundary.m_positions = triangle1;
+    boundary.correctVolume();
+    return boundary;
+}
+
 std::vector<Vector3d> ParticleEmitter::samplePosTriangle(Vector3d a,
                                                          Vector3d b,
                                                          Vector3d c,
