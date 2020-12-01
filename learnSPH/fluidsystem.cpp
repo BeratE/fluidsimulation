@@ -18,6 +18,14 @@ FluidSystem::FluidSystem(size_t size, bool fill)
     }
 }
 
+FluidSystem::FluidSystem(double particleRadius,
+                         size_t size, bool fill)
+    : FluidSystem(size, fill)
+{
+    m_particleRadius = particleRadius;
+    initTable();
+}
+
 void FluidSystem::initTable()
 {
     m_kernelTable.generateTable(smoothingLength(), 1000);

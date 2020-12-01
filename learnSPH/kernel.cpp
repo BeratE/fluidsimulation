@@ -64,13 +64,17 @@ CubicSpline::Table::Table(double smoothingLength, size_t numBins)
 
 void CubicSpline::Table::generateTable(double smoothingLength, size_t numBins)
 {
+    m_smoothingLength = smoothingLength;
     m_support = CubicSpline::support(smoothingLength);
-    m_stepSize = 2*m_support/(numBins-1);
-    Eigen::Vector3d begin(0.0, 0.0, 0.0);
+    m_stepSize = m_support/numBins;
+
     for (int i = 0; i < numBins; i++) {
-        Eigen::Vector3d curr(-m_support + (i*m_stepSize), 0.0, 0.0);
-        m_weights.push_back(CubicSpline::weight(begin, curr, smoothingLength));
-        m_gradCubicSpline.push_back(CubicSpline::gradCubicSpline((begin-curr).norm() / smoothingLength));
+        double d = i*m_stepSize;
+        m_weights.push_back(CubicSpline::weight(Eigen::Vector3d(0.0, 0.0, 0.0),
+                                                Eigen::Vector3d(i*m_stepSize, 0.0, 0.0),
+                                                smoothingLength));
+        m_gradMagnitudes.push_back(CubicSpline::gradCubicSpline(d/smoothingLength)
+                                   * pow(m_smoothingLength, -4));
     }
     m_isInit = true;
 }
@@ -78,23 +82,26 @@ void CubicSpline::Table::generateTable(double smoothingLength, size_t numBins)
 double CubicSpline::Table::weight(Eigen::Vector3d x_i,
                                   Eigen::Vector3d x_j)
 {
+    assert(m_isInit);
+    
     double d = (x_j - x_i).norm();
-    if (!m_isInit || fabs(d) > m_support)
+    if (d > m_support)
         return 0.0;
-    d += m_support;
+    
     size_t i = floor(d/m_stepSize);
     return m_weights[i];
 }
 
 Eigen::Vector3d CubicSpline::Table::gradWeight(Eigen::Vector3d x_i,
-                                               Eigen::Vector3d x_j,
-                                               const double smoothingLength)
+                                               Eigen::Vector3d x_j)
 {
-    Eigen::Vector3d posDiff = x_j - x_i;
+    assert(m_isInit);
+    
+    Eigen::Vector3d posDiff = (x_j - x_i);
     double d = posDiff.norm();
-    if (!m_isInit || fabs(d) > m_support)
+    if (d > m_support)
         return Eigen::Vector3d(0.0, 0.0, 0.0);
-    d += m_support;
+    
     size_t i = floor(d/m_stepSize);
-    return pow(smoothingLength, -4)* m_gradCubicSpline[i] * posDiff.normalized();
+    return m_gradMagnitudes[i] * posDiff.normalized();
 }

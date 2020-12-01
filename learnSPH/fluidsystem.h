@@ -8,10 +8,10 @@ namespace learnSPH {
     class FluidSystem : public ParticleSystem {
         friend class ParticleEmitter;
 
-    public:
-        
+    public:        
         FluidSystem() {}
         FluidSystem(size_t size, bool fill = true);
+        FluidSystem(double particleRadius, size_t size, bool fill = true);
 
         void initTable();
         

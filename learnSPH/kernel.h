@@ -24,14 +24,15 @@ namespace learnSPH::Kernel {
             void generateTable(double smoothingLength, size_t numBins = 100);
 
             double weight(Eigen::Vector3d x_i, Eigen::Vector3d x_j);
-            Eigen::Vector3d gradWeight(Eigen::Vector3d x_i, Eigen::Vector3d x_j, const double smoothingLength);
+            Eigen::Vector3d gradWeight(Eigen::Vector3d x_i, Eigen::Vector3d x_j);
 
         private:
             bool m_isInit = false;
             double m_support;
             double m_stepSize;
+            double m_smoothingLength;
             std::vector<double> m_weights;
-            std::vector<double> m_gradCubicSpline;
+            std::vector<double> m_gradMagnitudes;
         };
     } // namespace CubicSpline
     

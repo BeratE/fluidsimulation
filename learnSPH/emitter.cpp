@@ -16,9 +16,8 @@ FluidSystem ParticleEmitter::sampleFluidBox(Vector3d bottomLeft,
                                                     / samplingDistance);
         
     size_t size = numSamples[0] * numSamples[1] * numSamples[2];
-    FluidSystem particles(size);
+    FluidSystem particles(samplingDistance/2, size);
     particles.m_restDensity = restDensity;
-    particles.m_particleRadius = samplingDistance/2;    
 
     for (size_t x = 0; x < (size_t)numSamples[0]; x++) {
         for (size_t y = 0; y < (size_t)numSamples[1]; y++) {
