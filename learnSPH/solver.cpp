@@ -93,6 +93,9 @@ void SolverSPH::applyExternalForces()
         m_system.addParticleForce(i, drag_force);
     }
 
+    // Iterate force objects
+    // ...
+
 
     // Appy forces
     const std::vector<Eigen::Vector3d> &forces = m_system.getForces();
@@ -111,7 +114,7 @@ void SolverSPH::semiImplicitEulerStep(double deltaT)
     const std::vector<Eigen::Vector3d> &velocities = m_system.getVelocities();
     for (size_t i = 0; i < fluidPS.n_points(); i++) {
         Eigen::Vector3d dV = deltaT * m_system.getParticleAcc(i);
-        m_system.setParticleVel(i,  velocities[i] + dV);
+        m_system.addParticleVel(i,  dV);
     }
 
     // Update positions
@@ -123,18 +126,16 @@ void SolverSPH::semiImplicitEulerStep(double deltaT)
         Eigen::Vector3d fpVelStar = fpVel;
         if (m_smoothingEnable) { // perform XSPH smoothing
             Eigen::Vector3d fpVelSumOverNeighbors = Eigen::Vector3d::Zero();
-            for (size_t j = 0; j < fluidPS.n_neighbors(id, i);
-                 j++) {
-                const unsigned int k =fluidPS.neighbor(id, i, j);
+            for (size_t j = 0; j < fluidPS.n_neighbors(id, i); j++) {
+                const unsigned int k = fluidPS.neighbor(id, i, j);
                 fpVelSumOverNeighbors +=
-                    (m_system.getParticleVel(k) - fpVel) /
-                    (m_system.getParticleDensity(k) + fpDensity) *
+                    (2 * m_system.particleMass() *
+                    (m_system.getParticleVel(k) - fpVel)  *
                     Kernel::CubicSpline::weight(fpPos, m_system.getParticlePos(k),
-                                                m_system.smoothingLength());
-
-                fpVelSumOverNeighbors *= 2 * m_system.particleMass() * m_smoothEps;
-                fpVelStar += fpVelSumOverNeighbors;
+                                                m_system.smoothingLength()))
+                    / (m_system.getParticleDensity(k) + fpDensity);
             }
+            fpVelStar += m_smoothEps * fpVelSumOverNeighbors;
         }
         m_system.setParticlePos(i, fpPos + deltaT * fpVelStar);
     }

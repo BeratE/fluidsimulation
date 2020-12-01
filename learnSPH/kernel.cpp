@@ -11,13 +11,13 @@ double CubicSpline::support(double h)
 
 double CubicSpline::weight(Eigen::Vector3d x_i, Eigen::Vector3d x_j, double h)
 {
-    double q = (x_j - x_i).norm() / h;
+    double q = (x_i - x_j).norm() / h;
     return pow(h, -3) * cubicSpline(q);
 }
 
 Eigen::Vector3d CubicSpline::gradWeight(Eigen::Vector3d x_i, Eigen::Vector3d x_j, double h)
 {
-    Eigen::Vector3d dist = (x_j - x_i);
+    Eigen::Vector3d dist = (x_i - x_j);
     double q = dist.norm() / h;
     return pow(h, -4) * gradCubicSpline(q) * dist.normalized();
 }
@@ -70,10 +70,11 @@ void CubicSpline::Table::generateTable(double smoothingLength, size_t numBins)
 
     for (int i = 0; i < numBins; i++) {
         double d = i*m_stepSize;
+        double q = d /smoothingLength;
         m_weights.push_back(CubicSpline::weight(Eigen::Vector3d(0.0, 0.0, 0.0),
-                                                Eigen::Vector3d(i*m_stepSize, 0.0, 0.0),
+                                                Eigen::Vector3d(d, 0.0, 0.0),
                                                 smoothingLength));
-        m_gradMagnitudes.push_back(CubicSpline::gradCubicSpline(d/smoothingLength)
+        m_gradMagnitudes.push_back(CubicSpline::gradCubicSpline(q)
                                    * pow(m_smoothingLength, -4));
     }
     m_isInit = true;
@@ -84,11 +85,11 @@ double CubicSpline::Table::weight(Eigen::Vector3d x_i,
 {
     assert(m_isInit);
     
-    double d = (x_j - x_i).norm();
+    double d = (x_i - x_j).norm();
     if (d > m_support)
         return 0.0;
     
-    size_t i = floor(d/m_stepSize);
+    size_t i = (size_t)floor(d/m_stepSize);
     return m_weights[i];
 }
 
@@ -97,11 +98,11 @@ Eigen::Vector3d CubicSpline::Table::gradWeight(Eigen::Vector3d x_i,
 {
     assert(m_isInit);
     
-    Eigen::Vector3d posDiff = (x_j - x_i);
+    Eigen::Vector3d posDiff = (x_i - x_j);
     double d = posDiff.norm();
     if (d > m_support)
         return Eigen::Vector3d(0.0, 0.0, 0.0);
     
-    size_t i = floor(d/m_stepSize);
+    size_t i = (size_t)floor(d/m_stepSize);
     return m_gradMagnitudes[i] * posDiff.normalized();
 }

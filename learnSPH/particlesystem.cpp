@@ -38,6 +38,16 @@ void ParticleSystem::addToNeighborhood(NeighborhoodSearch &nsearch)
                                          m_positions.size());
 }
 
+void ParticleSystem::addParticlePos(size_t i, Eigen::Vector3d pos)
+{
+    m_positions[i] += pos;
+}
+
+void ParticleSystem::addParticleVel(size_t i, Eigen::Vector3d vel)
+{
+    m_velocities[i] += vel;
+}
+
 void ParticleSystem::addParticleAcc(size_t i, Eigen::Vector3d acc)
 {
     m_accelerations[i] += acc;

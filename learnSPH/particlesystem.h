@@ -17,6 +17,8 @@ namespace learnSPH {
         
         void addToNeighborhood(CompactNSearch::NeighborhoodSearch &nsearch);
 
+        void addParticlePos(size_t i, Eigen::Vector3d pos);
+        void addParticleVel(size_t i, Eigen::Vector3d vel);
         void addParticleAcc(size_t i, Eigen::Vector3d acc);
         void addParticleForce(size_t i, Eigen::Vector3d force);
         void clearForces();
@@ -54,9 +56,4 @@ namespace learnSPH {
         std::vector<Eigen::Vector3d> m_accelerations; // Particle Accelerations
         std::vector<Eigen::Vector3d> m_forces; // Particle Force Accumulator
     };
-    
 } // namespace learnSPH
-
-
-// double calculatePressure(const double particleDensity,
-//                          const double restDensity);
