@@ -83,7 +83,7 @@ void CubicSpline::Table::generateTable(double smoothingLength, size_t numBins)
 double CubicSpline::Table::weight(Eigen::Vector3d x_i,
                                   Eigen::Vector3d x_j)
 {
-    assert(m_isInit);
+
     
     double d = (x_i - x_j).norm();
     if (d > m_support)

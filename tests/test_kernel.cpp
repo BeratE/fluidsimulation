@@ -82,9 +82,9 @@ Eigen::Vector3d cubicKernelGradApprox(Eigen::Vector3d x_i, Eigen::Vector3d x_j,
     Eigen::Vector3d e_y(0.0, eps, 0.0);
     Eigen::Vector3d e_z(0.0, 0.0, eps);
     Eigen::Vector3d grad;
-    grad[0] = CubicSpline::weight(x_i, x_j+e_x, h) - CubicSpline::weight(x_i, x_j-e_x, h);
-    grad[1] = CubicSpline::weight(x_i, x_j+e_y, h) - CubicSpline::weight(x_i, x_j-e_y, h);
-    grad[2] = CubicSpline::weight(x_i, x_j+e_z, h) - CubicSpline::weight(x_i, x_j-e_z, h);
+    grad[0] = CubicSpline::weight(x_i + e_x, x_j, h) - CubicSpline::weight(x_i - e_x, x_j, h);
+    grad[1] = CubicSpline::weight(x_i + e_y, x_j, h) - CubicSpline::weight(x_i - e_y, x_j, h);
+    grad[2] = CubicSpline::weight(x_i + e_z, x_j, h) - CubicSpline::weight(x_i - e_z, x_j, h);
     grad /= (2*eps);
     return grad;
 }
@@ -109,7 +109,7 @@ TEST_CASE("CubicGradient", "[kernel][gradient]") {
                                                                    particles[j], h, eps);
                 Eigen::Vector3d gradCubic = CubicSpline::gradWeight(particles[i],
                                                                          particles[j], h);
-
+                
                 for (int k = 0; k < 3; k++) {
                     INFO("q = " << (particles[i] - particles[j]).norm() / h
                          << " Grad = " << gradCubic[k] << " Approx~ "

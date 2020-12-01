@@ -75,3 +75,4 @@ TEST_CASE("FluidBoxBoundary", "Generate fluid particles enclosed in a boundary b
     save_particles_to_vtk(f2.str(), boundaries[0].getPositions(), boundaries[0].getVolumes());
     std::cout << "Results saved to " << f2.str() << std::endl;
 }
+
