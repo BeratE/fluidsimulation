@@ -37,3 +37,19 @@ void ParticleSystem::addToNeighborhood(NeighborhoodSearch &nsearch)
     m_pointSetID = nsearch.add_point_set(m_positions.front().data(),
                                          m_positions.size());
 }
+
+void ParticleSystem::addParticleAcc(size_t i, Eigen::Vector3d acc)
+{
+    m_accelerations[i] += acc;
+}
+
+void ParticleSystem::addParticleForce(size_t i, Eigen::Vector3d force)
+{
+    m_forces[i] += force;
+}
+
+void ParticleSystem::clearForces()
+{
+    std::fill(m_forces.begin(), m_forces.end(),
+              Eigen::Vector3d(0.0, 0.0, 0.0));
+}

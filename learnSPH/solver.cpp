@@ -4,6 +4,9 @@
 #include "util/vtk_writer.h"
 #include <iostream>
 
+#define GRAVITY Eigen::Vector3d(0.0, -0.980665, 0.0)
+
+
 template<typename T>
 std::vector<T> interpolateVector(const std::vector<T>& previous,
                                  const std::vector<T>& current,
@@ -46,7 +49,7 @@ double SolverSPH::timeStepCFL()
     const double lambda = 0.5;
 
     auto const &velocities = m_system.getVelocities();
-    double maxVelNorm = m_system.getParticleRadius();
+    double maxVelNorm = 1.0;
     for (const auto &vel : velocities) 
         maxVelNorm = maxVelNorm > vel.norm() ? maxVelNorm : vel.norm();
     
@@ -61,16 +64,7 @@ double SolverSPH::integrationStep()
     m_system.estimateDensity(m_nsearch, m_boundaries);
     m_system.updatePressure();
     m_system.updateAcceleration(m_nsearch, m_boundaries);
-    
-    // Add  gravity
-    if (m_gravityEnable) {
-        for (size_t i = 0; i < m_system.getSize(); i++) {
-            Eigen::Vector3d acc = m_system.getParticleAcc(i)
-                + Eigen::Vector3d(0.0, -0.980665, 0.0);
-            m_system.setParticleAcc(i, acc);
-        }
-    }
-    
+    applyExternalForces();
     semiImplicitEulerStep(deltaT);
 
     return deltaT;
@@ -82,11 +76,37 @@ void SolverSPH::addBoundary(BoundarySystem boundary)
     m_boundaries.back().addToNeighborhood(m_nsearch);
 }
 
+void SolverSPH::applyExternalForces()
+{
+    m_system.clearForces();
+    
+    // Add  gravity
+    if (m_gravityEnable) {
+        for (size_t i = 0; i < m_system.getSize(); i++) {
+            m_system.addParticleAcc(i, GRAVITY);
+        }
+    }
+
+    // Drag force
+    for (size_t i = 0; i < m_system.getSize(); i++) {
+        auto drag_force = -m_drag*m_system.getParticleVel(i);
+        m_system.addParticleForce(i, drag_force);
+    }
+
+
+    // Appy forces
+    const std::vector<Eigen::Vector3d> &forces = m_system.getForces();
+    for (size_t i = 0; i < m_system.getSize(); i++) {
+        auto facc = m_system.getParticleForce(i)/m_system.getRestDensity();
+        m_system.addParticleAcc(i, facc);
+    }
+}
+
 void SolverSPH::semiImplicitEulerStep(double deltaT)
 {    
     const size_t id = m_system.getPointSetID();
     CompactNSearch::PointSet const& fluidPS = m_nsearch.point_set(id);
-
+    
     // Update velocities
     const std::vector<Eigen::Vector3d> &velocities = m_system.getVelocities();
     for (size_t i = 0; i < fluidPS.n_points(); i++) {

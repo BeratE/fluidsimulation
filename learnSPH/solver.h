@@ -24,15 +24,18 @@ namespace learnSPH {
 
         void setSnapShotAfterMS(double ms) {m_snapShotMS = ms;}
         void setParameterStiffness(double value) {m_system.setStiffness(value); }
+        void setParameterDrag(double value) { m_drag = value; }
         void setParameterViscosity(double value) {m_system.setViscosity(value); }
         void enableGravity(bool value) { m_gravityEnable = value; }
         void enableSmoothing(bool value) { m_smoothingEnable = value; }
 
       private:
+        void applyExternalForces();
         void semiImplicitEulerStep(double deltaT);
         
         double m_snapShotMS = 20;
 
+        double m_drag = 0.1;
         double m_smoothEps = 0.5;
         double m_maxTimeStep = 0.002;
         bool m_gravityEnable = true;
