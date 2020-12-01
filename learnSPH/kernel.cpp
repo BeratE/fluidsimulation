@@ -70,7 +70,7 @@ void CubicSpline::Table::generateTable(double smoothingLength, size_t numBins)
     for (int i = 0; i < numBins; i++) {
         Eigen::Vector3d curr(-m_support + (i*m_stepSize), 0.0, 0.0);
         m_weights.push_back(CubicSpline::weight(begin, curr, smoothingLength));
-        m_weightGrads.push_back(CubicSpline::gradWeight(begin, curr, smoothingLength));
+        m_gradCubicSpline.push_back(CubicSpline::gradCubicSpline((begin-curr).norm() / smoothingLength));
     }
     m_isInit = true;
 }
@@ -87,12 +87,14 @@ double CubicSpline::Table::weight(Eigen::Vector3d x_i,
 }
 
 Eigen::Vector3d CubicSpline::Table::gradWeight(Eigen::Vector3d x_i,
-                                               Eigen::Vector3d x_j)
+                                               Eigen::Vector3d x_j,
+                                               const double smoothingLength)
 {
-    double d = (x_j - x_i).norm();
+    Eigen::Vector3d posDiff = x_j - x_i;
+    double d = posDiff.norm();
     if (!m_isInit || fabs(d) > m_support)
         return Eigen::Vector3d(0.0, 0.0, 0.0);
     d += m_support;
     size_t i = floor(d/m_stepSize);
-    return m_weightGrads[i];
+    return pow(smoothingLength, -4)* m_gradCubicSpline[i] * posDiff.normalized();
 }
