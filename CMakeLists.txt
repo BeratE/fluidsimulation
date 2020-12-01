@@ -3,8 +3,8 @@ project(learnSPH)
 set(CMAKE_CXX_STANDARD 17)
 
 configure_file (
-    "${PROJECT_SOURCE_DIR}/learnSPH/config.h.in"
-    "${PROJECT_SOURCE_DIR}/learnSPH/config.h"
+    "${PROJECT_SOURCE_DIR}/cmake/config.h.in"
+    "${PROJECT_SOURCE_DIR}/learnSPH/util/config.h"
 )
 
 if (MSVC)

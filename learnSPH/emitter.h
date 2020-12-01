@@ -32,14 +32,14 @@ namespace learnSPH {
         FluidSystem sampleFluidBox(Eigen::Vector3d bottomLeft,
                                    Eigen::Vector3d topRight,
                                    double samplingDistance,
-                                   double restDensity = 1.0);
+                                   double restDensity = 1000.0);
 
         
         /* Construct a boundary from the given positions, rest density and mass */
         BoundarySystem sampleBoundaryHollowBox(Eigen::Vector3d bottomLeft,
                                                Eigen::Vector3d topRight,
                                                double samplingDistance,
-                                               double restDensity = 1.0);
+                                               double restDensity = 1000.0);
 
         
         /* Sample positions in a triangle specified by 3d points a, b , c with

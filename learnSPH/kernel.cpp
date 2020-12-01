@@ -56,3 +56,43 @@ double CubicSpline::gradCubicSpline(const double q)
     return alpha * value;
 }
 
+// Table
+CubicSpline::Table::Table(double smoothingLength, size_t numBins)
+{
+    generateTable(smoothingLength, numBins);
+}
+
+void CubicSpline::Table::generateTable(double smoothingLength, size_t numBins)
+{
+    m_support = CubicSpline::support(smoothingLength);
+    m_stepSize = 2*m_support/(numBins-1);
+    Eigen::Vector3d begin(0.0, 0.0, 0.0);
+    for (int i = 0; i < numBins; i++) {
+        Eigen::Vector3d curr(-m_support + (i*m_stepSize), 0.0, 0.0);
+        m_weights.push_back(CubicSpline::weight(begin, curr, smoothingLength));
+        m_weightGrads.push_back(CubicSpline::gradWeight(begin, curr, smoothingLength));
+    }
+    m_isInit = true;
+}
+
+double CubicSpline::Table::weight(Eigen::Vector3d x_i,
+                                  Eigen::Vector3d x_j)
+{
+    double d = (x_j - x_i).norm();
+    if (!m_isInit || fabs(d) > m_support)
+        return 0.0;
+    d += m_support;
+    size_t i = floor(d/m_stepSize);
+    return m_weights[i];
+}
+
+Eigen::Vector3d CubicSpline::Table::gradWeight(Eigen::Vector3d x_i,
+                                               Eigen::Vector3d x_j)
+{
+    double d = (x_j - x_i).norm();
+    if (!m_isInit || fabs(d) > m_support)
+        return Eigen::Vector3d(0.0, 0.0, 0.0);
+    d += m_support;
+    size_t i = floor(d/m_stepSize);
+    return m_weightGrads[i];
+}

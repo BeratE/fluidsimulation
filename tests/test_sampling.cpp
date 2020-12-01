@@ -8,7 +8,7 @@
 #include "particlesystem.h"
 #include "fluidsystem.h"
 #include "util/vtk_writer.h"
-#include "config.h"
+#include "util/config.h"
 
 using namespace learnSPH;
 using namespace learnSPH::Kernel;

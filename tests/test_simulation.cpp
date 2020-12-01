@@ -1,85 +1,97 @@
 #include "catch.hpp"
 #include "particlesystem.h"
-#include "simulator.h"
+#include "emitter.h"
 #include "kernel.h"
+#include "solver.h"
 #include "util/vtk_writer.h"
-#include "config.h"
+#include "util/config.h"
 
 using namespace learnSPH;
 
-// TEST_CASE("semiEuler", "Test semi-implicit Euler for a cube of particles with gravity only") {
-//     std::cout << "Testing semi-implicit Euler.." << std::endl;
+TEST_CASE("semiEuler", "Test semi-implicit Euler for a cube of particles with gravity only") {
+    std::cout << "Testing semi-implicit Euler.." << std::endl;
 
-//     // Generate particles
-//     const double restDensity = 1.0;
-//     const double particleDiameter = 0.1;
-//     const double smoothingLength = particleDiameter * Kernel::Parameter::TUNING;
+    const size_t N_STEPS = 100;
+    const double particleDiameter = 0.1;
 
-//     // Sample Particles in a Box
-//     FluidSystem particles = sampleFluidBox(Eigen::Vector3d(0, 0, 0),
-//                                            Eigen::Vector3d(1, 1, 1),
-//                                            restDensity, particleDiameter);
+    // Sample Particles in a Box
+    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
+                                                     Eigen::Vector3d(1, 1, 1),
+                                                     particleDiameter);
 
-//     particles.setAccelerationsToGravity();
-
-//     // Compute neighborhood information of fluid particles
-//     CompactNSearch::NeighborhoodSearch nsearch(Kernel::CubicSpline::support(smoothingLength));
-//     particles.id = nsearch.add_point_set(particles.positions.front().data(),
-//                                          particles.positions.size());
-
-//     std::string filename = SOURCE_DIR + std::string("/res/integration/test_semi_euler_smooth_on")
-//         + std::to_string(0) + std::string(".vtk");
-//     save_particles_to_vtk(filename, particles.positions);
-
-//     for (size_t steps = 1; steps < 100; steps++) {
-//         filename = SOURCE_DIR +
-//             std::string("/res/integration/test_semi_euler_smooth_on") +
-//             std::to_string(steps) + std::string(".vtk");
-//         nsearch.find_neighbors();
-//         estimateFluidDensity(particles, nsearch);
-//         semiImplicitEuler(particles, nsearch);
-//         save_particles_to_vtk(filename, particles.positions);
-//     }
-
-//     filename = SOURCE_DIR + std::string("/res/integration/test_semi_euler_smooth_off")
-//         + std::to_string(0) + std::string(".vtk");
-//     save_particles_to_vtk(filename, particles.positions);
-
-//     for (size_t steps = 1; steps < 100; steps++) {
-//         filename = SOURCE_DIR +
-//             std::string("/res/integration/test_semi_euler_smooth_off") +
-//             std::to_string(steps) + std::string(".vtk");
-//         nsearch.find_neighbors();
-//         estimateFluidDensity(particles, nsearch);
-//         semiImplicitEuler(particles, nsearch, 0.01, Kernel::Parameter::EPSILON, false);
-//         save_particles_to_vtk(filename, particles.positions);
-//     }
-
-//     std::cout << "completed" << std::endl;
-//     std::cout << "The scene files have been saved in the folder `<source_folder>/res/integration`. You can visualize them with Paraview." << std::endl;
-// }
-
-// TEST_CASE("Test time constant simulation for a cube of particles with gravity in a box", "[simulation]") {
-//     std::cout << "Testing time constant simulation.." << std::endl;
-
-//     // Generate particles
-//     const double restDensity = 1000;
-//     const double particleDiameter = 0.2;
-//     const double smoothingLength = particleDiameter * Kernel::Parameter::TUNING;
-
-//     // Sample Particles in a Box
-//     FluidSystem particles
-//         = sampleFluidBox(Eigen::Vector3d(0, 0, 0),
-//             Eigen::Vector3d(1, 1, 1),
-//             restDensity, particleDiameter);
-
-//     particles.setAccelerationsToGravity();
-//     particles.viscosity = 0.1;
-//     std::vector<BoundarySystem> boundaries;
-//     std::vector<Eigen::Vector3d> boundaryPositions = samplePositionsBox(Eigen::Vector3d(-0.1, -0.1, -0.1), Eigen::Vector3d(2, 2, 2), particleDiameter * 0.5);
-//     BoundarySystem boundary = createBoundary(boundaryPositions, 2600, 1000, particleDiameter);
-//     boundary.viscosity = 1;
-//     boundaries.push_back(boundary);
+    std::stringstream filename;
+    SolverSPH solver(particles);
     
-//     simulate(particles, boundaries, 0.02, 10, 50, std::string("time_consistent_simulation"));
-// }
+    SECTION("EulerSmoothON") {
+        solver.enableSmoothing(true);
+        
+        filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_on"
+                 << 0 << ".vtk";
+        save_particles_to_vtk(filename.str(), particles.getPositions(),
+                              solver.getSystem().getDensities());
+
+        for (size_t steps = 1; steps < N_STEPS; steps++) {
+            filename.str("");
+            filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_on"
+                     << steps << ".vtk";
+
+            solver.integrationStep();
+            
+            save_particles_to_vtk(filename.str(), solver.getSystem().getPositions(),
+                                  solver.getSystem().getDensities());
+
+            std::cout << "Results saved to " << filename.str() << std::endl;
+        }
+    }
+    
+    SECTION("EulerSmoothOFF") {
+        
+        solver.enableSmoothing(false);
+        
+        filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_on"
+                 << 0 << ".vtk";
+        save_particles_to_vtk(filename.str(), particles.getPositions(),
+                              solver.getSystem().getDensities());
+
+        for (size_t steps = 1; steps < N_STEPS; steps++) {
+            filename.str("");
+            filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_off"
+                     << steps << ".vtk";
+
+            solver.integrationStep();
+
+            save_particles_to_vtk(filename.str(), solver.getSystem().getPositions(),
+                                  solver.getSystem().getDensities());
+
+            std::cout << "Results saved to " << filename.str() << std::endl;            
+        }
+    }
+}
+
+TEST_CASE("SolverRun", "[simulation]") {
+    std::cout << "Testing time constant simulation.." << std::endl;
+
+    const double particleDiameter = 0.1;
+
+    // Sample Particles in a Box
+    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
+                                                     Eigen::Vector3d(1, 1, 1),
+                                                     particleDiameter);
+
+    SolverSPH solver(particles);
+    solver.setSnapShotAfterMS(5);
+    solver.setParameterStiffness(0.0);
+    solver.setParameterViscosity(0.0);
+    solver.enableGravity(false);
+    solver.enableSmoothing(false);
+    
+    SECTION("SimpleSolverI") {      
+        solver.run("solver_test_I", 50);
+    }
+
+    SECTION("SimpleSolverII") {
+        solver.enableGravity(true);
+        solver.setParameterStiffness(1000);
+        solver.run("solver_test_II", 50);
+    }   
+}

@@ -14,23 +14,25 @@ FluidSystem ParticleEmitter::sampleFluidBox(Vector3d bottomLeft,
     const Eigen::Vector3d samplingDir = samplingDistance * diagonalSign;
     const Eigen::Vector3d numSamples = Eigen::floor(Eigen::abs(diagonal.array())
                                                     / samplingDistance);
-    
-    FluidSystem particles;
+        
+    size_t size = numSamples[0] * numSamples[1] * numSamples[2];
+    FluidSystem particles(size);
     particles.m_restDensity = restDensity;
     particles.m_particleRadius = samplingDistance/2;    
 
-    for (size_t x = 0; x < (size_t)numSamples[0] - 1; x++) {
-        for (size_t y = 0; y < (size_t)numSamples[1] - 1; y++) {
-            for (size_t z = 0; z < (size_t)numSamples[2] - 1; z++) {
+    for (size_t x = 0; x < (size_t)numSamples[0]; x++) {
+        for (size_t y = 0; y < (size_t)numSamples[1]; y++) {
+            for (size_t z = 0; z < (size_t)numSamples[2]; z++) {
                 Eigen::Vector3d samplingPos  = bottomLeft
                     + Eigen::Vector3d((x + 0.5) * samplingDir[0],
                                       (y + 0.5) * samplingDir[1],
                                       (z + 0.5) * samplingDir[2]);
+                size_t index =
+                    x*numSamples[1]*numSamples[2] +
+                    y*numSamples[2] +
+                    z;
 
-                particles.m_positions.push_back(samplingPos);
-                particles.m_densities.push_back(0.0);
-                particles.m_velocities.push_back(Vector3d::Zero());
-                particles.m_accelerations.push_back(Vector3d::Zero());
+                particles.m_positions[index] = samplingPos;
             }
         }
     }
@@ -43,10 +45,12 @@ BoundarySystem ParticleEmitter::sampleBoundaryHollowBox(Vector3d bottomLeft,
                                                         double samplingDistance,
                                                         double restDensity)
 {
-    BoundarySystem boundary;
+    auto pos = samplePosHollowBox(bottomLeft, topRight, samplingDistance*0.8);
+    
+    BoundarySystem boundary(pos.size());
     boundary.m_restDensity = restDensity;
     boundary.m_particleRadius = samplingDistance/2;
-    boundary.m_positions = samplePosHollowBox(bottomLeft, topRight, samplingDistance*0.8);
+    boundary.m_positions = pos;
     boundary.correctVolume();
     return boundary;
 }

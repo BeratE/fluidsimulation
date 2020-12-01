@@ -26,8 +26,8 @@ set(SOURCE_FILES
         boundarysystem.h        
         emitter.cpp
         emitter.h
-        #simulator.cpp
-        #simulator.h
+        solver.cpp
+        solver.h
 	kernel.cpp
 	kernel.h)
     
