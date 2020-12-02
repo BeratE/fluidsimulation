@@ -100,12 +100,10 @@ TEST_CASE("SolverRun", "[simulation]") {
                                                          Eigen::Vector3d(1.0, 0.0, 0.0),
                                                          Eigen::Vector3d(0.0, 0.0, 1.0),
                                                          Eigen::Vector3d(1.0, 0.0, 1.0),
-                                                         particleDiameter));
-        
+                                                         particleDiameter));        
         solver.run("solver_test_III", 6000);
     }
-    */
-    /*
+    
     SECTION("SimpleSolverIV") {
         solver.enableGravity(true);
         solver.setParameterStiffness(1000);
@@ -151,26 +149,28 @@ TEST_CASE("SolverRun", "[simulation]") {
 }
 
 TEST_CASE("ComplexRun", "[complex]") {
-    std::cout << "Testing complex simulation.." << std::endl;
+    SECTION("DAMNBREAK") {
+        std::cout << "Testing complex simulation.." << std::endl;
 
-    const double particleDiameter = 0.05;
+        const double particleDiameter = 0.05;
 
-    // Sample Particles in a Box
-    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0.0, 0),
-        Eigen::Vector3d(1.0, 1.0, 1.0),
-        particleDiameter);
+        // Sample Particles in a Box
+        FluidSystem particles = Emitter().sampleFluidBox(
+                                                         Eigen::Vector3d(0, 0.0, 0), Eigen::Vector3d(1.0, 1.0, 1.0),
+                                                         particleDiameter);
 
-    SolverSPH solver(particles);
-    solver.setSnapShotAfterMS(40);
-    solver.setParameterStiffness(1000.0);
-    solver.setParameterViscosity(0.02);
-    solver.enableGravity(true);
-    solver.enableSmoothing(true);
+        SolverSPH solver(particles);
+        solver.setSnapShotAfterMS(40);
+        solver.setParameterStiffness(1000.0);
+        solver.setParameterViscosity(0.02);
+        solver.enableGravity(true);
+        solver.enableSmoothing(true);
 
-    BoundarySystem box = Emitter().sampleBoundaryHollowBox(Eigen::Vector3d(-0.05, -0.05, -0.05),
-        Eigen::Vector3d(2.5, 2.5, 2.5),
-        particleDiameter);
-    box.setViscosity(0.02);
-    solver.addBoundary(box);
-    solver.run("complex_simulation", 6000);
+        BoundarySystem box = Emitter().sampleBoundaryHollowBox(
+                                                               Eigen::Vector3d(-0.05, -0.05, -0.05), Eigen::Vector3d(2.5, 2.5, 2.5),
+                                                               particleDiameter);
+        box.setViscosity(0.02);
+        solver.addBoundary(box);
+        solver.run("complex_simulation", 6000);
+    }
 }
