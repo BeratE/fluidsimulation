@@ -75,51 +75,51 @@ TEST_CASE("SolverRun", "[simulation]") {
     const double particleDiameter = 0.1;
 
     // Sample Particles in a Box
-    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0.0, 0),
-                                                     Eigen::Vector3d(1.0, 1.0, 1.0),
+    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0.0, 0.25, 0),
+                                                     Eigen::Vector3d(1.0, 1.25, 1.0),
                                                      particleDiameter);
 
     SolverSPH solver(particles);
     solver.setSnapShotAfterMS(40);
-    solver.setParameterStiffness(0.0);
-    solver.setParameterViscosity(0.0);
+    solver.setParamStiffness(0.0);
+    solver.setParamViscosity(0.0);
     solver.enableGravity(false);
     solver.enableSmoothing(false);
 
     SECTION("SimpleSolverI") {      
-        solver.run("solver_test_I", 6000);
+        solver.run("solver_test_I", 12000);
     }
     SECTION("SimpleSolverII") {
-        solver.setParameterStiffness(1000);
-        solver.run("solver_test_II", 6000);
+        solver.setParamStiffness(1000);
+        solver.run("solver_test_II", 12000);
     }
     SECTION("SimpleSolverIII") {
         solver.enableGravity(true);
-        solver.setParameterStiffness(1000);
+        solver.setParamStiffness(1000);
         solver.addBoundary(Emitter().sampleBoundaryPlane(Eigen::Vector3d(0.0, 0.0, 0.0),
                                                          Eigen::Vector3d(1.0, 0.0, 0.0),
                                                          Eigen::Vector3d(0.0, 0.0, 1.0),
                                                          Eigen::Vector3d(1.0, 0.0, 1.0),
                                                          particleDiameter));        
-        solver.run("solver_test_III", 6000);
+        solver.run("solver_test_III", 12000);
     }
     
     SECTION("SimpleSolverIV") {
         solver.enableGravity(true);
-        solver.setParameterStiffness(1000);
+        solver.setParamStiffness(1000);
         BoundarySystem plane = Emitter().sampleBoundaryPlane(Eigen::Vector3d(0.0, 0.0, 0.0),
             Eigen::Vector3d(1.0, 0.0, 0.0),
             Eigen::Vector3d(0.0, 0.0, 1.0),
             Eigen::Vector3d(1.0, 0.0, 1.0),
             particleDiameter);
         solver.addBoundary(plane);
-        solver.setParameterViscosity(0.1);
+        solver.setParamViscosity(0.1);
         solver.run("solver_test_IV", 6000);
     }
 
     SECTION("SimpleSolverV") {
         solver.enableGravity(true);
-        solver.setParameterStiffness(1000);
+        solver.setParamStiffness(1000);
         BoundarySystem plane = Emitter().sampleBoundaryPlane(Eigen::Vector3d(0.0, 0.0, 0.0),
             Eigen::Vector3d(1.0, 0.0, 0.0),
             Eigen::Vector3d(0.0, 0.0, 1.0),
@@ -127,7 +127,7 @@ TEST_CASE("SolverRun", "[simulation]") {
             particleDiameter);
         plane.setViscosity(1000);
         solver.addBoundary(plane);
-        solver.setParameterViscosity(0.1);
+        solver.setParamViscosity(0.1);
 
 
         solver.run("solver_test_V", 6000);
@@ -135,7 +135,7 @@ TEST_CASE("SolverRun", "[simulation]") {
 
     SECTION("SimpleSolverVI") {
         solver.enableGravity(true);
-        solver.setParameterStiffness(1000);
+        solver.setParamStiffness(1000);
         solver.enableSmoothing(true);
         BoundarySystem plane = Emitter().sampleBoundaryPlane(Eigen::Vector3d(0.0, 0.0, 0.0),
             Eigen::Vector3d(1.0, 0.0, 0.0),
@@ -161,8 +161,8 @@ TEST_CASE("ComplexRun", "[complex]") {
 
         SolverSPH solver(particles);
         solver.setSnapShotAfterMS(40);
-        solver.setParameterStiffness(1000.0);
-        solver.setParameterViscosity(0.02);
+        solver.setParamStiffness(1000.0);
+        solver.setParamViscosity(0.02);
         solver.enableGravity(true);
         solver.enableSmoothing(true);
 

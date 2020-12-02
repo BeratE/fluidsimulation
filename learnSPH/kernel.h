@@ -12,8 +12,11 @@ namespace learnSPH::Kernel {
     // Cubic Spline Kernel
     namespace CubicSpline {
         double support(double h);
-        double weight(Eigen::Vector3d x_i, Eigen::Vector3d x_j, double h);
-        Eigen::Vector3d gradWeight(Eigen::Vector3d x_i, Eigen::Vector3d x_j, double h);
+        double weight(Eigen::Vector3d x_i,
+                      Eigen::Vector3d x_j, double h);
+        Eigen::Vector3d gradWeight(Eigen::Vector3d x_i,
+                                   Eigen::Vector3d x_j, double h);
+        
         double cubicSpline(const double q);
         double gradCubicSpline(const double q);
 
@@ -21,10 +24,13 @@ namespace learnSPH::Kernel {
         public:
             Table() {}
             Table(double smoothingLength, size_t numBins = 100);
-            void generateTable(double smoothingLength, size_t numBins = 100);
+            void generateTable(double smoothingLength,
+                               size_t numBins = 100);
 
-            double weight(Eigen::Vector3d x_i, Eigen::Vector3d x_j);
-            Eigen::Vector3d gradWeight(Eigen::Vector3d x_i, Eigen::Vector3d x_j);
+            double weight(Eigen::Vector3d x_i,
+                          Eigen::Vector3d x_j) const;
+            Eigen::Vector3d gradWeight(Eigen::Vector3d x_i,
+                                       Eigen::Vector3d x_j) const;
 
         private:
             bool m_isInit = false;

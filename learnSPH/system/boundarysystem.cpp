@@ -1,8 +1,8 @@
 #include "boundarysystem.h"
-#include "kernel.h"
 
 using namespace learnSPH;
 using namespace learnSPH::Kernel;
+using namespace learnSPH::System;
 using namespace CompactNSearch;
 
 BoundarySystem::BoundarySystem(size_t size, bool fill)
@@ -19,7 +19,7 @@ double BoundarySystem::particleMass(size_t i) const
     return m_restDensity * m_volumes[i];
 }
 
-void BoundarySystem::correctVolume()
+void BoundarySystem::updateVolume()
 {   
     NeighborhoodSearch nsearch(CubicSpline::support(smoothingLength()));
     addToNeighborhood(nsearch);

@@ -18,18 +18,18 @@ set(SOURCE_FILES
 	util/obj_reader.h
 	util/vtk_writer.cpp
 	util/vtk_writer.h
-        particlesystem.cpp
-        particlesystem.h
-        fluidsystem.cpp
-        fluidsystem.h
-        boundarysystem.cpp
-        boundarysystem.h        
-        emitter.cpp
-        emitter.h
-        solver.cpp
+        system/particlesystem.h
+        system/particlesystem.cpp
+        system/fluidsystem.h
+        system/fluidsystem.cpp
+        system/boundarysystem.h        
+        system/boundarysystem.cpp
+        system/emitter.h
+        system/emitter.cpp
         solver.h
-	kernel.cpp
-	kernel.h)
+        solver.cpp
+        kernel.h
+	kernel.cpp)
     
 # Create a library version so it can be linked with other modules
 add_library(learnSPH ${SOURCE_FILES})

@@ -1,10 +1,11 @@
 #pragma once
+#include "../kernel.h"
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <CompactNSearch/CompactNSearch.h>
 
-namespace learnSPH {
+namespace learnSPH::System {
     class ParticleSystem {
         friend class ParticleEmitter;
 
@@ -17,11 +18,12 @@ namespace learnSPH {
         
         void addToNeighborhood(CompactNSearch::NeighborhoodSearch &nsearch);
 
+        
+        void clearForces();
         void addParticlePos(size_t i, Eigen::Vector3d pos);
         void addParticleVel(size_t i, Eigen::Vector3d vel);
         void addParticleAcc(size_t i, Eigen::Vector3d acc);
         void addParticleForce(size_t i, Eigen::Vector3d force);
-        void clearForces();
         
         // Setter & Getter
         size_t getSize() const { return m_positions.size(); }
@@ -56,4 +58,4 @@ namespace learnSPH {
         std::vector<Eigen::Vector3d> m_accelerations; // Particle Accelerations
         std::vector<Eigen::Vector3d> m_forces; // Particle Force Accumulator
     };
-} // namespace learnSPH
+} // namespace learnSPH::System

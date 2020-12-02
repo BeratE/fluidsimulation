@@ -2,6 +2,7 @@
 #include <math.h>
 
 using namespace learnSPH;
+using namespace learnSPH::System;
 using namespace Eigen;
 
 FluidSystem ParticleEmitter::sampleFluidBox(Vector3d bottomLeft,

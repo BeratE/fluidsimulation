@@ -1,52 +1,63 @@
 #pragma once
-#include "fluidsystem.h"
-#include "boundarysystem.h"
+#include "system/fluidsystem.h"
+#include "system/boundarysystem.h"
 #include <vector>
-#include <CompactNSearch/CompactNSearch.h>
 #include <Eigen/Dense>
+#include <CompactNSearch/CompactNSearch.h>
+
+
+#define VEC_GRAVITY Eigen::Vector3d(0.0, -0.980665, 0.0)
 
 namespace learnSPH {
+    
+    struct ParameterSPH {
+        double drag = 0.2;
+        double stiffness = 1000.0;
+        double smoothing = 0.5;
+    };
+
     class SolverSPH {
     public:
-        SolverSPH(FluidSystem system);
+        SolverSPH(System::FluidSystem system);
         ~SolverSPH();
 
         double timeStepCFL();
         double integrationStep();
-        void run(std::string file, double milliseconds);
         
-        void addBoundary(BoundarySystem boundary);
+        void run(std::string file, double milliseconds);
+
+        void addBoundary(System::BoundarySystem boundary);
 
         // Setter & Getter
-        const FluidSystem &getSystem() {return m_system; }
+        const System::FluidSystem &getSystem() const { return m_system; }
 
-        void setSmoothingEpsilon(double value) {m_smoothEps = value;}
+        void setSnapShotAfterMS(double ms) { m_snapShotMS = ms; }
+        
+        void setParamSmoothing(double val) { m_param.smoothing = val; }
+        void setParamStiffness(double val) { m_param.stiffness = val; }
+        void setParameterDrag(double val) { m_param.drag = val; }
 
-        void setSnapShotAfterMS(double ms) {m_snapShotMS = ms;}
-        void setParameterStiffness(double value) {m_system.setStiffness(value); }
-        void setParameterViscosity(double value) {m_system.setViscosity(value); }
-        void setParameterDrag(double value) { m_drag = value; }
-        void enableGravity(bool value) { m_gravityEnable = value; }
-        void enableSmoothing(bool value) { m_smoothingEnable = value; }
+        void setFluidViscosity(double val) {m_system.setViscosity(val);}
+        void setBoundaryViscosity(size_t i, double val) {m_boundaries[i].setViscosity(val);}
 
-      private:
+        void enableGravity(bool val) { m_gravityEnable = val; }
+        void enableSmoothing(bool val) { m_smoothingEnable = val; }
+
+    private:
         void applyExternalForces();
         void semiImplicitEulerStep(double deltaT);
-        
+
         double m_snapShotMS = 20;
 
-        double m_drag = 0.2;
-        double m_smoothEps = 0.5;
-        double m_maxTimeStep = 0.002;
+        ParameterSPH m_param;
+        
+        double m_maxTimeStep = 0.002; // millisecods
         bool m_gravityEnable = true;
         bool m_smoothingEnable = true;
-        
-        FluidSystem m_system;
-        std::vector<BoundarySystem> m_boundaries;
-        CompactNSearch::NeighborhoodSearch m_nsearch;
 
-        std::vector<double> m_weightTable;
-        std::vector<Eigen::Vector3d> m_weightGradTable;
+        System::FluidSystem m_system;
+        std::vector<System::BoundarySystem> m_boundaries;
+        CompactNSearch::NeighborhoodSearch m_nsearch;
     };
 
 } // namespace learnSPH

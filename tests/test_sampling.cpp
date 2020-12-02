@@ -28,7 +28,7 @@ TEST_CASE("FluidBox", "Generate fluid particles in a box")
     
     nsearch.find_neighbors();
     
-    particles.estimateDensity(nsearch);
+    particles.updateDensities(nsearch);
 
     std::stringstream filename;
     filename << SOURCE_DIR << "/res/test_fluidbox.vtk";
@@ -63,7 +63,7 @@ TEST_CASE("FluidBoxBoundary", "Generate fluid particles enclosed in a boundary b
     
     nsearch.find_neighbors();
     
-    particles.estimateDensity(nsearch, boundaries);
+    particles.updateDensities(nsearch, boundaries);
 
     std::stringstream f1;
     f1 << SOURCE_DIR << "/res/test_fluid_in_box.vtk";

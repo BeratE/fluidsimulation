@@ -1,7 +1,7 @@
 #pragma once
 #include "particlesystem.h"
 
-namespace learnSPH {
+namespace learnSPH::System {
     class BoundarySystem : public ParticleSystem {
         friend class ParticleEmitter;
         
@@ -11,7 +11,7 @@ namespace learnSPH {
 
         double particleMass(size_t i) const;
         
-        void correctVolume();
+        void updateVolume();
 
         // Setter & Getter
         double getParticleVolume(size_t i) const { return m_volumes[i]; }
@@ -21,4 +21,4 @@ namespace learnSPH {
       private:
         std::vector<double> m_volumes; 
     };
-}
+} // namespace learnSPH::System

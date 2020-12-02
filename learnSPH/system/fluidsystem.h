@@ -1,9 +1,8 @@
 #pragma once
 #include "particlesystem.h"
-#include "kernel.h"
 #include <CompactNSearch/CompactNSearch.h>
 
-namespace learnSPH {
+namespace learnSPH::System {
     class BoundarySystem;
     class FluidSystem : public ParticleSystem {
         friend class ParticleEmitter;
@@ -13,17 +12,16 @@ namespace learnSPH {
         FluidSystem(size_t size, bool fill = true);
         FluidSystem(double particleRadius, size_t size, bool fill = true);
 
-        void initTable();
+        void initKernelLookupTable();
         
-        void estimateDensity(CompactNSearch::NeighborhoodSearch &nsearch,
+        void updateDensities(CompactNSearch::NeighborhoodSearch &nsearch,
                              const std::vector<BoundarySystem> &boundaries);
-        void estimateDensity(CompactNSearch::NeighborhoodSearch &nsearch);
-        void updatePressure();
-        void updateAcceleration(CompactNSearch::NeighborhoodSearch& nsearch,
+        void updateDensities(CompactNSearch::NeighborhoodSearch &nsearch);
+        void updatePressures(double stiffness);
+        void updateAccelerations(CompactNSearch::NeighborhoodSearch& nsearch,
                                  const std::vector<BoundarySystem> &boundaries);
         
         // Setter & Getter
-        void setStiffness(double value) { m_stiffness = value; }
         double getParticleDensity(size_t i) {return m_densities[i]; }
         double getParticlePressure(size_t i) {return m_pressures[i]; }
 
@@ -41,10 +39,11 @@ namespace learnSPH {
                                              const std::vector<BoundarySystem> &boundaries);
                    
 
-        double m_stiffness = 1000;
+        
         std::vector<double> m_pressures;
-        std::vector<double> m_densities; // Estimated particle densities
+        std::vector<double> m_densities;
 
-        Kernel::CubicSpline::Table m_kernelTable;
+        bool m_isLookupTableInit = false;
+        Kernel::CubicSpline::Table m_kernelLookup;
     };
-} // namespace learnSPH
+} // namespace learnSPH::System

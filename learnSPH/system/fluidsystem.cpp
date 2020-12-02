@@ -1,9 +1,9 @@
 #include "fluidsystem.h"
 #include "boundarysystem.h"
-#include "kernel.h"
 #include <algorithm>
 
 using namespace learnSPH;
+using namespace learnSPH::System;
 using namespace learnSPH::Kernel;
 using namespace CompactNSearch;
 
@@ -23,20 +23,23 @@ FluidSystem::FluidSystem(double particleRadius,
     : FluidSystem(size, fill)
 {
     m_particleRadius = particleRadius;
-    initTable();
+    initKernelLookupTable();
 }
 
-void FluidSystem::initTable()
+void FluidSystem::initKernelLookupTable()
 {
-    m_kernelTable.generateTable(smoothingLength(), 1000);
+    if (!m_isLookupTableInit) {
+        m_kernelLookup.generateTable(smoothingLength(), 1000);
+        m_isLookupTableInit = true;
+    }
 }
 
-void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch)
+void FluidSystem::updateDensities(NeighborhoodSearch &nsearch)
 {
-    estimateDensity(nsearch, std::vector<BoundarySystem>());
+    updateDensities(nsearch, std::vector<BoundarySystem>());
 }
 
-void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch,
+void FluidSystem::updateDensities(NeighborhoodSearch &nsearch,
                                   const std::vector<BoundarySystem> &boundaries)
 {
     // get neighborhood information of fluid particle point set
@@ -50,10 +53,10 @@ void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch,
         // Fluid contribution
         /* The current fluid particle itself is part of its own neighborhood. */
         double fluidDensity = 0.0;
-        fluidDensity += m_kernelTable.weight(fpPos, fpPos);
+        fluidDensity += m_kernelLookup.weight(fpPos, fpPos);
         for (size_t j = 0; j < fluidPS.n_neighbors(m_pointSetID, i); j++) {
             const unsigned int k = fluidPS.neighbor(m_pointSetID, i, j);
-            fluidDensity += m_kernelTable.weight(fpPos, m_positions[k]);
+            fluidDensity += m_kernelLookup.weight(fpPos, m_positions[k]);
         }
         fluidDensity *= particleMass();
 
@@ -66,7 +69,7 @@ void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch,
             for (size_t j = 0; j < n_neighbors; j++) {
                 const unsigned int k = fluidPS.neighbor(boundaryID, i, j);
                 density += boundary.getParticleVolume(k)
-                    * m_kernelTable.weight(fpPos, boundary.getParticlePos(k));
+                    * m_kernelLookup.weight(fpPos, boundary.getParticlePos(k));
             }
             density *= boundary.getRestDensity();
             boundaryDensity += density;
@@ -76,15 +79,15 @@ void FluidSystem::estimateDensity(NeighborhoodSearch &nsearch,
     }  
 }
 
-void FluidSystem::updatePressure()
+void FluidSystem::updatePressures(double stiffness)
 {
     for (size_t i = 0; i < getSize(); i++) {
-        m_pressures[i] = std::max(0.0, m_stiffness * (m_densities[i] - m_restDensity));
+        m_pressures[i] = std::max(0.0, stiffness * (m_densities[i] - m_restDensity));
     }
 }
 
 
-void FluidSystem::updateAcceleration(CompactNSearch::NeighborhoodSearch& nsearch,
+void FluidSystem::updateAccelerations(CompactNSearch::NeighborhoodSearch& nsearch,
                                       const std::vector<BoundarySystem> &boundaries)
 {
     for (size_t i = 0; i < getSize(); i++) {
@@ -111,7 +114,7 @@ Eigen::Vector3d FluidSystem::particlePressureAcc(size_t index,
     // Fluid contribution
     Eigen::Vector3d fluidContrib(0.0, 0.0, 0.0);
     fluidContrib += particleMass * 2 * particleDensityRatio
-        * m_kernelTable.gradWeight(pos, pos);
+        * m_kernelLookup.gradWeight(pos, pos);
     for (size_t j = 0; j < fluidPS.n_neighbors(id, index); j++) {
         const unsigned int k = fluidPS.neighbor(id, index, j);
 
@@ -119,7 +122,7 @@ Eigen::Vector3d FluidSystem::particlePressureAcc(size_t index,
             + (m_pressures[k] / pow(m_densities[k], 2));
         
         fluidContrib += particleMass * pressureTerm
-            * m_kernelTable.gradWeight(pos, m_positions[k]);
+            * m_kernelLookup.gradWeight(pos, m_positions[k]);
     }
 
     // Boundary contribution
@@ -131,7 +134,7 @@ Eigen::Vector3d FluidSystem::particlePressureAcc(size_t index,
             
             boundaryContrib += m_restDensity * boundary.getParticleVolume(k)
                 * particleDensityRatio
-                * m_kernelTable.gradWeight(pos, boundary.getParticlePos(k));
+                * m_kernelLookup.gradWeight(pos, boundary.getParticlePos(k));
         }
     }
     
@@ -158,7 +161,7 @@ Eigen::Vector3d FluidSystem::particleViscosityAcc(size_t index,
             fluidContrib +=
                 (particleMass / getParticleDensity(k)) *
                 (getParticleVel(index) - getParticleVel(k)) *
-                posDiff.dot(m_kernelTable.gradWeight(pos, getParticlePos(k))) /
+                posDiff.dot(m_kernelLookup.gradWeight(pos, getParticlePos(k))) /
                 (pow(posDiff.norm(), 2) + 0.01 * pow(smoothingLength(), 2));
         }
         fluidContrib *= getViscosity();
@@ -178,7 +181,7 @@ Eigen::Vector3d FluidSystem::particleViscosityAcc(size_t index,
             
             boundaryContrib += boundary.getViscosity() 
                 * boundary.getParticleVolume(k) * getParticleVel(index)
-                * posDiff.dot(m_kernelTable.gradWeight(pos, boundary.getParticlePos(k)))
+                * posDiff.dot(m_kernelLookup.gradWeight(pos, boundary.getParticlePos(k)))
                 * (pow(posDiff.norm(), 2) + 0.01 * pow(smoothingLength(), 2));
         }
     }

@@ -1,7 +1,7 @@
 #include "particlesystem.h"
-#include "kernel.h"
 
 using namespace learnSPH;
+using namespace learnSPH::System;
 using namespace CompactNSearch;
 
 ParticleSystem::ParticleSystem(size_t size, bool fill)

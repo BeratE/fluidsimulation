@@ -56,6 +56,7 @@ double CubicSpline::gradCubicSpline(const double q)
     return alpha * value;
 }
 
+
 // Table
 CubicSpline::Table::Table(double smoothingLength, size_t numBins)
 {
@@ -81,9 +82,9 @@ void CubicSpline::Table::generateTable(double smoothingLength, size_t numBins)
 }
 
 double CubicSpline::Table::weight(Eigen::Vector3d x_i,
-                                  Eigen::Vector3d x_j)
+                                  Eigen::Vector3d x_j) const
 {
-
+    assert(m_isInit);
     
     double d = (x_i - x_j).norm();
     if (d > m_support)
@@ -94,7 +95,7 @@ double CubicSpline::Table::weight(Eigen::Vector3d x_i,
 }
 
 Eigen::Vector3d CubicSpline::Table::gradWeight(Eigen::Vector3d x_i,
-                                               Eigen::Vector3d x_j)
+                                               Eigen::Vector3d x_j) const
 {
     assert(m_isInit);
     
