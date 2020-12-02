@@ -4,14 +4,15 @@
 #include <stdio.h>
 #include "kernel.h"
 #include <string>
-#include "emitter.h"
-#include "particlesystem.h"
-#include "fluidsystem.h"
+#include "system/emitter.h"
+#include "system/particlesystem.h"
+#include "system/fluidsystem.h"
 #include "util/vtk_writer.h"
 #include "util/config.h"
 
 using namespace learnSPH;
 using namespace learnSPH::Kernel;
+using namespace learnSPH::System;
 
 TEST_CASE("FluidBox", "Generate fluid particles in a box")
 {

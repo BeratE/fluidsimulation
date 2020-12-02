@@ -71,10 +71,11 @@ double SolverSPH::integrationStep()
     return deltaT;
 }
 
-void SolverSPH::addBoundary(BoundarySystem boundary)
+size_t SolverSPH::addBoundary(BoundarySystem boundary)
 {
     m_boundaries.push_back(boundary);
     m_boundaries.back().addToNeighborhood(m_nsearch);
+    return m_boundaries.size()-1;
 }
 
 void SolverSPH::applyExternalForces()

@@ -26,7 +26,7 @@ namespace learnSPH {
         
         void run(std::string file, double milliseconds);
 
-        void addBoundary(System::BoundarySystem boundary);
+        size_t addBoundary(System::BoundarySystem boundary);
 
         // Setter & Getter
         const System::FluidSystem &getSystem() const { return m_system; }

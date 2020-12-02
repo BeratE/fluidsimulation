@@ -4,11 +4,6 @@
 #include <string>
 #include <algorithm>    // std::max
 #include <Eigen/Dense>
-#include "learnSPH/kernel.h"
-#include "learnSPH/particlesystem.h"
-#include "learnSPH/util/vtk_writer.h"
-
-using namespace learnSPH;
 
 int main()
 {
