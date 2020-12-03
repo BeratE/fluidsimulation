@@ -35,9 +35,8 @@ SolverSPH::SolverSPH(FluidSystem system):
     m_system(system)
 {
     mp_nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(m_system.getParticleRadius());
-    mp_nsearch->set_radius(Kernel::CubicSpline::support(m_system.smoothingLength()));
+    mp_nsearch->set_radius(Kernel::CubicSpline::support(m_system.getSmoothingLength()));
     m_system.addToNeighborhood(mp_nsearch);
-    m_system.initKernelLookupTable();
 }
 
 SolverSPH::~SolverSPH()
@@ -54,7 +53,7 @@ double SolverSPH::timeStepCFL()
     for (const auto &vel : velocities) 
         maxVelNorm = maxVelNorm > vel.norm() ? maxVelNorm : vel.norm();
     
-    return std::min(m_maxTimeStep, lambda * (2*m_system.getParticleRadius() / maxVelNorm));
+    return std::min(m_maxTimeStep_s, lambda * (2*m_system.getParticleRadius() / maxVelNorm));
 }
 
 double SolverSPH::integrationStep()
@@ -65,15 +64,16 @@ double SolverSPH::integrationStep()
     
     m_system.updateDensities(m_boundaries);
     m_system.updatePressures(m_param.stiffness);
-    m_system.updateAccelerations(m_boundaries);
-    
+
     applyExternalForces();
+    m_system.updateAccelerations(m_boundaries);    
+    
     semiImplicitEulerStep(deltaT);
 
     return deltaT;
 }
 
-size_t SolverSPH::addBoundary(BoundarySystem boundary)
+size_t SolverSPH::addBoundary(const BoundarySystem &boundary)
 {
     m_boundaries.push_back(boundary);
     m_boundaries.back().addToNeighborhood(mp_nsearch);
@@ -84,29 +84,21 @@ void SolverSPH::applyExternalForces()
 {
     m_system.clearForces();
     
-    // Add  gravity
-    if (m_gravityEnable) {
-        for (size_t i = 0; i < m_system.getSize(); i++) {
-            m_system.addParticleAcc(i, VEC_GRAVITY);
-        }
-    }
+    Eigen::Vector3d grav_force(0.0, 0.0, 0.0);
+    if (m_gravityEnable)
+        grav_force = VEC_GRAVITY * m_system.getRestDensity();
 
-    // Drag force
     for (size_t i = 0; i < m_system.getSize(); i++) {
+        // gravity
+        m_system.addParticleForce(i, grav_force);
+
+        // drag force
         auto drag_force = -m_param.drag * m_system.getParticleVel(i);
-        m_system.addParticleForce(i, drag_force);
+        m_system.addParticleForce(i, drag_force);        
     }
 
     // Iterate force objects
     // ...
-
-
-    // Appy forces
-    const std::vector<Eigen::Vector3d> &forces = m_system.getForces();
-    for (size_t i = 0; i < m_system.getSize(); i++) {
-        auto facc = m_system.getParticleForce(i)/m_system.getRestDensity();
-        m_system.addParticleAcc(i, facc);
-    }
 }
 
 void SolverSPH::semiImplicitEulerStep(double deltaT)
@@ -115,9 +107,10 @@ void SolverSPH::semiImplicitEulerStep(double deltaT)
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
     
     // Update velocities
+    const std::vector<Eigen::Vector3d> &accelerations = m_system.getAccelerations();
     const std::vector<Eigen::Vector3d> &velocities = m_system.getVelocities();
     for (size_t i = 0; i < fluidPS.n_points(); i++) {
-        Eigen::Vector3d dV = deltaT * m_system.getParticleAcc(i);
+        Eigen::Vector3d dV = deltaT * accelerations[i];
         m_system.addParticleVel(i,  dV);
     }
 
@@ -135,10 +128,10 @@ void SolverSPH::semiImplicitEulerStep(double deltaT)
             for (size_t j = 0; j < fluidPS.n_neighbors(id, i); j++) {
                 const unsigned int k = fluidPS.neighbor(id, i, j);
                 fpVelSumOverNeighbors +=
-                    (2 * m_system.particleMass() *
+                    (2 * m_system.getParticleMass() *
                     (m_system.getParticleVel(k) - fpVel)  *
                     Kernel::CubicSpline::weight(fpPos, m_system.getParticlePos(k),
-                                                m_system.smoothingLength()))
+                                                m_system.getSmoothingLength()))
                     / (m_system.getParticleDensity(k) + fpDensity);
             }
             

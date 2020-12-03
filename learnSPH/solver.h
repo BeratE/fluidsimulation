@@ -27,7 +27,7 @@ namespace learnSPH {
         
         void run(std::string file, double milliseconds);
 
-        size_t addBoundary(System::BoundarySystem boundary);
+        size_t addBoundary(const System::BoundarySystem &boundary);
 
         // Setter & Getter
         const System::FluidSystem &getSystem() const { return m_system; }
@@ -44,18 +44,16 @@ namespace learnSPH {
         void enableGravity(bool val) { m_gravityEnable = val; }
         void enableSmoothing(bool val) { m_smoothingEnable = val; }
 
-    private:
+    private:        
         void applyExternalForces();
-        void semiImplicitEulerStep(double deltaT);
-
-        double m_snapShotMS = 20;
-
+        void semiImplicitEulerStep(double deltaT);                          
+     
         ParameterSPH m_param;
-        
-        double m_maxTimeStep = 0.002; // millisecods
+        double m_snapShotMS = 20;
+        double m_maxTimeStep_s = 0.002;
         bool m_gravityEnable = true;
         bool m_smoothingEnable = true;
-
+        
         System::FluidSystem m_system;
         std::vector<System::BoundarySystem> m_boundaries;
         std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch;

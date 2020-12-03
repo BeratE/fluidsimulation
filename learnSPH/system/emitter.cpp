@@ -17,8 +17,8 @@ FluidSystem ParticleEmitter::sampleFluidBox(Vector3d bottomLeft,
                                                     / samplingDistance);
         
     size_t size = numSamples[0] * numSamples[1] * numSamples[2];
-    FluidSystem particles(samplingDistance/2, size);
-    particles.m_restDensity = restDensity;
+    
+    FluidSystem particles(samplingDistance/2, restDensity, size);
     
     for (size_t x = 0; x < (size_t)numSamples[0]; x++) {
         for (size_t y = 0; y < (size_t)numSamples[1]; y++) {
@@ -47,11 +47,9 @@ BoundarySystem ParticleEmitter::sampleBoundaryHollowBox(Vector3d bottomLeft,
 {
     auto pos = samplePosHollowBox(bottomLeft, topRight, samplingDistance*0.8);
     
-    BoundarySystem boundary(pos.size());
-    boundary.m_restDensity = restDensity;
-    boundary.m_particleRadius = samplingDistance/2;
+    BoundarySystem boundary(samplingDistance/2, restDensity, pos.size());
     boundary.m_positions = pos;
-    boundary.updateVolume();
+    boundary.updateVolumes();
     return boundary;
 }
 
@@ -66,11 +64,9 @@ BoundarySystem ParticleEmitter::sampleBoundaryPlane(Eigen::Vector3d bottomLeft,
     auto triangle2 = samplePosTriangle(topRight, topLeft, bottomLeft, samplingDistance*0.8);
     triangle1.insert(triangle1.end(), triangle2.begin(), triangle2.end());
     
-    BoundarySystem boundary(triangle1.size());
-    boundary.m_restDensity = restDensity;
-    boundary.m_particleRadius = samplingDistance/2;
+    BoundarySystem boundary(samplingDistance/2, restDensity, triangle1.size());
     boundary.m_positions = triangle1;
-    boundary.updateVolume();
+    boundary.updateVolumes();
     return boundary;
 }
 

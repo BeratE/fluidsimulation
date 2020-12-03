@@ -6,12 +6,11 @@ namespace learnSPH::System {
         friend class ParticleEmitter;
         
     public:
-        BoundarySystem() {}
-        BoundarySystem(size_t size, bool fill = true);
+        BoundarySystem(double radius, double density, size_t size, bool fill = true);
 
-        double particleMass(size_t i) const;
+        void updateVolumes();
         
-        void updateVolume();
+        double getParticleMass(size_t i) const;       
 
         // Setter & Getter
         double getParticleVolume(size_t i) const { return m_volumes[i]; }

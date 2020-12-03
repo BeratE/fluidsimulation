@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
-project(learnSPH)
 set(CMAKE_CXX_STANDARD 17)
+
+project(learnSPH)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 configure_file (
     "${PROJECT_SOURCE_DIR}/cmake/config.h.in"
@@ -18,6 +21,7 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
+
 
 # Dependencies
 add_subdirectory(extern/CompactNSearch)

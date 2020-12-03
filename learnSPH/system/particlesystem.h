@@ -6,58 +6,59 @@
 #include <Eigen/Geometry>
 #include <CompactNSearch/CompactNSearch.h>
 
+using namespace Eigen;
+using namespace CompactNSearch;
+
 namespace learnSPH::System {
     class ParticleSystem {
         friend class ParticleEmitter;
 
     public:
-        ParticleSystem() {}
-        ParticleSystem(size_t size, bool fill = true);
+        ParticleSystem(double radius, double density,
+                       size_t size, bool fill = true);
 
-        double smoothingLength() const;
-        double particleMass() const;
-        
-        void addToNeighborhood(const std::shared_ptr<CompactNSearch::NeighborhoodSearch> &nsearch);
-      
+        void addToNeighborhood(const std::shared_ptr<NeighborhoodSearch> &nsearch);
+
         void clearForces();
-        void addParticlePos(size_t i, Eigen::Vector3d pos);
-        void addParticleVel(size_t i, Eigen::Vector3d vel);
-        void addParticleAcc(size_t i, Eigen::Vector3d acc);
-        void addParticleForce(size_t i, Eigen::Vector3d force);
-        
+        void addParticlePos(size_t i, Vector3d pos);
+        void addParticleVel(size_t i, Vector3d vel);
+        void addParticleForce(size_t i, Vector3d force);
+
         // Setter & Getter
+        void setViscosity(double value) { m_viscosity = value; }
+        void setPointSetID(double id) { m_pointSetID = id; }
+
+        void setParticlePos(size_t i, Vector3d pos) {m_positions[i] = pos;}
+        void setParticleVel(size_t i, Vector3d vel) {m_velocities[i] = vel;}        
+        
         size_t getSize() const { return m_positions.size(); }
+        size_t getPointSetID() const { return m_pointSetID; }
         double getViscosity() const {return m_viscosity; }
         double getRestDensity() const { return m_restDensity; }
+        double getParticleMass() const { return m_particleMass; }
         double getParticleRadius() const { return m_particleRadius; }
-        size_t getPointSetID() const { return m_pointSetID; }
-
-        void setViscosity(double value) {m_viscosity = value;}
-        void setPointSetID(double id) { m_pointSetID = id; }
+        double getSmoothingLength() const { return m_smoothingLength; }
 
         Eigen::Vector3d getParticlePos(size_t i) const {return m_positions[i];}
         Eigen::Vector3d getParticleVel(size_t i) const {return m_velocities[i];}
-        Eigen::Vector3d getParticleAcc(size_t i) const {return m_accelerations[i];}
         Eigen::Vector3d getParticleForce(size_t i) const {return m_forces[i];}
-        void setParticlePos(size_t i, Eigen::Vector3d pos) {m_positions[i] = pos;}
-        void setParticleVel(size_t i, Eigen::Vector3d vel) {m_velocities[i] = vel;}        
-        void setParticleAcc(size_t i, Eigen::Vector3d acc) {m_accelerations[i] = acc;}
 
-        const std::vector<Eigen::Vector3d>& getForces() const { return m_forces; }
-        const std::vector<Eigen::Vector3d>& getPositions() const { return m_positions; }
-        const std::vector<Eigen::Vector3d>& getVelocities() const { return m_velocities; }
-        const std::vector<Eigen::Vector3d>& getAccelerations() const { return m_accelerations; }
+        const std::vector<Vector3d>& getForces() const { return m_forces; }
+        const std::vector<Vector3d>& getPositions() const { return m_positions; }
+        const std::vector<Vector3d>& getVelocities() const { return m_velocities; }
 
     protected:
         long m_pointSetID = -1; // CompactNSearch PointSet ID
         double m_viscosity = 0.0; // Viscosity, different for fluid and boundary
         double m_restDensity = 1000.0;
+        double m_particleMass = 1.0;
         double m_particleRadius = 1.0; // (cubic root of volume) / 2
-        std::vector<Eigen::Vector3d> m_positions; // Particle Positions
-        std::vector<Eigen::Vector3d> m_velocities; // Particle Velocities
-        std::vector<Eigen::Vector3d> m_accelerations; // Particle Accelerations
-        std::vector<Eigen::Vector3d> m_forces; // Particle Force Accumulator
+        double m_smoothingLength = 1.0;
+        
+        std::vector<Vector3d> m_positions; // Particle Positions
+        std::vector<Vector3d> m_velocities; // Particle Velocities        
+        std::vector<Vector3d> m_forces; // Particle Force Accumulator
 
-        std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch;
+        std::shared_ptr<NeighborhoodSearch> mp_nsearch; // reference to neighborhood information
     };
 } // namespace learnSPH::System

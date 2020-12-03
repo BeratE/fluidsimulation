@@ -23,7 +23,7 @@ TEST_CASE("FluidBox", "Generate fluid particles in a box")
                                                      Eigen::Vector3d(1, 1, 1),
                                                      particleDiameter);
     
-    const double r = CubicSpline::support(particles.smoothingLength());
+    const double r = CubicSpline::support(particles.getSmoothingLength());
     std::shared_ptr<CompactNSearch::NeighborhoodSearch> nsearch;
     nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(r);
     particles.addToNeighborhood(nsearch);
@@ -58,7 +58,7 @@ TEST_CASE("FluidBoxBoundary", "Generate fluid particles enclosed in a boundary b
     boundaries.push_back(boundary);
     
     // Compute neighborhood information of fluid particles
-    const double r = Kernel::CubicSpline::support(particles.smoothingLength());
+    const double r = Kernel::CubicSpline::support(particles.getSmoothingLength());
     std::shared_ptr<CompactNSearch::NeighborhoodSearch> nsearch;
     nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(r);
     particles.addToNeighborhood(nsearch);
