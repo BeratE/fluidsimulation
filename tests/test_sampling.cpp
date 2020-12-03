@@ -24,12 +24,13 @@ TEST_CASE("FluidBox", "Generate fluid particles in a box")
                                                      particleDiameter);
     
     const double r = CubicSpline::support(particles.smoothingLength());
-    CompactNSearch::NeighborhoodSearch nsearch(r);
+    std::shared_ptr<CompactNSearch::NeighborhoodSearch> nsearch;
+    nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(r);
     particles.addToNeighborhood(nsearch);
     
-    nsearch.find_neighbors();
+    nsearch->find_neighbors();
     
-    particles.updateDensities(nsearch);
+    particles.updateDensities(std::vector<BoundarySystem>());
 
     std::stringstream filename;
     filename << SOURCE_DIR << "/res/test_fluidbox.vtk";
@@ -58,13 +59,14 @@ TEST_CASE("FluidBoxBoundary", "Generate fluid particles enclosed in a boundary b
     
     // Compute neighborhood information of fluid particles
     const double r = Kernel::CubicSpline::support(particles.smoothingLength());
-    CompactNSearch::NeighborhoodSearch nsearch(r);
+    std::shared_ptr<CompactNSearch::NeighborhoodSearch> nsearch;
+    nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(r);
     particles.addToNeighborhood(nsearch);
     boundaries[0].addToNeighborhood(nsearch);
     
-    nsearch.find_neighbors();
+    nsearch->find_neighbors();
     
-    particles.updateDensities(nsearch, boundaries);
+    particles.updateDensities(boundaries);
 
     std::stringstream f1;
     f1 << SOURCE_DIR << "/res/test_fluid_in_box.vtk";

@@ -2,6 +2,7 @@
 #include "system/fluidsystem.h"
 #include "system/boundarysystem.h"
 #include <vector>
+#include <memory>
 #include <Eigen/Dense>
 #include <CompactNSearch/CompactNSearch.h>
 
@@ -57,7 +58,7 @@ namespace learnSPH {
 
         System::FluidSystem m_system;
         std::vector<System::BoundarySystem> m_boundaries;
-        CompactNSearch::NeighborhoodSearch m_nsearch;
+        std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch;
     };
 
 } // namespace learnSPH

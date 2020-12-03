@@ -32,10 +32,11 @@ double ParticleSystem::particleMass() const
     return pow(2 * m_particleRadius, 3) * m_restDensity;
 }
 
-void ParticleSystem::addToNeighborhood(NeighborhoodSearch &nsearch)
+void ParticleSystem::addToNeighborhood(const std::shared_ptr<NeighborhoodSearch> &nsearch)
 {
-    m_pointSetID = nsearch.add_point_set(m_positions.front().data(),
-                                         m_positions.size());
+    mp_nsearch = nsearch;
+    m_pointSetID = mp_nsearch->add_point_set(m_positions.front().data(),
+                                             m_positions.size());
 }
 
 void ParticleSystem::addParticlePos(size_t i, Eigen::Vector3d pos)

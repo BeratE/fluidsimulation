@@ -1,6 +1,7 @@
 #pragma once
 #include "../kernel.h"
 #include <vector>
+#include <memory>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <CompactNSearch/CompactNSearch.h>
@@ -16,9 +17,8 @@ namespace learnSPH::System {
         double smoothingLength() const;
         double particleMass() const;
         
-        void addToNeighborhood(CompactNSearch::NeighborhoodSearch &nsearch);
-
-        
+        void addToNeighborhood(const std::shared_ptr<CompactNSearch::NeighborhoodSearch> &nsearch);
+      
         void clearForces();
         void addParticlePos(size_t i, Eigen::Vector3d pos);
         void addParticleVel(size_t i, Eigen::Vector3d vel);
@@ -30,7 +30,7 @@ namespace learnSPH::System {
         double getViscosity() const {return m_viscosity; }
         double getRestDensity() const { return m_restDensity; }
         double getParticleRadius() const { return m_particleRadius; }
-        long getPointSetID() const { return m_pointSetID; }
+        size_t getPointSetID() const { return m_pointSetID; }
 
         void setViscosity(double value) {m_viscosity = value;}
         void setPointSetID(double id) { m_pointSetID = id; }
@@ -57,5 +57,7 @@ namespace learnSPH::System {
         std::vector<Eigen::Vector3d> m_velocities; // Particle Velocities
         std::vector<Eigen::Vector3d> m_accelerations; // Particle Accelerations
         std::vector<Eigen::Vector3d> m_forces; // Particle Force Accumulator
+
+        std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch;
     };
 } // namespace learnSPH::System

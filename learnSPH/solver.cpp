@@ -32,15 +32,17 @@ using namespace learnSPH::Kernel;
 
 
 SolverSPH::SolverSPH(FluidSystem system):
-    m_system(system), m_nsearch(1.0)
-{    
-    m_nsearch.set_radius(Kernel::CubicSpline::support(m_system.smoothingLength()));
-    m_system.addToNeighborhood(m_nsearch);
+    m_system(system)
+{
+    mp_nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(m_system.getParticleRadius());
+    mp_nsearch->set_radius(Kernel::CubicSpline::support(m_system.smoothingLength()));
+    m_system.addToNeighborhood(mp_nsearch);
     m_system.initKernelLookupTable();
 }
 
 SolverSPH::~SolverSPH()
 {
+    mp_nsearch.reset();
 }
 
 double SolverSPH::timeStepCFL()
@@ -59,11 +61,11 @@ double SolverSPH::integrationStep()
 {
     const double deltaT = timeStepCFL();
     
-    m_nsearch.find_neighbors();
+    mp_nsearch->find_neighbors();
     
-    m_system.updateDensities(m_nsearch, m_boundaries);
+    m_system.updateDensities(m_boundaries);
     m_system.updatePressures(m_param.stiffness);
-    m_system.updateAccelerations(m_nsearch, m_boundaries);
+    m_system.updateAccelerations(m_boundaries);
     
     applyExternalForces();
     semiImplicitEulerStep(deltaT);
@@ -74,7 +76,7 @@ double SolverSPH::integrationStep()
 size_t SolverSPH::addBoundary(BoundarySystem boundary)
 {
     m_boundaries.push_back(boundary);
-    m_boundaries.back().addToNeighborhood(m_nsearch);
+    m_boundaries.back().addToNeighborhood(mp_nsearch);
     return m_boundaries.size()-1;
 }
 
@@ -110,7 +112,7 @@ void SolverSPH::applyExternalForces()
 void SolverSPH::semiImplicitEulerStep(double deltaT)
 {    
     const size_t id = m_system.getPointSetID();
-    CompactNSearch::PointSet const& fluidPS = m_nsearch.point_set(id);
+    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
     
     // Update velocities
     const std::vector<Eigen::Vector3d> &velocities = m_system.getVelocities();
