@@ -16,27 +16,30 @@ using namespace learnSPH::System;
 
 TEST_CASE("FluidBox", "Generate fluid particles in a box")
 {
-    std::cout << "Generating Fluid Particles in a Box.." << std::endl;
+    SECTION("UpdateDensities") {
+        std::cout << "Generating Fluid Particles in a Box.." << std::endl;
 
-    const double particleDiameter = 0.1;
-    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
-                                                     Eigen::Vector3d(1, 1, 1),
-                                                     particleDiameter);
+        const double particleDiameter = 0.1;
+        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
+                                                         Eigen::Vector3d(1, 1, 1),
+                                                         particleDiameter);
     
-    const double r = CubicSpline::support(particles.getSmoothingLength());
-    std::shared_ptr<CompactNSearch::NeighborhoodSearch> nsearch;
-    nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(r);
-    particles.addToNeighborhood(nsearch);
+        const double r = CubicSpline::support(particles.getSmoothingLength());
+        std::shared_ptr<CompactNSearch::NeighborhoodSearch> nsearch;
+        nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(r);
+        particles.addToNeighborhood(nsearch);
     
-    nsearch->find_neighbors();
+        nsearch->find_neighbors();
     
-    particles.updateDensities(std::vector<BoundarySystem>());
+        particles.updateDensities(std::vector<BoundarySystem>());
 
-    std::stringstream filename;
-    filename << SOURCE_DIR << "/res/test_fluidbox.vtk";
-    save_particles_to_vtk(filename.str(), particles.getPositions(), particles.getDensities());
+        std::stringstream filename;
+        filename << SOURCE_DIR << "/res/test_fluidbox.vtk";
+        save_particles_to_vtk(filename.str(), particles.getPositions(),
+                              particles.getDensities());
 
-    std::cout << "Results saved to " << filename.str() << std::endl;
+        std::cout << "Results saved to " << filename.str() << std::endl;
+    }
 }
 
 

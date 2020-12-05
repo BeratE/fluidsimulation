@@ -25,6 +25,7 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
 
 void FluidSystem::updatePressures(double stiffness)
 {
+#pragma omp parallel for
     for (size_t i = 0; i < getSize(); i++) {
         m_pressures[i] = std::max(0.0, stiffness * (m_densities[i] - m_restDensity));
     }
@@ -34,15 +35,15 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
 {
     // get neighborhood information of fluid particle point set
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_pointSetID);
-    m_densities.resize(fluidPS.n_points());
-    
+
     // iterate fluid particles
+    //#pragma omp parallel for
     for (size_t i = 0; i < fluidPS.n_points(); i++) {
         const Eigen::Vector3d &fpPos = m_positions[i];
 
         // Fluid contribution
         double fluidDensity = 0.0;
-        fluidDensity += m_kernelLookup.weight(fpPos, fpPos);
+        fluidDensity += m_kernelLookup.weight(fpPos, fpPos);        
         for (size_t j = 0; j < fluidPS.n_neighbors(m_pointSetID, i); j++) {
             const unsigned int k = fluidPS.neighbor(m_pointSetID, i, j);
             fluidDensity += m_kernelLookup.weight(fpPos, m_positions[k]);
@@ -54,7 +55,7 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
         for (const BoundarySystem &boundary : boundaries) {
             double density = 0.0;
             const size_t boundaryID = boundary.getPointSetID();
-            size_t n_neighbors = fluidPS.n_neighbors(boundaryID, i);
+            const size_t n_neighbors = fluidPS.n_neighbors(boundaryID, i);
             for (size_t j = 0; j < n_neighbors; j++) {
                 const unsigned int k = fluidPS.neighbor(boundaryID, i, j);
                 density += boundary.getParticleVolume(k)
@@ -71,6 +72,7 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
 
 void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundaries)
 {
+#pragma omp parallel for
     for (size_t i = 0; i < getSize(); i++) {
         Eigen::Vector3d pressureAcc = particlePressureAcc(i, boundaries);
         Eigen::Vector3d viscosityAcc = particleViscosityAcc(i, boundaries);
@@ -160,7 +162,6 @@ Vector3d FluidSystem::particleViscosityAcc(size_t i, const std::vector<BoundaryS
         }
     }
     
-
     return 2.0 * (fluidContrib + boundaryContrib);
 }
 
