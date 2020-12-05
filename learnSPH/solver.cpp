@@ -88,7 +88,7 @@ void SolverSPH::applyExternalForces()
     if (m_gravityEnable)
         grav_force = VEC_GRAVITY * m_system.getRestDensity();
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t i = 0; i < m_system.getSize(); i++) {
         // gravity
         m_system.addParticleForce(i, grav_force);
@@ -111,14 +111,14 @@ void SolverSPH::semiImplicitEulerStep(double deltaT)
     const std::vector<Eigen::Vector3d> &accelerations = m_system.getAccelerations();
     const std::vector<Eigen::Vector3d> &velocities = m_system.getVelocities();
     
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t i = 0; i < fluidPS.n_points(); i++) {
         Eigen::Vector3d dV = deltaT * accelerations[i];
         m_system.addParticleVel(i,  dV);
     }
 
     // Update positions
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t i = 0; i < fluidPS.n_points(); i++) {
         const Eigen::Vector3d &fpPos = m_system.getParticlePos(i);
         const Eigen::Vector3d &fpVel = m_system.getParticleVel(i);
@@ -167,7 +167,6 @@ void SolverSPH::run(std::string file, double milliseconds)
     
     const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
         * m_snapShotMS * pow(10, -3);
-    
     
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s <<std::endl;

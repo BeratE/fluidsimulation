@@ -25,7 +25,7 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
 
 void FluidSystem::updatePressures(double stiffness)
 {
-#pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t i = 0; i < getSize(); i++) {
         m_pressures[i] = std::max(0.0, stiffness * (m_densities[i] - m_restDensity));
     }
@@ -72,7 +72,7 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
 
 void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundaries)
 {
-#pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t i = 0; i < getSize(); i++) {
         Eigen::Vector3d pressureAcc = particlePressureAcc(i, boundaries);
         Eigen::Vector3d viscosityAcc = particleViscosityAcc(i, boundaries);
