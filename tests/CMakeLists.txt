@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(TARGET_NAME tests)
 
 set(LIBRARIES
+  surface
   learnSPH)
 
 set(INCLUDE_DIRS
@@ -17,10 +18,11 @@ set(SOURCE_FILES
     sph_kernel.cpp
     sph_sampling.cpp
     sph_runtime.cpp
-    sph_simulation.cpp)
+    sph_simulation.cpp
+    mc_surface.cpp)
 
 ### Target  
 add_executable(${TARGET_NAME} ${SOURCE_FILES})
-add_dependencies(${TARGET_NAME} learnSPH)
+add_dependencies(${TARGET_NAME} surface learnSPH)
 target_link_libraries(${TARGET_NAME} ${LIBRARIES})
 target_include_directories(${TARGET_NAME} ${INCLUDE_DIRS})
