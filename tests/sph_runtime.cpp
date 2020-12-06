@@ -1,12 +1,12 @@
 #include "catch.hpp"
-#include "kernel.h"
-#include "solver.h"
-#include "system/emitter.h"
-#include "system/particlesystem.h"
-#include "util/config.h"
-#include "util/vtk_writer.h"
 #include <omp.h>
 #include <iostream>
+#include "config.h"
+#include "vtk_writer.h"
+#include "learnSPH/kernel.h"
+#include "learnSPH/solver.h"
+#include "learnSPH/system/emitter.h"
+#include "learnSPH/system/particlesystem.h"
 
 TEST_CASE("RUN_TIME", "[runtime]")
 {

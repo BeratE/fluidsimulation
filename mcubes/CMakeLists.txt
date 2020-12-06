@@ -2,19 +2,17 @@ cmake_minimum_required(VERSION 3.1)
 set(CMAKE_CXX_STANDARD 17)
 
 ### Project
-set(TARGET_NAME learnSPH)
+set(TARGET_NAME mcubes)
 
 set(LIBRARIES 
-  CompactNSearch)
+  )
 
 set(INCLUDE_DIRS
   PUBLIC
-  ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/extern
-  ${PROJECT_SOURCE_DIR}/common/inc)
+  ${PROJECT_SOURCE_DIR}/common)
 
-
-### External dependencies
+#### External dependencies
 ## Eigen
 set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/Eigen)
 if(NOT EIGEN3_INCLUDE_DIR)
@@ -23,21 +21,11 @@ if(NOT EIGEN3_INCLUDE_DIR)
 endif()
 list(APPEND INCLUDE_DIRS "${EIGEN3_INCLUDE_DIR}")
 
+
+
 ### Sources
 set(SOURCE_FILES
-  ${COMMON_SOURCES}
-  system/particlesystem.h
-  system/particlesystem.cpp
-  system/fluidsystem.h
-  system/fluidsystem.cpp
-  system/boundarysystem.h        
-  system/boundarysystem.cpp
-  system/emitter.h
-  system/emitter.cpp
-  solver.h
-  solver.cpp
-  kernel.h
-  kernel.cpp)
+  )
 
 ### Target Library
 add_library(${TARGET_NAME} ${SOURCE_FILES})

@@ -1,14 +1,14 @@
 #include "catch.hpp"
-#include <Eigen/Dense>
 #include <tuple>
-#include <stdio.h>
-#include "kernel.h"
 #include <string>
-#include "system/emitter.h"
-#include "system/particlesystem.h"
-#include "system/fluidsystem.h"
-#include "util/vtk_writer.h"
-#include "util/config.h"
+#include <stdio.h>
+#include <Eigen/Dense>
+#include "vtk_writer.h"
+#include "config.h"
+#include "learnSPH/kernel.h"
+#include "learnSPH/system/emitter.h"
+#include "learnSPH/system/fluidsystem.h"
+#include "learnSPH/system/particlesystem.h"
 
 using namespace learnSPH;
 using namespace learnSPH::Kernel;

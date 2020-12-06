@@ -1,10 +1,10 @@
 #include "catch.hpp"
-#include "system/particlesystem.h"
-#include "system/emitter.h"
-#include "kernel.h"
-#include "solver.h"
-#include "util/vtk_writer.h"
-#include "util/config.h"
+#include "config.h"
+#include "vtk_writer.h"
+#include "learnSPH/kernel.h"
+#include "learnSPH/solver.h"
+#include "learnSPH/system/emitter.h"
+#include "learnSPH/system/particlesystem.h"
 
 using namespace learnSPH;
 using namespace learnSPH::System;

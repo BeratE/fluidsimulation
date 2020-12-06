@@ -1,8 +1,8 @@
 #include "catch.hpp"
-#include <Eigen/Dense>
 #include <tuple>
 #include <stdio.h>
-#include "kernel.h"
+#include <Eigen/Dense>
+#include "learnSPH/kernel.h"
 
 using namespace learnSPH::Kernel;
 

@@ -1,7 +1,7 @@
 #include "solver.h"
 #include "kernel.h"
-#include "util/config.h"
-#include "util/vtk_writer.h"
+#include "config.h"
+#include "vtk_writer.h"
 #include <iostream>
 
 template<typename T>
