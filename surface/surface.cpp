@@ -1,123 +1,35 @@
 #include "surface.h"
-#include "mc_lut.hpp"
 #include <iostream>
-#include <unordered_map>
 
 using namespace learnSPH;
 
-// void Surface::printCudaVersion()
-// {
-//     std::cout << "CUDA Compiled version: "
-//               << __CUDACC_VER_MAJOR__ << "."
-//               << __CUDACC_VER_MINOR__
-//               << std::endl;
-
-//     int runtime_ver;
-//     cudaRuntimeGetVersion(&runtime_ver);
-//     std::cout << "CUDA Runtime version: " << runtime_ver << std::endl;
-
-//     int driver_ver;
-//     cudaDriverGetVersion(&driver_ver);
-//     std::cout << "CUDA Driver version: " << driver_ver << std::endl;
-// }
-
-
-inline size_t
-getIndex1D(IndexVector3d it, Dimensions3d gridDim)
-{
-    return it(0) * gridDim(1) * gridDim(2) + it(1) * gridDim(2) + it(2);
-}
-
-std::vector<Eigen::Vector3d>
-Surface::marchCubes(std::vector<Eigen::Vector3d> const &gridVerts,
-                    std::vector<double> const &gridSDF,
-                    const Dimensions3d gridDim)
-{
-    assert(gridSDF.size() == gridVerts.size());
-
-    std::vector<Eigen::Vector3d> triangles;
-
-    // Iterate cubes
-    // Cube dimensions = number of vertices - 1
-    for (size_t x = 0; x < gridDim(0)-1; x++) {
-        for (size_t y = 0; y < gridDim(1)-1; y++) {
-            for (size_t z = 0; z < gridDim(2)-1; z++) {
-                // Mapping local index to global 1D grid index
-                const std::array<size_t, 8> GRID_INDICES = {
-                    getIndex1D(IndexVector3d(x, y, z), gridDim),
-                    getIndex1D(IndexVector3d(x + 1, y, z), gridDim),
-                    getIndex1D(IndexVector3d(x + 1, y + 1, z), gridDim),
-                    getIndex1D(IndexVector3d(x, y + 1, z), gridDim),
-                    getIndex1D(IndexVector3d(x, y, z + 1), gridDim),
-                    getIndex1D(IndexVector3d(x + 1, y, z + 1), gridDim),
-                    getIndex1D(IndexVector3d(x + 1, y + 1, z + 1), gridDim),
-                    getIndex1D(IndexVector3d(x, y + 1, z + 1), gridDim),
-                };
-                               
-                std::array<bool, 8> signs;
-                for (size_t i = 0; i < 8; i++)
-                    signs[i] = (gridSDF[GRID_INDICES[i]] <= 0.0);
-
-                const std::array<std::array<int, 3>, 5> TRIANG
-                    = getMarchingCubesCellTriangulation(signs);
-
-                // Iterate edges                
-                for (size_t i = 0; i < 5; i++) {
-                    for (size_t j = 0; j < 3; j++) {
-                        const int EDGE_INDEX = TRIANG[i][j];
-                        if (EDGE_INDEX == -1)
-                            break;                      
-
-                        const auto EDGE = CELL_EDGES[EDGE_INDEX];
-                        // Global 1d vertex indices
-                        const size_t V_A = GRID_INDICES[EDGE[0]];
-                        const size_t V_B = GRID_INDICES[EDGE[1]];
-                        // Isolevel vales
-                        const double ISO_A = gridSDF[V_A];
-                        const double ISO_B = gridSDF[V_B];
-                        // Interpolate positions
-                        const double ALPHA = ISO_A / (ISO_A - ISO_B);
-                        Eigen::Vector3d xs =
-                            (1.0 - ALPHA) * gridVerts[V_A] + ALPHA * gridVerts[V_B];
-
-                        triangles.push_back(xs);
-                    }
-                }                                
-            }            
-        }
-    }
-
-    return triangles;
-}
-
 void Surface::discretizeSDF(
-    const Dimensions3d gridDim,
-    const Eigen::Vector3d gridSize,
-    std::function<double(Eigen::Vector3d)> const &sdf,
-    std::vector<Eigen::Vector3d> *pOutGridVerts,
-    std::vector<double> *pOutGridSDF)
+    const Eigen::Vector3f volSize,
+    const Eigen::Vector3i volDims,
+    std::function<float(Eigen::Vector3f)> const &sdf,
+    std::vector<Eigen::Vector3f> *pOutVolVerts,
+    std::vector<float> *pOutVolSDF)
 {
-    Eigen::Vector3d stepSizes = gridSize;
-    stepSizes(0) /= (double)gridDim(0);
-    stepSizes(1) /= (double)gridDim(1);
-    stepSizes(2) /= (double)gridDim(2);
+    Eigen::Vector3f stepSizes = volSize;
+    stepSizes(0) /= (float)volDims(0);
+    stepSizes(1) /= (float)volDims(1);
+    stepSizes(2) /= (float)volDims(2);
 
-    for (size_t x = 0; x < gridDim(0); x++) {
-        std::vector<Eigen::Vector3d> gridVerts;
-        std::vector<double> gridSDF;
-        for (size_t y = 0; y < gridDim(1); y++) {
-            for (size_t z = 0; z < gridDim(2); z++) {
-                pOutGridVerts->push_back(
-                    Eigen::Vector3d(
+    for (size_t x = 0; x < volDims(0); x++) {
+        for (size_t y = 0; y < volDims(1); y++) {
+            for (size_t z = 0; z < volDims(2); z++) {
+                pOutVolVerts->push_back(
+                    Eigen::Vector3f(
                         stepSizes(0) * x,
                         stepSizes(1) * y,
                         stepSizes(0) * z));
                 
-                pOutGridSDF->push_back(sdf(pOutGridVerts->back()));
+                pOutVolSDF->push_back(sdf(pOutVolVerts->back()));
             }
         }
     }
 }
+
 
 // void constructSurface(const std::vector<Eigen::Vector3d> &gridVerts,
 //                       const std::vector<double> &gridSDF,

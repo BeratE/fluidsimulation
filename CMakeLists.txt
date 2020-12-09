@@ -10,7 +10,7 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/common/inc/config.h")
 
 ### CUDA
-option(USE_CUDA "Use CUDA" OFF)
+option(USE_CUDA "Use CUDA" ON)
 
 if (USE_CUDA)
   enable_language(CUDA)
@@ -20,12 +20,10 @@ if (USE_CUDA)
     set(CMAKE_CUDA_ARCHITECTURES 50)
   endif()
 
-  if(NOT DEFINED CMAKE_CUDA_STANDARD)
-    set(CMAKE_CUDA_STANDARD 17)
-    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-  endif()
+  set(CMAKE_CUDA_STANDARD 17)
+  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
-  set(CMAKE_CUDA_FLAGS "-Wall")
+  set(CMAKE_CUDA_FLAGS "-Wall -Wno-deprecated-gpu-targets")
   set(CMAKE_CUDA_FLAGS_DEBUG "-g")
 
   set(LIBRARIES ${CUDA_LIBRARIES})

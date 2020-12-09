@@ -16,37 +16,37 @@ TEST_CASE("Construction", "") {
     
     const double start_t = omp_get_wtime();
 
-    const Dimensions3d gridDim(30, 30, 30);
-    const Eigen::Vector3d gridSize(1.0, 1.0, 1.0);
+    const Eigen::Vector3i numVerts(30, 30, 30);
+    const Eigen::Vector3f gridSize(1.0, 1.0, 1.0);
     
-    std::vector<Eigen::Vector3d> gridVerts;
-    std::vector<double> gridSDF;
+    std::vector<Eigen::Vector3f> gridVerts;
+    std::vector<float> gridSDF;
     
     SECTION("SphereSDF") {
-        const double radius = 0.2;
-        const Eigen::Vector3d origin(0.5, 0.5, 0.5);
-        auto sdf = [origin,radius](Eigen::Vector3d x)
+        const float radius = 0.2;
+        const Eigen::Vector3f origin(0.5, 0.5, 0.5);
+        auto sdf = [origin,radius](Eigen::Vector3f x)
             { return (x-origin).norm() - radius; };
         
-        discretizeSDF(gridDim, gridSize, sdf,
-                  &gridVerts, &gridSDF);
+        discretizeSDF(gridSize, numVerts, sdf,
+                      &gridVerts, &gridSDF);
     }
     SECTION("TorusSDF") {
-        const double r = 0.1;
-        const double R = 0.3;
-        const Eigen::Vector3d origin(0.5, 0.5, 0.5);
-        auto sdf = [r, R, origin](Eigen::Vector3d x)
+        const float r = 0.1;
+        const float R = 0.3;
+        const Eigen::Vector3f origin(0.5, 0.5, 0.5);
+        auto sdf = [r, R, origin](Eigen::Vector3f x)
             {
                 x = x - origin;
                 return r*r-pow(sqrt(x(0)*x(0)+x(1)*x(1))-R, 2)-x(2)*x(2);
             };
         
-        discretizeSDF(gridDim, gridSize, sdf,
-                  &gridVerts, &gridSDF);
+        discretizeSDF(gridSize, numVerts, sdf,
+                      &gridVerts, &gridSDF);
     }
 
     std::vector<Eigen::Vector3d> triangles =
-        marchCubes(gridVerts, gridSDF, gridDim);
+        marchCubes(numVerts, gridVerts, gridSDF);
 
     std::stringstream filename;
     filename << SOURCE_DIR << "/res/surface/simple_surface.vtk";
