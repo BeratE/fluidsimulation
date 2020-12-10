@@ -1,76 +1,122 @@
 #include "surface.h"
 #include "mc_lut.h"
+#include <unordered_map>
+#include <iostream>
 
 using namespace learnSPH;
 
 static inline
-size_t getVertIdx(Eigen::Vector3i pos, Eigen::Vector3i volDims)
+size_t getVertIdx(Eigen::Vector3i pos, Eigen::Vector3i volDim)
 {
-    return pos(0) * volDims(1) * volDims(2)
-        + pos(1) * volDims(2)
+    return pos(0) * volDim(1) * volDim(2)
+        + pos(1) * volDim(2)
         + pos(2);
 }
 
-std::vector<Eigen::Vector3d>
-Surface::marchCubes(Eigen::Vector3i volDim,
-                    std::vector<Eigen::Vector3f> &volVerts,
-                    std::vector<float> &volSDF)
+static inline
+Eigen::Vector3i getPos(size_t idx, Eigen::Vector3i volDim)
 {
-    assert(volSDF.size() == volVerts.size());
+    uint x = idx/ (volDim(1) * volDim(2));
+    uint r = idx - (x * (volDim(1) * volDim(2)));
+    uint y = r / volDim(2);
+    uint z = r - (y * volDim(2));
+    return Eigen::Vector3i(x, y, z);
+}
 
-    std::vector<Eigen::Vector3d> triangles;
-
-    // Iterate cubes
-    // Cube dimensions = number of vertices - 1
-    for (size_t x = 0; x < volDim(0)-1; x++) {
-        for (size_t y = 0; y < volDim(1)-1; y++) {
-            for (size_t z = 0; z < volDim(2)-1; z++) {
-                // Mapping local index to global 1D grid index
-                const std::array<size_t, 8> VERT_IDX = {
-                    getVertIdx(Eigen::Vector3i(x,   y,   z), volDim),
-                    getVertIdx(Eigen::Vector3i(x+1, y,   z), volDim),
-                    getVertIdx(Eigen::Vector3i(x+1, y+1, z), volDim),
-                    getVertIdx(Eigen::Vector3i(x,   y+1, z), volDim),
-                    getVertIdx(Eigen::Vector3i(x,   y,   z+1), volDim),
-                    getVertIdx(Eigen::Vector3i(x+1, y,   z+1), volDim),
-                    getVertIdx(Eigen::Vector3i(x+1, y+1, z+1), volDim),
-                    getVertIdx(Eigen::Vector3i(x,   y+1, z+1), volDim),
-                };
-                               
-                uint index = 0;
-                for (uint i = 0; i < 8; i++) {
-                    if (volSDF[VERT_IDX[i]] <= 0.0)
-                        index |= (1 << i);
-                }
-
-                // Iterate edges                
-                for (uint i = 0; i < 5; i++) {
-                    for (uint j = 0; j < 3; j++) {
-                        uint edgeIdx = MARCHING_CUBES_TABLE[index][i][j];
-                        if (edgeIdx == -1)
-                            goto endloop;                      
-
-                        // Global 1d vertex indices
-                        const size_t V_A = VERT_IDX[CELL_EDGES[edgeIdx][0]];
-                        const size_t V_B = VERT_IDX[CELL_EDGES[edgeIdx][1]];
-                        // Isolevel vales
-                        const float ISO_A = volSDF[V_A];
-                        const float ISO_B = volSDF[V_B];
-                        // Interpolate positions
-                        const float ALPHA = ISO_A / (ISO_A - ISO_B);
-                        Eigen::Vector3d xs =
-                            (1.0 - ALPHA) * volVerts[V_A].cast<double>()
-                            + ALPHA * volVerts[V_B].cast<double>();
-
-                        triangles.push_back(xs);
-                    }
-                }
-
-            endloop:
+void collectVertices(const Eigen::Vector3i volDim,
+                     const std::vector<float> &volSDF,
+                     const std::vector<Eigen::Vector3f> &volVerts,
+                     std::vector<Eigen::Vector3f> &outVertices,
+                     std::unordered_map<size_t, size_t> &outEdgeIdxToVertIdx)
+{
+    const size_t SIZE = volDim(0)*volDim(1)*volDim(2);
+    for (size_t idx = 0; idx < SIZE; idx++) {
+        Eigen::Vector3i originPos = getPos(idx, volDim);
+        size_t originIdx = idx;
+        float  originLvl = volSDF[idx];
+                
+        // Loop Edges 0, 1, 2 (x, y, z)
+        for (size_t i = 0; i < 3; i++) {
+            if (originPos(i) == volDim(i)-1)
                 continue;
+            
+            Eigen::Vector3i oppositePos = originPos;
+            oppositePos(i) += 1;
+            size_t oppositeIdx = getVertIdx(oppositePos, volDim);
+            float oppositeLvl = volSDF[oppositeIdx];
+
+            if ((oppositeLvl / originLvl) < 0.0) {
+                size_t edgeIdx = 3*originIdx + i;
+                float alpha = originLvl / (originLvl -oppositeLvl);
+                Eigen::Vector3f vert =
+                    (1.0 -alpha) * volVerts[originIdx]
+                    + alpha * volVerts[oppositeIdx];
+                
+                outVertices.push_back(vert);
+                outEdgeIdxToVertIdx.insert(std::make_pair(edgeIdx, outVertices.size()-1));
             }
         }
     }
+}
 
-    return triangles;
+void Surface::marchCubes(const Eigen::Vector3i volDim,
+                         const std::vector<float> &volSDF,
+                         const std::vector<Eigen::Vector3f> &volVerts,
+                         std::vector<Eigen::Vector3f> &outVertices,
+                         std::vector<std::array<int, 3>> &outTriangles)
+{
+    size_t SIZE = volDim(0)*volDim(1)*volDim(2);
+    assert(SIZE == volSDF.size());
+    assert(volSDF.size() == volVerts.size());    
+   
+    std::unordered_map<size_t, size_t> edgeIdxToVertIdx;    
+    collectVertices(volDim, volSDF, volVerts, outVertices, edgeIdxToVertIdx);
+
+    // for (auto &v : edgeIdxToVertIdx)
+    //     std::cout << v.first << " " << v.second << std::endl;
+
+    // Iterate cubes
+    // Cube dimensions = number of vertices - 1
+    Eigen::Vector3i numCells = volDim - Eigen::Vector3i(1, 1, 1);
+    const size_t NUM_CELLS = numCells(0) * numCells(1) * numCells(2);
+    for (size_t idx = 0; idx < NUM_CELLS; idx++) {
+        Eigen::Vector3i pos = getPos(idx, numCells);
+
+        // Mapping local index to global 1D grid index
+        std::array<size_t, 8> vertIdx;
+        for (int i = 0; i < 8; i++) {
+            const Eigen::Vector3i offset(CELL_VERTICES[i]);
+            vertIdx[i] = getVertIdx(pos + offset, volDim);
+        }
+
+        uint caseIdx = 0;
+        for (uint i = 0; i < 8; i++) {
+            if (volSDF[vertIdx[i]] <= 0.0)
+                caseIdx |= (1 << i);
+        }
+
+        // Iterate edges        
+        for (uint i = 0; i < 5; i++) {
+            std::array<int, 3> triangle;
+            for (uint j = 0; j < 3; j++) {
+                uint edgeIdx = MARCHING_CUBES_TABLE[caseIdx][i][j];
+                if (edgeIdx == -1)
+                    goto endloop;
+                
+                size_t originIdx  = vertIdx[CELL_EDGES[edgeIdx][0]];
+                size_t globalEdgeIdx = 3*originIdx + EDGE_DIR[edgeIdx];
+                printf("%d", globalEdgeIdx);
+                triangle[j] = edgeIdxToVertIdx[globalEdgeIdx];
+                printf(", %d\n", triangle[j]);
+            }
+            outTriangles.push_back(triangle);
+        }
+
+      endloop:
+        continue;
+    }
+
+    // for (auto &v : outTriangles) {
+    //     printf("%d, %d, %d\n", v[0], v[1], v[2]);
+    // }
 }

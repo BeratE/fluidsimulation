@@ -10,7 +10,7 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/common/inc/config.h")
 
 ### CUDA
-option(USE_CUDA "Use CUDA" ON)
+option(USE_CUDA "Use CUDA" OFF)
 
 if (USE_CUDA)
   enable_language(CUDA)

@@ -29,7 +29,7 @@ TEST_CASE("Construction", "") {
             { return (x-origin).norm() - radius; };
         
         discretizeSDF(gridSize, numVerts, sdf,
-                      &gridVerts, &gridSDF);
+                      &gridSDF, &gridVerts);
     }
     SECTION("TorusSDF") {
         const float r = 0.1;
@@ -42,16 +42,24 @@ TEST_CASE("Construction", "") {
             };
         
         discretizeSDF(gridSize, numVerts, sdf,
-                      &gridVerts, &gridSDF);
+                      &gridSDF, &gridVerts);
     }
 
-    std::vector<Eigen::Vector3d> triangles =
-        marchCubes(numVerts, gridVerts, gridSDF);
+    std::vector<Eigen::Vector3f> vertices;
+    std::vector<std::array<int, 3>> triangles;
+    marchCubes(numVerts, gridSDF, gridVerts,
+               vertices, triangles);
 
     std::stringstream filename;
     filename << SOURCE_DIR << "/res/surface/simple_surface.vtk";
-        
-    save_particles_to_vtk(filename.str(), triangles);
+
+    std::vector<Eigen::Vector3d> verts;
+    for (auto &v : vertices) {
+        verts.push_back(v.cast<double>());
+    }
+
+    save_mesh_to_vtk(filename.str(), vertices, triangles);
+    //save_particles_to_vtk(filename.str(), verts);
 
     const double end_t = omp_get_wtime();
     const double delta_t = end_t - start_t;
