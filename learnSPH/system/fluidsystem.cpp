@@ -15,6 +15,7 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
     m_densities.resize(size);
     m_pressures.resize(size);
     m_accelerations.resize(size);
+
     
     if (fill) {
         std::fill(m_densities.begin(), m_densities.end(), 0.0);
@@ -80,6 +81,10 @@ void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundar
 
         m_accelerations[i] = pressureAcc + viscosityAcc + externalAcc;
     }
+}
+
+const double FluidSystem::calculateWeightBetweenParticles(Eigen::Vector3d x_i, Eigen::Vector3d x_j) const{
+    return m_kernelLookup.weight(x_i, x_j);
 }
 
 Vector3d FluidSystem::particlePressureAcc(size_t i, const std::vector<BoundarySystem> &boundaries)

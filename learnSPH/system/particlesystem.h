@@ -47,6 +47,8 @@ namespace learnSPH::System {
         const std::vector<Vector3d>& getPositions() const { return m_positions; }
         const std::vector<Vector3d>& getVelocities() const { return m_velocities; }
 
+        void boundingBox(Eigen::Vector3d& bottomLeft, Eigen::Vector3d& upperRight) const;
+
     protected:
         long m_pointSetID = -1; // CompactNSearch PointSet ID
         double m_viscosity = 0.0; // Viscosity, different for fluid and boundary

@@ -4,13 +4,16 @@ set(CMAKE_CXX_STANDARD 17)
 ### Project
 set(TARGET_NAME surface)
 
-#set(LIBRARIES "")
+set(LIBRARIES 
+    CompactNSearch
+    learnSPH)
 
 set(INCLUDE_DIRS
   PUBLIC
   ${PROJECT_SOURCE_DIR}/extern
   ${PROJECT_SOURCE_DIR}/common
-  ${PROJECT_SOURCE_DIR}/extern/Eigen)
+  ${PROJECT_SOURCE_DIR}/extern/Eigen
+  )
 
 ### Sources
 set(SOURCE_FILES
@@ -26,7 +29,9 @@ else()
     marching_cubes.cpp)
 endif()
 
+
 ### Target Library
-add_library(${TARGET_NAME} SHARED ${SOURCE_FILES})
-#target_link_libraries(${TARGET_NAME} ${LIBRARIES})
+add_library(${TARGET_NAME} ${SOURCE_FILES})
+add_dependencies(${TARGET_NAME} learnSPH)
+target_link_libraries(${TARGET_NAME} ${LIBRARIES})
 target_include_directories(${TARGET_NAME} ${INCLUDE_DIRS})

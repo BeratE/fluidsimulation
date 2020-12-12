@@ -2,11 +2,12 @@
 #include "mc_lut.h"
 #include <unordered_map>
 #include <iostream>
+#include <array>
 
 using namespace learnSPH;
 
-static inline
-size_t getVertIdx(Eigen::Vector3i pos, Eigen::Vector3i volDim)
+
+size_t Surface::getVertIdx(Eigen::Vector3i pos, Eigen::Vector3i volDim)
 {
     return pos(0) * volDim(1) * volDim(2)
         + pos(1) * volDim(2)
@@ -42,10 +43,11 @@ void collectVertices(const Eigen::Vector3i volDim,
             
             Eigen::Vector3i oppositePos = originPos;
             oppositePos(i) += 1;
-            size_t oppositeIdx = getVertIdx(oppositePos, volDim);
+            size_t oppositeIdx = Surface::getVertIdx(oppositePos, volDim);
             float oppositeLvl = volSDF[oppositeIdx];
 
-            if ((oppositeLvl / originLvl) < 0.0) {
+
+            if (originLvl != 0 && (oppositeLvl / originLvl) < 0.0) {
                 size_t edgeIdx = 3*originIdx + i;
                 float alpha = originLvl / (originLvl -oppositeLvl);
                 Eigen::Vector3f vert =

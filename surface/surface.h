@@ -1,6 +1,7 @@
 #include <Eigen/Dense>
 #include <functional>
 #include <vector>
+#include <learnSPH/system/fluidsystem.h>
 
 namespace learnSPH::Surface {
     //void printCudaVersion();
@@ -19,4 +20,16 @@ namespace learnSPH::Surface {
         std::function<float(Eigen::Vector3f)> const &sdf,
         std::vector<float> *pOutVolSDF,
         std::vector<Eigen::Vector3f> *pOutVolVerts);
+
+    void discretizeFluidSystemSDF(
+        const learnSPH::System::FluidSystem &system, 
+        const double c, 
+        const double samplingDistance,
+        std::vector<double> *pOutVolSDF,
+        std::vector<Eigen::Vector3d> *pOutVolVerts,
+        CompactNSearch::NeighborhoodSearch& nsearch);
+
+    size_t getVertIdx(Eigen::Vector3i pos, Eigen::Vector3i volDim);
+
+    void calculateNormalizedDensities(const learnSPH::System::FluidSystem& system, CompactNSearch::NeighborhoodSearch& nsearch, std::vector<double>& normalizedDensities);
 }

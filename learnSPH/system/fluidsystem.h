@@ -13,6 +13,7 @@ namespace learnSPH::System {
         void updatePressures(double stiffness);
         void updateDensities(const std::vector<BoundarySystem> &boundaries);
         void updateAccelerations(const std::vector<BoundarySystem> &boundaries);        
+        const double calculateWeightBetweenParticles(Eigen::Vector3d x_i, Eigen::Vector3d x_j) const;
         
         // Setter & Getter
         double getParticleDensity(size_t i) const { return m_densities[i]; }

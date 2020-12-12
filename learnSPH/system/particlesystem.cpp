@@ -1,4 +1,5 @@
 #include "particlesystem.h"
+#include <float.h>
 
 using namespace learnSPH;
 using namespace learnSPH::System;
@@ -46,4 +47,30 @@ void ParticleSystem::addParticleForce(size_t i, Vector3d force)
 void ParticleSystem::clearForces()
 {
     std::fill(m_forces.begin(), m_forces.end(), Vector3d(0.0, 0.0, 0.0));
+}
+
+void ParticleSystem::boundingBox(Eigen::Vector3d& bottomLeft, Eigen::Vector3d& upperRight) const {
+    double minX = DBL_MAX, minY = DBL_MAX, minZ = DBL_MAX;
+    double maxX = DBL_MIN, maxY = DBL_MIN, maxZ = DBL_MIN;
+    for (Eigen::Vector3d position : m_positions) {
+        if (position.x() < minX)
+            minX = position.x();
+        if (position.y() < minY)
+            minY = position.y();
+        if (position.z() < minZ)
+            minZ = position.z();
+        if (position.x() > maxX)
+            maxX = position.x();
+        if (position.y() > maxY)
+            maxY = position.y();
+        if (position.z() > maxZ)
+            maxZ = position.z();
+    }
+    bottomLeft(0) = minX;
+    bottomLeft(1) = minY;
+    bottomLeft(2) = minZ;
+    upperRight(0) = maxX;
+    upperRight(1) = maxY;
+    upperRight(2) = maxZ;
+    
 }

@@ -43,6 +43,8 @@
 #ifndef MC_LUT_H
 #define MC_LUT_H
 
+typedef unsigned int uint;
+
 // Local Vertex Positions
 const int CELL_VERTICES[8][3] = {
     { 0, 0, 0 }, // 0
