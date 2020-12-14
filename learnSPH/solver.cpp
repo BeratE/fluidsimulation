@@ -58,4 +58,3 @@ void Solver::applyExternalForces()
     // Iterate force objects
     // ...
 }
-

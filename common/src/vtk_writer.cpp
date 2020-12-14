@@ -41,19 +41,19 @@ void learnSPH::save_particles_to_vtk(std::string path,
 }
 
 
-static void compute_node_normals(std::vector<Eigen::Vector3f>& out_normals,
-                                  const std::vector<Eigen::Vector3f>& vertices,
+static void compute_node_normals(std::vector<Eigen::Vector3d>& out_normals,
+                                  const std::vector<Eigen::Vector3d>& vertices,
                                   const std::vector<std::array<int, 3>>& triangles)
 {
     out_normals.clear();
-    out_normals.resize(vertices.size(), Eigen::Vector3f::Zero());
+    out_normals.resize(vertices.size(), Eigen::Vector3d::Zero());
     for (const std::array<int, 3> &triangle : triangles) {
-        const Eigen::Vector3f& p0 = vertices[triangle[0]];
-        const Eigen::Vector3f& p1 = vertices[triangle[1]];
-        const Eigen::Vector3f& p2 = vertices[triangle[2]];
+        const Eigen::Vector3d& p0 = vertices[triangle[0]];
+        const Eigen::Vector3d& p1 = vertices[triangle[1]];
+        const Eigen::Vector3d& p2 = vertices[triangle[2]];
 
-        const Eigen::Vector3f triangle_normal = (p0 - p2).cross(p1 - p2);
-        const float triangle_area =
+        const Eigen::Vector3d triangle_normal = (p0 - p2).cross(p1 - p2);
+        const double triangle_area =
             0.5 * std::abs((p1[0] - p0[0]) * (p2[1] - p0[1])
                            - (p2[0] - p0[0]) * (p1[1] - p0[1]));
 
@@ -62,7 +62,7 @@ static void compute_node_normals(std::vector<Eigen::Vector3f>& out_normals,
         out_normals[triangle[2]] += triangle_area * triangle_normal;
     }
 
-    for (Eigen::Vector3f& normal : out_normals) {
+    for (Eigen::Vector3d& normal : out_normals) {
         normal.normalize();
     }
 }
@@ -70,7 +70,7 @@ static void compute_node_normals(std::vector<Eigen::Vector3f>& out_normals,
 
 
 void learnSPH::save_mesh_to_vtk(std::string path,
-                                const std::vector<Eigen::Vector3f>& vertices,
+                                const std::vector<Eigen::Vector3d>& vertices,
                                 const std::vector<std::array<int, 3>>& triangles)
 {
     vtkio::VTKFile vtk_file;
@@ -78,7 +78,7 @@ void learnSPH::save_mesh_to_vtk(std::string path,
     vtk_file.set_points_from_twice_indexable(vertices);
     vtk_file.set_cells_from_twice_indexable(triangles, vtkio::CellType::Triangle);
 
-    std::vector<Eigen::Vector3f> normals;
+    std::vector<Eigen::Vector3d> normals;
     compute_node_normals(normals, vertices, triangles);
     vtk_file.set_point_data_from_twice_indexable("normals", normals, vtkio::AttributeType::Normals);
 

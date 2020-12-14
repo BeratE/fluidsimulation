@@ -25,16 +25,16 @@ Eigen::Vector3i getPos(size_t idx, Eigen::Vector3i volDim)
 }
 
 void collectVertices(const Eigen::Vector3i volDim,
-                     const std::vector<float> &volSDF,
-                     const std::vector<Eigen::Vector3f> &volVerts,
-                     std::vector<Eigen::Vector3f> &outVertices,
+                     const std::vector<double> &volSDF,
+                     const std::vector<Eigen::Vector3d> &volVerts,
+                     std::vector<Eigen::Vector3d> &outVertices,
                      std::unordered_map<size_t, size_t> &outEdgeIdxToVertIdx)
 {
     const size_t SIZE = volDim(0)*volDim(1)*volDim(2);
     for (size_t idx = 0; idx < SIZE; idx++) {
         Eigen::Vector3i originPos = getPos(idx, volDim);
         size_t originIdx = idx;
-        float  originLvl = volSDF[idx];
+        double originLvl = volSDF[idx];
                 
         // Loop Edges 0, 1, 2 (x, y, z)
         for (size_t i = 0; i < 3; i++) {
@@ -44,13 +44,13 @@ void collectVertices(const Eigen::Vector3i volDim,
             Eigen::Vector3i oppositePos = originPos;
             oppositePos(i) += 1;
             size_t oppositeIdx = Surface::getVertIdx(oppositePos, volDim);
-            float oppositeLvl = volSDF[oppositeIdx];
+            double oppositeLvl = volSDF[oppositeIdx];
 
 
             if (originLvl != 0 && (oppositeLvl / originLvl) < 0.0) {
                 size_t edgeIdx = 3*originIdx + i;
-                float alpha = originLvl / (originLvl -oppositeLvl);
-                Eigen::Vector3f vert =
+                double alpha = originLvl / (originLvl -oppositeLvl);
+                Eigen::Vector3d vert =
                     (1.0 -alpha) * volVerts[originIdx]
                     + alpha * volVerts[oppositeIdx];
                 
@@ -62,9 +62,9 @@ void collectVertices(const Eigen::Vector3i volDim,
 }
 
 void Surface::marchCubes(const Eigen::Vector3i volDim,
-                         const std::vector<float> &volSDF,
-                         const std::vector<Eigen::Vector3f> &volVerts,
-                         std::vector<Eigen::Vector3f> &outVertices,
+                         const std::vector<double> &volSDF,
+                         const std::vector<Eigen::Vector3d> &volVerts,
+                         std::vector<Eigen::Vector3d> &outVertices,
                          std::vector<std::array<int, 3>> &outTriangles)
 {
     size_t SIZE = volDim(0)*volDim(1)*volDim(2);

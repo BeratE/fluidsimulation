@@ -1,3 +1,4 @@
+
 #include "catch.hpp"
 #include "config.h"
 #include "vtk_writer.h"
@@ -157,3 +158,4 @@ TEST_CASE("ComplexRun", "[complex]") {
         solver.run("complex_simulation", 6000);
     }
 }
+

@@ -15,12 +15,14 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
     m_densities.resize(size);
     m_pressures.resize(size);
     m_accelerations.resize(size);
+    m_normalizedDensities.resize(size);
 
     
     if (fill) {
         std::fill(m_densities.begin(), m_densities.end(), 0.0);
         std::fill(m_pressures.begin(), m_pressures.end(), 0.0);
         std::fill(m_accelerations.begin(), m_accelerations.end(), Vector3d(0.0, 0.0, 0.0));
+        std::fill(m_normalizedDensities.begin(), m_normalizedDensities.end(), 0.0);
     }
 }
 
@@ -82,6 +84,19 @@ void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundar
         m_accelerations[i] = pressureAcc + viscosityAcc + externalAcc;
     }
 }
+
+void FluidSystem::updateNormalizedDensities() {
+    CompactNSearch::PointSet const ps = mp_nsearch->point_set(m_pointSetID);
+    for (int fpIdx = 0; fpIdx < ps.n_points(); fpIdx++) {
+        double normalizedDensity = calculateWeightBetweenParticles(m_positions[fpIdx], m_positions[fpIdx]);
+        for (size_t fnId = 0; fnId < ps.n_neighbors(m_pointSetID, fpIdx); fnId++) {
+            const unsigned int nId = ps.neighbor(m_pointSetID, fpIdx, fnId);
+            normalizedDensity += calculateWeightBetweenParticles(m_positions[fpIdx], m_positions[nId]);
+        }
+        m_normalizedDensities[fpIdx] = normalizedDensity;
+    }
+}
+
 
 const double FluidSystem::calculateWeightBetweenParticles(Eigen::Vector3d x_i, Eigen::Vector3d x_j) const{
     return m_kernelLookup.weight(x_i, x_j);

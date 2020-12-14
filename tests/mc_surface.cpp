@@ -7,9 +7,15 @@
 #include "config.h"
 #include "surface/surface.h"
 #include <omp.h>
+#include "learnSPH/system/emitter.h"
+#include "learnSPH/system/particlesystem.h"
+#include "learnSPH/kernel.h"
 
 using namespace learnSPH;
 using namespace learnSPH::Surface;
+using namespace learnSPH::System;
+
+
 
 TEST_CASE("Construction", "") {
     //printCudaVersion();
@@ -17,25 +23,25 @@ TEST_CASE("Construction", "") {
     const double start_t = omp_get_wtime();
 
     const Eigen::Vector3i numVerts(30, 30, 30);
-    const Eigen::Vector3f gridSize(1.0, 1.0, 1.0);
+    const Eigen::Vector3d gridSize(1.0, 1.0, 1.0);
     
-    std::vector<Eigen::Vector3f> gridVerts;
-    std::vector<float> gridSDF;
+    std::vector<Eigen::Vector3d> gridVerts;
+    std::vector<double> gridSDF;
     
     SECTION("SphereSDF") {
-        const float radius = 0.2;
-        const Eigen::Vector3f origin(0.5, 0.5, 0.5);
-        auto sdf = [origin,radius](Eigen::Vector3f x)
+        const double radius = 0.2;
+        const Eigen::Vector3d origin(0.5, 0.5, 0.5);
+        auto sdf = [origin,radius](Eigen::Vector3d x)
             { return (x-origin).norm() - radius; };
         
         discretizeSDF(gridSize, numVerts, sdf,
                       &gridSDF, &gridVerts);
     }
     SECTION("TorusSDF") {
-        const float r = 0.1;
-        const float R = 0.3;
-        const Eigen::Vector3f origin(0.5, 0.5, 0.5);
-        auto sdf = [r, R, origin](Eigen::Vector3f x)
+        const double r = 0.1;
+        const double R = 0.3;
+        const Eigen::Vector3d origin(0.5, 0.5, 0.5);
+        auto sdf = [r, R, origin](Eigen::Vector3d x)
             {
                 x = x - origin;
                 return r*r-pow(sqrt(x(0)*x(0)+x(1)*x(1))-R, 2)-x(2)*x(2);
@@ -45,7 +51,7 @@ TEST_CASE("Construction", "") {
                       &gridSDF, &gridVerts);
     }
 
-    std::vector<Eigen::Vector3f> vertices;
+    std::vector<Eigen::Vector3d> vertices;
     std::vector<std::array<int, 3>> triangles;
     marchCubes(numVerts, gridSDF, gridVerts,
                vertices, triangles);
@@ -53,10 +59,6 @@ TEST_CASE("Construction", "") {
     std::stringstream filename;
     filename << SOURCE_DIR << "/res/surface/simple_surface.vtk";
 
-    std::vector<Eigen::Vector3d> verts;
-    for (auto &v : vertices) {
-        verts.push_back(v.cast<double>());
-    }
 
     save_mesh_to_vtk(filename.str(), vertices, triangles);
     //save_particles_to_vtk(filename.str(), verts);
@@ -66,3 +68,32 @@ TEST_CASE("Construction", "") {
 
     std::cout << "Runtime: " << delta_t << std::endl;
 }
+
+TEST_CASE("Fluid_Surface", "") {
+    const double particleDiameter = 0.1;
+
+    // Sample Particles in a Box
+    FluidSystem particles = learnSPH::System::ParticleEmitter::getInstance().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
+                                                     Eigen::Vector3d(1, 1, 1),
+                                                     particleDiameter);
+    const double r = learnSPH::Kernel::CubicSpline::support(particles.getSmoothingLength());
+    std::shared_ptr<CompactNSearch::NeighborhoodSearch> nsearch;
+    nsearch = std::make_shared<CompactNSearch::NeighborhoodSearch>(r);
+    particles.addToNeighborhood(nsearch);
+    nsearch->find_neighbors();
+    particles.updateNormalizedDensities();
+    std::vector<double> gridSDF;
+    std::vector<Eigen::Vector3d> gridVerts;
+    Eigen::Vector3i gridDims;
+    discretizeFluidSystemSDF(particles, 0.6, particles.getSmoothingLength(), &gridSDF, &gridVerts, &gridDims);
+
+    std::vector<Eigen::Vector3d> vertices;
+    std::vector<std::array<int, 3>> triangles;
+    marchCubes(gridDims, gridSDF, gridVerts, vertices, triangles);
+
+    std::stringstream filename;
+    filename << SOURCE_DIR << "/res/surface/fluid_surface.vtk";
+
+    save_mesh_to_vtk(filename.str(), vertices, triangles);
+}
+

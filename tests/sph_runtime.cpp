@@ -1,3 +1,4 @@
+
 #include "catch.hpp"
 #include <omp.h>
 #include <iostream>
@@ -18,3 +19,4 @@ TEST_CASE("RUN_TIME", "[runtime]")
 
     std::cout << "Runtime: " << delta_t << std::endl;
 }
+

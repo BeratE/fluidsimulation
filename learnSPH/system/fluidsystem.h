@@ -12,7 +12,8 @@ namespace learnSPH::System {
 
         void updatePressures(double stiffness);
         void updateDensities(const std::vector<BoundarySystem> &boundaries);
-        void updateAccelerations(const std::vector<BoundarySystem> &boundaries);        
+        void updateAccelerations(const std::vector<BoundarySystem> &boundaries); 
+        void updateNormalizedDensities();
         const double calculateWeightBetweenParticles(Eigen::Vector3d x_i, Eigen::Vector3d x_j) const;
         
         // Setter & Getter
@@ -23,6 +24,7 @@ namespace learnSPH::System {
         const std::vector<double> &getDensities() const { return m_densities; }
         const std::vector<double> &getPressures() const { return m_pressures; }
         const std::vector<Vector3d> &getAccelerations() const { return m_accelerations; }
+        const std::vector<double> &getNormalizedDensities() const { return m_normalizedDensities; }
 
       private:        
         Vector3d particlePressureAcc(size_t i, const std::vector<BoundarySystem> &boundaries);
@@ -31,6 +33,7 @@ namespace learnSPH::System {
         std::vector<double> m_pressures; // last updated particle pressures
         std::vector<double> m_densities; // last updated particle densities
         std::vector<Vector3d> m_accelerations; // last updated accelerations
+        std::vector<double> m_normalizedDensities; // last normalized densities for SDF calculation
 
         Kernel::CubicSpline::Table m_kernelLookup;
     };

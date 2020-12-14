@@ -8,18 +8,18 @@ namespace learnSPH::Surface {
     
     void marchCubes(
         const Eigen::Vector3i volDim,
-        const std::vector<float> &volSDF,
-        const std::vector<Eigen::Vector3f> &volVerts,
-        std::vector<Eigen::Vector3f> &outVertices,
+        const std::vector<double> &volSDF,
+        const std::vector<Eigen::Vector3d> &volVerts,
+        std::vector<Eigen::Vector3d> &outVertices,
         std::vector<std::array<int, 3>> &outTriangles);
     
 
     void discretizeSDF(
-        const Eigen::Vector3f volSize,
+        const Eigen::Vector3d volSize,
         const Eigen::Vector3i volDims,
-        std::function<float(Eigen::Vector3f)> const &sdf,
-        std::vector<float> *pOutVolSDF,
-        std::vector<Eigen::Vector3f> *pOutVolVerts);
+        std::function<double(Eigen::Vector3d)> const &sdf,
+        std::vector<double> *pOutVolSDF,
+        std::vector<Eigen::Vector3d> *pOutVolVerts);
 
     void discretizeFluidSystemSDF(
         const learnSPH::System::FluidSystem &system, 
@@ -27,9 +27,8 @@ namespace learnSPH::Surface {
         const double samplingDistance,
         std::vector<double> *pOutVolSDF,
         std::vector<Eigen::Vector3d> *pOutVolVerts,
-        CompactNSearch::NeighborhoodSearch& nsearch);
+        Eigen::Vector3i* pOutDims);
 
     size_t getVertIdx(Eigen::Vector3i pos, Eigen::Vector3i volDim);
 
-    void calculateNormalizedDensities(const learnSPH::System::FluidSystem& system, CompactNSearch::NeighborhoodSearch& nsearch, std::vector<double>& normalizedDensities);
 }
