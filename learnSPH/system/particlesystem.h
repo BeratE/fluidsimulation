@@ -24,6 +24,8 @@ namespace learnSPH::System {
         void addParticleVel(size_t i, Vector3d vel);
         void addParticleForce(size_t i, Vector3d force);
 
+        void updateNormalizedDensities();
+
         // Setter & Getter
         void setViscosity(double value) { m_viscosity = value; }
         void setPointSetID(double id) { m_pointSetID = id; }
@@ -46,8 +48,8 @@ namespace learnSPH::System {
         const std::vector<Vector3d>& getForces() const { return m_forces; }
         const std::vector<Vector3d>& getPositions() const { return m_positions; }
         const std::vector<Vector3d>& getVelocities() const { return m_velocities; }
-
-        void boundingBox(Eigen::Vector3d& bottomLeft, Eigen::Vector3d& upperRight) const;
+        const std::vector<double>& getNormalizedDensities() const { return m_normalizedDensities; }
+        const Kernel::CubicSpline::Table getKernelLookUp() const { return m_kernelLookup;  }
 
     protected:
         long m_pointSetID = -1; // CompactNSearch PointSet ID
@@ -60,7 +62,11 @@ namespace learnSPH::System {
         std::vector<Vector3d> m_positions; // Particle Positions
         std::vector<Vector3d> m_velocities; // Particle Velocities        
         std::vector<Vector3d> m_forces; // Particle Force Accumulator
+        std::vector<double> m_normalizedDensities; // last normalized densities for SDF calculation
 
         std::shared_ptr<NeighborhoodSearch> mp_nsearch; // reference to neighborhood information
+        
+        Kernel::CubicSpline::Table m_kernelLookup;
+
     };
 } // namespace learnSPH::System

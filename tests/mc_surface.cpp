@@ -10,6 +10,7 @@
 #include "learnSPH/system/emitter.h"
 #include "learnSPH/system/particlesystem.h"
 #include "learnSPH/kernel.h"
+#include "learnSPH/solver.h"
 
 using namespace learnSPH;
 using namespace learnSPH::Surface;
@@ -85,7 +86,8 @@ TEST_CASE("Fluid_Surface", "") {
     std::vector<double> gridSDF;
     std::vector<Eigen::Vector3d> gridVerts;
     Eigen::Vector3i gridDims;
-    discretizeFluidSystemSDF(particles, 0.6, particles.getSmoothingLength(), &gridSDF, &gridVerts, &gridDims);
+    discretizeFluidSystemSDF(particles.getPositions(), particles.getNormalizedDensities(), particles.getKernelLookUp(), particles.getSmoothingLength(),
+        0.6, particles.getSmoothingLength(), &gridSDF, &gridVerts, &gridDims);
 
     std::vector<Eigen::Vector3d> vertices;
     std::vector<std::array<int, 3>> triangles;
@@ -95,5 +97,54 @@ TEST_CASE("Fluid_Surface", "") {
     filename << SOURCE_DIR << "/res/surface/fluid_surface.vtk";
 
     save_mesh_to_vtk(filename.str(), vertices, triangles);
+}
+
+TEST_CASE("SimulationSurface", "") {
+    double ratioSmoothingLengthSamplingStep = 2.0;
+    const double particleDiameter = 0.05; // Reset to 0.05
+
+    // Sample Particles in a Box
+    FluidSystem particles = System::Emitter().sampleFluidBox(
+        Eigen::Vector3d(0, 0.0, 0),
+        Eigen::Vector3d(1.0, 1.0, 1.0),
+        particleDiameter);
+
+    SolverSPH solver(particles);
+    solver.setSnapShotAfterMS(40);
+    solver.setParamStiffness(1000.0);
+    solver.setFluidViscosity(0.02);
+    solver.enableGravity(true);
+    solver.enableSmoothing(true);
+
+    solver.addBoundary(System::Emitter().sampleBoundaryHollowBox(
+        Eigen::Vector3d(-0.05, -0.05, -0.05),
+        Eigen::Vector3d(2.5, 2.5, 2.5), // Reset to 2.5, 2.5, 2.5
+        particleDiameter));
+    solver.setBoundaryViscosity(0, 0.02);
+
+    std::vector<SurfaceInformation> surfaceInfos;
+    solver.run("complex_simulation", 6000, &surfaceInfos);
+    for (SurfaceInformation surfaceInfo : surfaceInfos) {
+        std::vector<double> gridSDF;
+        std::vector<Eigen::Vector3d> gridVerts;
+        Eigen::Vector3i gridDims;
+        discretizeFluidSystemSDF(
+            surfaceInfo.getPositions(),
+            surfaceInfo.getNormalizedDensities(),
+            surfaceInfo.getKernelLookup(),
+            surfaceInfo.getSmoothingLength(),
+            0.6,
+            surfaceInfo.getSmoothingLength() / ratioSmoothingLengthSamplingStep,
+            &gridSDF,
+            &gridVerts,
+            &gridDims);
+
+        std::vector<Eigen::Vector3d> vertices;
+        std::vector<std::array<int, 3>> triangles;
+        marchCubes(gridDims, gridSDF, gridVerts, vertices, triangles);
+        std::stringstream absoluteFilename;
+        absoluteFilename << SOURCE_DIR << "/res/simulation/" << ratioSmoothingLengthSamplingStep << surfaceInfo.getFilename() << ".vtk";
+        save_mesh_to_vtk(absoluteFilename.str(), vertices, triangles);
+    }
 }
 

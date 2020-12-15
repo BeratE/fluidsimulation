@@ -3,6 +3,7 @@
 #include "config.h"
 #include "vtk_writer.h"
 #include <iostream>
+#include <surface/surface.h>
 
 using namespace learnSPH;
 using namespace learnSPH::System;
@@ -54,7 +55,7 @@ void Solver::applyExternalForces()
         // gravity
         m_system.addParticleForce(i, grav_force);     
     }
-
     // Iterate force objects
     // ...
 }
+

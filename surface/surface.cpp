@@ -4,6 +4,15 @@
 #include <math.h>
 
 using namespace learnSPH;
+using namespace learnSPH::Surface;
+
+SurfaceInformation::SurfaceInformation(
+    const std::vector<Eigen::Vector3d> positions,
+    const std::vector<double> normalizedDensities,
+    const Kernel::CubicSpline::Table kernelLookup,
+    double smoothingLength,
+    std::string filename)
+    : m_positions(positions), m_normalizedDensities(normalizedDensities), m_kernelLookup(kernelLookup), m_smoothingLength(smoothingLength), m_filename(filename) {}
 
 void Surface::discretizeSDF(
     const Eigen::Vector3d volSize,
@@ -33,7 +42,10 @@ void Surface::discretizeSDF(
 }
 
 void Surface::discretizeFluidSystemSDF(
-    const learnSPH::System::FluidSystem& system,
+    const std::vector<Eigen::Vector3d>& positions,
+    const std::vector<double>& normalizedDensities,
+    const Kernel::CubicSpline::Table& kernelLookup,
+    double smoothingLength,
     const double c,
     const double samplingDistance,
     std::vector<double>* pOutVolSDF,
@@ -42,11 +54,11 @@ void Surface::discretizeFluidSystemSDF(
     // TODO: Find Bounding Box for the fluid
     Eigen::Vector3d lowerLeft = Eigen::Vector3d::Zero();
     Eigen::Vector3d upperRight = Eigen::Vector3d::Zero();
-    system.boundingBox(lowerLeft, upperRight);
+    Surface::boundingBox(positions, lowerLeft, upperRight);
 
     // TODO: Increase the length of the bounding box by 3*samplingDistance in every direction
-    lowerLeft -= 2 * samplingDistance * Eigen::Vector3d::Ones();
-    upperRight += 2 * samplingDistance * Eigen::Vector3d::Ones();
+    lowerLeft -= 2 * smoothingLength * Eigen::Vector3d::Ones();
+    upperRight += 2 * smoothingLength * Eigen::Vector3d::Ones();
 
     (*pOutDims) = Eigen::Vector3i(
         (upperRight.x() - lowerLeft.x()) / samplingDistance,
@@ -70,11 +82,11 @@ void Surface::discretizeFluidSystemSDF(
 
 
     // TODO: Calculate number of steps required in every direction (positive and negative)
-    double support = learnSPH::Kernel::CubicSpline::support(system.getSmoothingLength());
+    double support = learnSPH::Kernel::CubicSpline::support(smoothingLength);
     int samplingSteps = ceil(support / samplingDistance);
     std::cout << samplingSteps << std::endl;
-    for (size_t posIdx = 0; posIdx < system.getSize(); posIdx++) {
-        const Eigen::Vector3d& position = system.getPositions()[posIdx];
+    for (size_t posIdx = 0; posIdx < positions.size(); posIdx++) {
+        const Eigen::Vector3d& position = positions[posIdx];
         // TODO: Find the indiizes that belongs to the lower left vertex of the cell that the particle is positioned in 
         Eigen::Vector3d offset = position - lowerLeft;
         Eigen::Vector3i indizes = Eigen::Vector3i(
@@ -97,15 +109,40 @@ void Surface::discretizeFluidSystemSDF(
                         gridVertexIndizes.z() < 0 || gridVertexIndizes.z() >= pOutDims->z()) {
                         continue;
                     }
-                    size_t gridVertexIdx = getVertIdx(gridVertexIndizes, (*pOutDims));
+                    size_t gridVertexIdx = Surface::getVertIdx(gridVertexIndizes, (*pOutDims));
                     Eigen::Vector3d gridVertex = pOutVolVerts->at(gridVertexIdx);
                     
                     if ((gridVertex - position).norm() < support) {
-                        (*pOutVolSDF)[gridVertexIdx] += (1.0 / system.getNormalizedDensities()[posIdx]) * system.calculateWeightBetweenParticles(gridVertex, position);
+                        (*pOutVolSDF)[gridVertexIdx] += (1.0 / normalizedDensities[posIdx]) * kernelLookup.weight(gridVertex, position);
                     }
                 }
             }
         }
     }
+}
+
+void Surface::boundingBox(const std::vector<Eigen::Vector3d>& positions, Eigen::Vector3d& bottomLeft, Eigen::Vector3d& upperRight) {
+    double minX = DBL_MAX, minY = DBL_MAX, minZ = DBL_MAX;
+    double maxX = DBL_MIN, maxY = DBL_MIN, maxZ = DBL_MIN;
+    for (const Eigen::Vector3d& position : positions) {
+        if (position.x() < minX)
+            minX = position.x();
+        if (position.y() < minY)
+            minY = position.y();
+        if (position.z() < minZ)
+            minZ = position.z();
+        if (position.x() > maxX)
+            maxX = position.x();
+        if (position.y() > maxY)
+            maxY = position.y();
+        if (position.z() > maxZ)
+            maxZ = position.z();
+    }
+    bottomLeft(0) = minX;
+    bottomLeft(1) = minY;
+    bottomLeft(2) = minZ;
+    upperRight(0) = maxX;
+    upperRight(1) = maxY;
+    upperRight(2) = maxZ;
 }
 

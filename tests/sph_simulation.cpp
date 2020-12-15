@@ -129,7 +129,7 @@ TEST_CASE("SolverRun", "[simulation]") {
         solver.run("solver_test_VI", 6000);
     }
 }
-
+ 
 TEST_CASE("ComplexRun", "[complex]") {
     SECTION("DAMNBREAK") {
         std::cout << "Testing complex simulation.." << std::endl;

@@ -9,9 +9,7 @@ using namespace CompactNSearch;
 
 FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
     : ParticleSystem(radius, density, size, fill)
-{
-    m_kernelLookup.generateTable(m_smoothingLength, 1000);
-    
+{   
     m_densities.resize(size);
     m_pressures.resize(size);
     m_accelerations.resize(size);
@@ -85,22 +83,6 @@ void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundar
     }
 }
 
-void FluidSystem::updateNormalizedDensities() {
-    CompactNSearch::PointSet const ps = mp_nsearch->point_set(m_pointSetID);
-    for (int fpIdx = 0; fpIdx < ps.n_points(); fpIdx++) {
-        double normalizedDensity = calculateWeightBetweenParticles(m_positions[fpIdx], m_positions[fpIdx]);
-        for (size_t fnId = 0; fnId < ps.n_neighbors(m_pointSetID, fpIdx); fnId++) {
-            const unsigned int nId = ps.neighbor(m_pointSetID, fpIdx, fnId);
-            normalizedDensity += calculateWeightBetweenParticles(m_positions[fpIdx], m_positions[nId]);
-        }
-        m_normalizedDensities[fpIdx] = normalizedDensity;
-    }
-}
-
-
-const double FluidSystem::calculateWeightBetweenParticles(Eigen::Vector3d x_i, Eigen::Vector3d x_j) const{
-    return m_kernelLookup.weight(x_i, x_j);
-}
 
 Vector3d FluidSystem::particlePressureAcc(size_t i, const std::vector<BoundarySystem> &boundaries)
 {
