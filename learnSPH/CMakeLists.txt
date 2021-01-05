@@ -36,6 +36,8 @@ set(SOURCE_FILES
   system/emitter.cpp
   solver.h
   solver.cpp
+  solver_sph.h
+  solver_sph.cpp
   kernel.h
   kernel.cpp)
 

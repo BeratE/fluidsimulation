@@ -2,7 +2,7 @@
 #include "config.h"
 #include "vtk_writer.h"
 #include "learnSPH/kernel.h"
-#include "learnSPH/solver.h"
+#include "learnSPH/solver_sph.h"
 #include "learnSPH/system/emitter.h"
 #include "learnSPH/system/particlesystem.h"
 
