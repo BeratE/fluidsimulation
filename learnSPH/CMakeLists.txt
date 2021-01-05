@@ -39,6 +39,8 @@ set(SOURCE_FILES
   solver.cpp
   solver_sph.h
   solver_sph.cpp
+  solver_pbf.h
+  solver_pbf.cpp
   kernel.h
   kernel.cpp)
 

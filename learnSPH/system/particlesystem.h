@@ -50,7 +50,7 @@ namespace learnSPH::System {
         const std::vector<Vector3d>& getVelocities() const { return m_velocities; }
         const std::vector<double>& getNormalizedDensities() const { return m_normalizedDensities; }
         const Kernel::CubicSpline::Table getKernelLookUp() const { return m_kernelLookup;  }
-
+        
     protected:
         long m_pointSetID = -1; // CompactNSearch PointSet ID
         double m_viscosity = 0.0; // Viscosity, different for fluid and boundary
@@ -65,8 +65,7 @@ namespace learnSPH::System {
         std::vector<double> m_normalizedDensities; // last normalized densities for SDF calculation
 
         std::shared_ptr<NeighborhoodSearch> mp_nsearch; // reference to neighborhood information
-        
-        Kernel::CubicSpline::Table m_kernelLookup;
 
+        Kernel::CubicSpline::Table m_kernelLookup;
     };
 } // namespace learnSPH::System

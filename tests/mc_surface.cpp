@@ -10,7 +10,7 @@
 #include "learnSPH/system/emitter.h"
 #include "learnSPH/system/particlesystem.h"
 #include "learnSPH/kernel.h"
-#include "learnSPH/solver.h"
+#include "learnSPH/solver_sph.h"
 
 using namespace learnSPH;
 using namespace learnSPH::Surface;
@@ -28,6 +28,7 @@ TEST_CASE("Construction", "") {
     
     std::vector<Eigen::Vector3d> gridVerts;
     std::vector<double> gridSDF;
+    bool run = false;
     
     SECTION("SphereSDF") {
         const double radius = 0.2;
@@ -37,6 +38,7 @@ TEST_CASE("Construction", "") {
         
         discretizeSDF(gridSize, numVerts, sdf,
                       &gridSDF, &gridVerts);
+        run = true;
     }
     SECTION("TorusSDF") {
         const double r = 0.1;
@@ -50,20 +52,19 @@ TEST_CASE("Construction", "") {
         
         discretizeSDF(gridSize, numVerts, sdf,
                       &gridSDF, &gridVerts);
+        run = true;
     }
+    if (run) {
+      std::vector<Eigen::Vector3d> vertices;
+      std::vector<std::array<int, 3>> triangles;
+      marchCubes(numVerts, gridSDF, gridVerts, vertices, triangles);
 
-    std::vector<Eigen::Vector3d> vertices;
-    std::vector<std::array<int, 3>> triangles;
-    marchCubes(numVerts, gridSDF, gridVerts,
-               vertices, triangles);
+      std::stringstream filename;
+      filename << SOURCE_DIR << "/res/surface/simple_surface.vtk";
 
-    std::stringstream filename;
-    filename << SOURCE_DIR << "/res/surface/simple_surface.vtk";
-
-
-    save_mesh_to_vtk(filename.str(), vertices, triangles);
-    //save_particles_to_vtk(filename.str(), verts);
-
+      save_mesh_to_vtk(filename.str(), vertices, triangles);
+      // save_particles_to_vtk(filename.str(), verts);
+    }
     const double end_t = omp_get_wtime();
     const double delta_t = end_t - start_t;
 
@@ -100,6 +101,7 @@ TEST_CASE("Fluid_Surface", "") {
 }
 
 TEST_CASE("SimulationSurface", "") {
+    SECTION("SurfaceSimulation") {
     double ratioSmoothingLengthSamplingStep = 2.0;
     const double particleDiameter = 0.05; // Reset to 0.05
 
@@ -125,26 +127,24 @@ TEST_CASE("SimulationSurface", "") {
     std::vector<SurfaceInformation> surfaceInfos;
     solver.run("complex_simulation", 6000, &surfaceInfos);
     for (SurfaceInformation surfaceInfo : surfaceInfos) {
-        std::vector<double> gridSDF;
-        std::vector<Eigen::Vector3d> gridVerts;
-        Eigen::Vector3i gridDims;
-        discretizeFluidSystemSDF(
-            surfaceInfo.getPositions(),
-            surfaceInfo.getNormalizedDensities(),
-            surfaceInfo.getKernelLookup(),
-            surfaceInfo.getSmoothingLength(),
-            0.6,
-            surfaceInfo.getSmoothingLength() / ratioSmoothingLengthSamplingStep,
-            &gridSDF,
-            &gridVerts,
-            &gridDims);
+      std::vector<double> gridSDF;
+      std::vector<Eigen::Vector3d> gridVerts;
+      Eigen::Vector3i gridDims;
+      discretizeFluidSystemSDF(
+          surfaceInfo.getPositions(), surfaceInfo.getNormalizedDensities(),
+          surfaceInfo.getKernelLookup(), surfaceInfo.getSmoothingLength(), 0.6,
+          surfaceInfo.getSmoothingLength() / ratioSmoothingLengthSamplingStep,
+          &gridSDF, &gridVerts, &gridDims);
 
-        std::vector<Eigen::Vector3d> vertices;
-        std::vector<std::array<int, 3>> triangles;
-        marchCubes(gridDims, gridSDF, gridVerts, vertices, triangles);
-        std::stringstream absoluteFilename;
-        absoluteFilename << SOURCE_DIR << "/res/simulation/" << ratioSmoothingLengthSamplingStep << surfaceInfo.getFilename() << ".vtk";
-        save_mesh_to_vtk(absoluteFilename.str(), vertices, triangles);
+      std::vector<Eigen::Vector3d> vertices;
+      std::vector<std::array<int, 3>> triangles;
+      marchCubes(gridDims, gridSDF, gridVerts, vertices, triangles);
+      std::stringstream absoluteFilename;
+      absoluteFilename << SOURCE_DIR << "/res/simulation/"
+                       << ratioSmoothingLengthSamplingStep
+                       << surfaceInfo.getFilename() << ".vtk";
+      save_mesh_to_vtk(absoluteFilename.str(), vertices, triangles);
+    }
     }
 }
 

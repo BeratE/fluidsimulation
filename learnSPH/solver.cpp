@@ -58,3 +58,46 @@ void Solver::applyExternalForces()
     // Iterate force objects
     // ...
 }
+
+void Solver::semiImplicitEulerStep(double deltaT)
+{    
+    const size_t id = m_system.getPointSetID();
+    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
+    
+    // Update velocities
+    const std::vector<Eigen::Vector3d> &accelerations = m_system.getAccelerations();
+    const std::vector<Eigen::Vector3d> &velocities = m_system.getVelocities();
+    
+    //#pragma omp parallel for
+    for (size_t i = 0; i < fluidPS.n_points(); i++) {
+        Eigen::Vector3d dV = deltaT * accelerations[i];
+        m_system.addParticleVel(i,  dV);
+    }
+
+    // Update positions
+    //#pragma omp parallel for
+    for (size_t i = 0; i < fluidPS.n_points(); i++) {
+        const Eigen::Vector3d &fpPos = m_system.getParticlePos(i);
+        const Eigen::Vector3d &fpVel = m_system.getParticleVel(i);
+        const double fpDensity = m_system.getParticleDensity(i);        
+        Eigen::Vector3d fpVelStar = fpVel;
+        
+        // perform XSPH smoothing
+        if (m_smoothingEnable) { 
+            Eigen::Vector3d fpVelSumOverNeighbors(0.0, 0.0, 0.0);
+            
+            for (size_t j = 0; j < fluidPS.n_neighbors(id, i); j++) {
+                const unsigned int k = fluidPS.neighbor(id, i, j);
+                fpVelSumOverNeighbors +=
+                    (2 * m_system.getParticleMass() *
+                    (m_system.getParticleVel(k) - fpVel)  *
+                    Kernel::CubicSpline::weight(fpPos, m_system.getParticlePos(k),
+                                                m_system.getSmoothingLength()))
+                    / (m_system.getParticleDensity(k) + fpDensity);
+            }
+            
+            fpVelStar += m_xsphSmoothing * fpVelSumOverNeighbors;
+        }
+        m_system.setParticlePos(i, fpPos + deltaT * fpVelStar);
+    }
+}

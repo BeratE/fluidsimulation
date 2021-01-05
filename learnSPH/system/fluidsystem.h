@@ -12,7 +12,8 @@ namespace learnSPH::System {
 
         void updatePressures(double stiffness);
         void updateDensities(const std::vector<BoundarySystem> &boundaries);
-        void updateAccelerations(const std::vector<BoundarySystem> &boundaries); 
+        void updateAccelerations(const std::vector<BoundarySystem> &boundaries,
+                                 bool pressure = true, bool viscosity = true, bool external = true); 
         
         // Setter & Getter
         double getParticleDensity(size_t i) const { return m_densities[i]; }
@@ -26,7 +27,7 @@ namespace learnSPH::System {
 
       private:        
         Vector3d particlePressureAcc(size_t i, const std::vector<BoundarySystem> &boundaries);
-        Vector3d particleViscosityAcc(size_t i, const std::vector<BoundarySystem> &boundaries);                     
+        Vector3d particleViscosityAcc(size_t i, const std::vector<BoundarySystem> &boundaries);       
         
         std::vector<double> m_pressures; // last updated particle pressures
         std::vector<double> m_densities; // last updated particle densities

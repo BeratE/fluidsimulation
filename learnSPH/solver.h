@@ -10,6 +10,28 @@
 
 #define VEC_GRAVITY Eigen::Vector3d(0.0, -0.980665, 0.0)
 
+template<typename T>
+std::vector<T> interpolateVector(const std::vector<T>& previous,
+                                 const std::vector<T>& current,
+                                 double prevTime,
+                                 double currTime,
+                                 double targetTime)
+{
+    double alpha = (targetTime - prevTime) / (currTime - prevTime);
+
+    auto inter_func =  [alpha](const T& prev, const T& curr)
+    {
+        return (1.0 - alpha) * prev + alpha * curr;
+    };
+    
+    std::vector<T> interpolation(previous);
+    std::transform(previous.begin(), previous.end(),
+                   current.begin(), interpolation.begin(), inter_func);
+    
+    return interpolation;
+}
+
+
 namespace learnSPH {
 class Solver {
 public:
@@ -25,6 +47,7 @@ public:
     // Setter & Getter
     const System::FluidSystem &getSystem() const { return m_system; }
 
+    void setParamSmoothing(double val) { m_xsphSmoothing = val; }
     void setSnapShotAfterMS(double ms) { m_snapShotMS = ms; }
     void setFluidViscosity(double val) { m_system.setViscosity(val); }
     void setBoundaryViscosity(size_t i, double val) {m_boundaries[i].setViscosity(val);}
@@ -33,10 +56,11 @@ public:
 
 protected:        
     void applyExternalForces();
-    //void semiImplicitEulerStep(double deltaT) {}
+    void semiImplicitEulerStep(double deltaT);
 
     double m_snapShotMS = 20;
     double m_maxTimeStep_s = 0.002;
+    double m_xsphSmoothing = 0.5;
     bool m_gravityEnable = true;
     bool m_smoothingEnable = true;
         

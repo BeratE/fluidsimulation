@@ -71,15 +71,24 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
 }
 
 
-void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundaries)
+void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundaries,
+                                      bool pressure, bool viscosity, bool external)
 {
     //#pragma omp parallel for
     for (size_t i = 0; i < getSize(); i++) {
-        Eigen::Vector3d pressureAcc = particlePressureAcc(i, boundaries);
-        Eigen::Vector3d viscosityAcc = particleViscosityAcc(i, boundaries);
-        Eigen::Vector3d externalAcc = m_forces[i] / m_restDensity;
-
-        m_accelerations[i] = pressureAcc + viscosityAcc + externalAcc;
+        m_accelerations[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
+    }
+    if (pressure) {
+      for (size_t i = 0; i < getSize(); i++) 
+          m_accelerations[i] += particlePressureAcc(i, boundaries);      
+    }
+    if (viscosity) {
+      for (size_t i = 0; i < getSize(); i++) 
+          m_accelerations[i] += particleViscosityAcc(i, boundaries);
+    }
+    if (external) {
+      for (size_t i = 0; i < getSize(); i++) 
+          m_accelerations[i] += m_forces[i] / m_restDensity;
     }
 }
 
@@ -166,4 +175,3 @@ Vector3d FluidSystem::particleViscosityAcc(size_t i, const std::vector<BoundaryS
     
     return 2.0 * (fluidContrib + boundaryContrib);
 }
-

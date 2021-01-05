@@ -9,20 +9,22 @@
 #include <surface/surface.h>
 
 namespace learnSPH {
-class SolverSPH : public Solver {
+class SolverPBF : public Solver {
   public:
-    SolverSPH(System::FluidSystem system);
-    ~SolverSPH();
+    SolverPBF(System::FluidSystem system);
+    ~SolverPBF();
     
     double integrationStep();      
     void run(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr);
     
     // Setter & Getter        
-    void setParamStiffness(double val) { m_stiffness = val; }
-    void setParameterDrag(double val) { m_drag = val; }     
-    
+
   private:
-    double m_drag = 0.2;    
-    double m_stiffness = 1000.0;
+    double C(size_t i);
+    double S(size_t i);
+    Eigen::Vector3d deltaX(size_t i, std::vector<double> lambda);
+    void semiImplicitEulerStep(double deltaT);
+
+    size_t m_npbfIterations = 3;
 };
 } // namespace learnSPH

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <learnSPH/kernel.h>
 #include <math.h>
+#include <cfloat>
 
 using namespace learnSPH;
 using namespace learnSPH::Surface;
