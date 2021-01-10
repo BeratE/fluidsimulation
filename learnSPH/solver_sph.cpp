@@ -35,7 +35,7 @@ double SolverSPH::integrationStep()
         m_system.addParticleForce(i, drag_force);        
     }
     
-    m_system.updateAccelerations(m_boundaries);    
+    m_system.updateAccelerations(m_boundaries, true, true, true);    
     
     semiImplicitEulerStep(deltaT);
     m_system.updateNormalizedDensities();
@@ -88,9 +88,9 @@ void SolverSPH::run(std::string file, double milliseconds, std::vector<Surface::
     const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
         * m_snapShotMS * pow(10, -3);
     
-
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s <<std::endl;
+        
         double deltaT_s = integrationStep();
         runTime_s += deltaT_s;
         
@@ -107,14 +107,19 @@ void SolverSPH::run(std::string file, double milliseconds, std::vector<Surface::
             save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
 
             if (pOutSurfaceInfos) {
-                std::vector<double> interpolNormalizedDensities = interpolateVector<double>(previousNormalizedDensities,
+                std::vector<double> interpolNormalizedDensities
+                    = interpolateVector<double>(previousNormalizedDensities,
                     m_system.getNormalizedDensities(),
                     prevSnapShotTime_s,
                     runTime_s,
                     nextSnapShotTime_s);
                 std::stringstream surfaceFilename;
                 surfaceFilename << file + "_surface" << snapShotNr;
-                pOutSurfaceInfos->push_back(SurfaceInformation(interpolPos, interpolNormalizedDensities, m_system.getKernelLookUp(), m_system.getSmoothingLength(), surfaceFilename.str()));
+                pOutSurfaceInfos->push_back(SurfaceInformation(
+                                                interpolPos, interpolNormalizedDensities,
+                                                m_system.getKernelLookUp(),
+                                                m_system.getSmoothingLength(),
+                                                surfaceFilename.str()));
             }
 
             prevSnapShotTime_s = nextSnapShotTime_s;

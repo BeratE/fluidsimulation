@@ -15,15 +15,16 @@ class SolverPBF : public Solver {
     ~SolverPBF();
     
     double integrationStep();      
-    void run(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr);
+    void run(std::string file, double milliseconds,
+             std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr);
     
-    // Setter & Getter        
+    // Setter & Getter
+    void setNumIterations(size_t value) {m_npbfIterations = value;}
 
   private:
     double C(size_t i);
     double S(size_t i);
     Eigen::Vector3d deltaX(size_t i, std::vector<double> lambda);
-    void semiImplicitEulerStep(double deltaT);
 
     size_t m_npbfIterations = 3;
 };

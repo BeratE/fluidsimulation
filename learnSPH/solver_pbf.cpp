@@ -29,17 +29,17 @@ double SolverPBF::integrationStep()
     m_system.updateDensities(m_boundaries);
 
     applyExternalForces();
-    
     m_system.updateAccelerations(m_boundaries, false, true, true);    
     
     semiImplicitEulerStep(deltaT);
     
     m_system.updateNormalizedDensities();
-
+    
     return deltaT;
 }
 
-void SolverPBF::run(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos)
+void SolverPBF::run(std::string file, double milliseconds,
+                    std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos)
 {
     std::stringstream filename;
     double runTime_s = 0.0;
@@ -59,10 +59,9 @@ void SolverPBF::run(std::string file, double milliseconds, std::vector<Surface::
         double deltaT_s = integrationStep();
         runTime_s += deltaT_s;
 
-        mp_nsearch->find_neighbors();
-
         // constraint solver
         for (size_t k = 0; k < m_npbfIterations; k++) {
+            mp_nsearch->find_neighbors();
             m_system.updateDensities(m_boundaries);
 
             std::vector<double> lambda;
@@ -93,7 +92,10 @@ void SolverPBF::run(std::string file, double milliseconds, std::vector<Surface::
                                                      runTime_s,
                                                      nextSnapShotTime_s);
             save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
-           
+
+            prevSnapShotTime_s = nextSnapShotTime_s;
+            nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS * pow(10, -3);
+            
             std::cout << "save results to " << filename.str() << std::endl;
         }
     }
@@ -109,12 +111,13 @@ double SolverPBF::S(size_t i)
     const size_t id = m_system.getPointSetID();
     const Eigen::Vector3d &pos = m_system.getParticlePos(i);
     const Kernel::CubicSpline::Table& kernelLut = m_system.getKernelLookUp();
+    
     const double inverseVol = m_system.getParticleMass() / m_system.getRestDensity();
+    
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
     
     double s = 0.0;
     
-    // Fluid contribution
     Eigen::Vector3d sum (0.0, 0.0, 0.0);
     sum += inverseVol * kernelLut.gradWeight(pos, pos);
     
@@ -154,11 +157,11 @@ Eigen::Vector3d SolverPBF::deltaX(size_t i, std::vector<double> lambda)
 
     Eigen::Vector3d deltaX (0.0, 0.0, 0.0);
     // fluid contribution
-    deltaX += 2*lambda[i] * kernelLut.gradWeight(pos, pos);
+    deltaX += (2*lambda[i] * kernelLut.gradWeight(pos, pos));
     
     for (size_t j = 0; j < fluidPS.n_neighbors(id, i); j++) {
         const unsigned int k = fluidPS.neighbor(id, i, j);        
-        deltaX += (lambda[i]+lambda[j])
+        deltaX += (lambda[i]+lambda[k])
             *kernelLut.gradWeight(pos, m_system.getParticlePos(k));
     }
 
@@ -169,8 +172,8 @@ Eigen::Vector3d SolverPBF::deltaX(size_t i, std::vector<double> lambda)
         const size_t boundaryID = boundary.getPointSetID();
         for (size_t j = 0; j < fluidPS.n_neighbors(boundaryID, i); j++) {
             const unsigned int k = fluidPS.neighbor(boundaryID, i, j);
-            deltaX += (boundary.getParticleVolume(k)/m_system.getParticleMass())
-                * lambda[i] * kernelLut.gradWeight(pos, boundary.getParticlePos(k));
+            deltaX += ((boundary.getParticleVolume(k)/m_system.getParticleMass())
+                       * lambda[i] * kernelLut.gradWeight(pos, boundary.getParticlePos(k)));
         }
     }
 

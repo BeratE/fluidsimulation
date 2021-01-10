@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 #include "config.h"
 #include "vtk_writer.h"

@@ -19,6 +19,7 @@ set(SOURCE_FILES
     sph_sampling.cpp
     sph_runtime.cpp
     sph_simulation.cpp
+    pbf_simulation.cpp
     mc_surface.cpp)
 
 ### Target  
