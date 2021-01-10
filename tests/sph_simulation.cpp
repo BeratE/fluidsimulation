@@ -85,7 +85,7 @@ TEST_CASE("SolverRun", "[simulation]") {
     solver.setParamStiffness(0.0);
     solver.setFluidViscosity(0.0);
     solver.enableGravity(false);
-    solver.enableSmoothing(false);
+    solver.enableSmoothing(true);
 
     SECTION("SimpleSolverI") {      
         solver.run("solver_test_I", 12000);
@@ -94,7 +94,7 @@ TEST_CASE("SolverRun", "[simulation]") {
     solver.setParamStiffness(1000);
     
     SECTION("SimpleSolverII") {        
-        solver.run("solver_test_II", 12000);
+        solver.run("solver_test_II", 6000);
     }
 
     solver.addBoundary(System::Emitter().sampleBoundaryPlane(
@@ -107,7 +107,7 @@ TEST_CASE("SolverRun", "[simulation]") {
     solver.enableGravity(true);
     
     SECTION("SimpleSolverIII") {       
-        solver.run("solver_test_III", 12000);
+        solver.run("solver_test_III", 6000);
     }
 
     solver.setFluidViscosity(0.1);
@@ -124,7 +124,6 @@ TEST_CASE("SolverRun", "[simulation]") {
     solver.enableSmoothing(true);
     
     SECTION("SimpleSolverVI") {
-        solver.enableGravity(true);
         solver.run("solver_test_VI", 6000);
     }
 }
