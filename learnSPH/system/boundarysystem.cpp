@@ -39,3 +39,11 @@ void BoundarySystem::updateVolumes()
         m_volumes[i] = 1.0 / vol;
     }
 }
+
+void BoundarySystem::transform(Eigen::Matrix4d transform)
+{
+    for (auto &p : m_positions) {
+        Eigen::Vector4d tmp = Eigen::Vector4d(p(0), p(1), p(2), 1.0);
+        p = (transform * tmp).segment(0, 3);
+    }
+}

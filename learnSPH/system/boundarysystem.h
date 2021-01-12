@@ -9,6 +9,8 @@ namespace learnSPH::System {
         BoundarySystem(double radius, double density, size_t size, bool fill = true);
 
         void updateVolumes();
+        void transform(Eigen::Matrix4d transform);
+
         
         double getParticleMass(size_t i) const;       
 

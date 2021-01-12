@@ -174,10 +174,10 @@ std::vector<Vector3d> ParticleEmitter::samplePosHollowBox(Vector3d bottomLeft,
     vertices.push_back(Vector3d(bottomLeft(0), bottomLeft(1)+dir(1), bottomLeft(2)));
     vertices.push_back(Vector3d(bottomLeft(0)+dir(0), bottomLeft(1), bottomLeft(2)));
     vertices.push_back(Vector3d(bottomLeft(0)+dir(0), bottomLeft(1)+dir(1), bottomLeft(2)));
-    vertices.push_back(Vector3d(bottomLeft(0), bottomLeft(1), bottomLeft(2)+dir(1)));
-    vertices.push_back(Vector3d(bottomLeft(0), bottomLeft(1)+dir(1), bottomLeft(2)+dir(1)));
-    vertices.push_back(Vector3d(bottomLeft(0)+dir(0), bottomLeft(1),bottomLeft(2)+dir(1)));
-    vertices.push_back(Vector3d(bottomLeft(0)+dir(0), bottomLeft(1)+dir(1), bottomLeft(2)+dir(1)));
+    vertices.push_back(Vector3d(bottomLeft(0), bottomLeft(1), bottomLeft(2)+dir(2)));
+    vertices.push_back(Vector3d(bottomLeft(0), bottomLeft(1)+dir(1), bottomLeft(2)+dir(2)));
+    vertices.push_back(Vector3d(bottomLeft(0)+dir(0), bottomLeft(1),bottomLeft(2)+dir(2)));
+    vertices.push_back(Vector3d(bottomLeft(0)+dir(0), bottomLeft(1)+dir(1), bottomLeft(2)+dir(2)));
 
     std::vector<std::vector<Vector3d>> v;
     v.push_back(samplePosTriangle(vertices[2], vertices[1], vertices[3], samplingDistance));
