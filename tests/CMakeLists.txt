@@ -17,10 +17,10 @@ set(SOURCE_FILES
     main.cpp
     sph_kernel.cpp
     sph_sampling.cpp
-    sph_runtime.cpp
     sph_simulation.cpp
     pbf_simulation.cpp
-    mc_surface.cpp)
+    mc_surface.cpp
+    comparison.cpp)
 
 ### Target  
 add_executable(${TARGET_NAME} ${SOURCE_FILES})

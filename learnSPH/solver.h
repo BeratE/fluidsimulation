@@ -40,7 +40,9 @@ public:
 
     double timeStepCFL();
     //double integrationStep() {}
-    void run(std::string file, double milliseconds) {}
+    virtual void
+    run(std::string file, double milliseconds,
+        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr) {}
 
     size_t addBoundary(const System::BoundarySystem &boundary);
 

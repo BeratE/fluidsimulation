@@ -10,57 +10,59 @@ using namespace learnSPH;
 using namespace learnSPH::System;
 
 TEST_CASE("PBF Solver Run", "[pbf]") {
-    const double particleDiameter = 0.1;
+    SECTION("PBFSolver") {
+        const double particleDiameter = 0.1;
 
-    // Sample Particles in a Box
-    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0.0, 0.25, 0),
-                                                     Eigen::Vector3d(1.0, 1.25, 1.0),
-                                                     particleDiameter);
+        // Sample Particles in a Box
+        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0.0, 0.25, 0),
+                                                         Eigen::Vector3d(1.0, 1.25, 1.0),
+                                                         particleDiameter);
 
-    SolverPBF solver(particles);
-    solver.setSnapShotAfterMS(40);
-    solver.setFluidViscosity(0.0);
-    solver.enableSmoothing(false);
-    solver.enableGravity(false);
+        SolverPBF solver(particles);
+        solver.setSnapShotAfterMS(40);
+        solver.setFluidViscosity(0.0);
+        solver.enableSmoothing(false);
+        solver.enableGravity(false);
    
-    SECTION("PBFSolverI") {      
-        solver.run("pbf_solver_test_I", 6000);
-    }
+        SECTION("PBFSolverI") {      
+            solver.run("pbf_solver_test_I", 6000);
+        }
 
 
     
-    SECTION("PBFSolverII") {      
-        solver.run("pbf_solver_test_II", 6000);
-    }
+        SECTION("PBFSolverII") {      
+            solver.run("pbf_solver_test_II", 6000);
+        }
 
-    solver.enableGravity(true);
+        solver.enableGravity(true);
     
-    solver.addBoundary(System::Emitter().sampleBoundaryPlane(
-        Eigen::Vector3d(0.0, 0.0, 0.0),
-        Eigen::Vector3d(1.0, 0.0, 0.0),
-        Eigen::Vector3d(0.0, 0.0, 1.0),
-        Eigen::Vector3d(1.0, 0.0, 1.0),
-        particleDiameter));
+        solver.addBoundary(System::Emitter().sampleBoundaryPlane(
+                               Eigen::Vector3d(0.0, 0.0, 0.0),
+                               Eigen::Vector3d(1.0, 0.0, 0.0),
+                               Eigen::Vector3d(0.0, 0.0, 1.0),
+                               Eigen::Vector3d(1.0, 0.0, 1.0),
+                               particleDiameter));
     
-    SECTION("PBFSolverIII") {       
-        solver.run("pbf_solver_test_III", 6000);
-    }
+        SECTION("PBFSolverIII") {       
+            solver.run("pbf_solver_test_III", 6000);
+        }
 
-    solver.setFluidViscosity(0.1);
+        solver.setFluidViscosity(0.1);
     
-    SECTION("PBFSolverIV") {
-        solver.run("pbf_solver_test_IV", 6000);
-    }
+        SECTION("PBFSolverIV") {
+            solver.run("pbf_solver_test_IV", 6000);
+        }
 
-    SECTION("PBFSolverV") {
-        solver.setBoundaryViscosity(0, 1000);
-        solver.run("pbf_solver_test_V", 6000);
-    }
+        SECTION("PBFSolverV") {
+            solver.setBoundaryViscosity(0, 1000);
+            solver.run("pbf_solver_test_V", 6000);
+        }
 
-    solver.enableSmoothing(true);
+        solver.enableSmoothing(true);
 
-    SECTION("PBFSolverVI") {
-        solver.run("pbf_solver_test_VI", 6000);
+        SECTION("PBFSolverVI") {
+            solver.run("pbf_solver_test_VI", 6000);
+        }
     }
 }
 

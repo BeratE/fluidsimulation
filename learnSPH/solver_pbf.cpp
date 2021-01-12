@@ -42,6 +42,15 @@ void SolverPBF::run(std::string file, double milliseconds,
                     std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos)
 {
     std::stringstream filename;
+    
+    int boundaryIdx = 0;
+    for (BoundarySystem& boundary : m_boundaries) {
+        filename.str(std::string());
+        filename << SOURCE_DIR << "/res/simulation/"
+                 << file << "_boundary" << (boundaryIdx++) << ".vtk";
+        save_particles_to_vtk(filename.str(), boundary.getPositions(), boundary.getVolumes());
+    }
+    
     double runTime_s = 0.0;
     size_t iteration = 0;
     size_t snapShotNr = 0;

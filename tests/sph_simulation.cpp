@@ -10,126 +10,132 @@ using namespace learnSPH;
 using namespace learnSPH::System;
 
 TEST_CASE("semiEuler", "Test semi-implicit Euler for a cube of particles with gravity only") {
-    std::cout << "Testing semi-implicit Euler.." << std::endl;
+    SECTION("SPHEuler") {
+        std::cout << "Testing semi-implicit Euler.." << std::endl;
 
-    const size_t N_STEPS = 100;
-    const double particleDiameter = 0.1;
+        const size_t N_STEPS = 100;
+        const double particleDiameter = 0.1;
 
-    // Sample Particles in a Box
-    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
-                                                     Eigen::Vector3d(1, 1, 1),
-                                                     particleDiameter);
+        // Sample Particles in a Box
+        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
+                                                         Eigen::Vector3d(1, 1, 1),
+                                                         particleDiameter);
 
-    std::stringstream filename;
-    SolverSPH solver(particles);
-    solver.enableGravity(false);
+        std::stringstream filename;
+        SolverSPH solver(particles);
+        solver.enableGravity(false);
     
-    SECTION("EulerSmoothON") {
-        solver.enableSmoothing(true);
+        SECTION("EulerSmoothON") {
+            solver.enableSmoothing(true);
         
-        filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_on"
-                 << 0 << ".vtk";
-        save_particles_to_vtk(filename.str(), particles.getPositions(),
-                              solver.getSystem().getDensities());
-
-        for (size_t steps = 1; steps < N_STEPS; steps++) {
-            filename.str("");
             filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_on"
-                     << steps << ".vtk";
+                     << 0 << ".vtk";
+            save_particles_to_vtk(filename.str(), particles.getPositions(),
+                                  solver.getSystem().getDensities());
 
-            solver.integrationStep();
+            for (size_t steps = 1; steps < N_STEPS; steps++) {
+                filename.str("");
+                filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_on"
+                         << steps << ".vtk";
+
+                solver.integrationStep();
             
-            save_particles_to_vtk(filename.str(), solver.getSystem().getPositions(),
-                                  solver.getSystem().getDensities());
+                save_particles_to_vtk(filename.str(), solver.getSystem().getPositions(),
+                                      solver.getSystem().getDensities());
 
-            std::cout << "Results saved to " << filename.str() << std::endl;
+                std::cout << "Results saved to " << filename.str() << std::endl;
+            }
         }
-    }
     
-    SECTION("EulerSmoothOFF") {
+        SECTION("EulerSmoothOFF") {
         
-        solver.enableSmoothing(false);
+            solver.enableSmoothing(false);
         
-        filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_on"
-                 << 0 << ".vtk";
-        save_particles_to_vtk(filename.str(), particles.getPositions(),
-                              solver.getSystem().getDensities());
-
-        for (size_t steps = 1; steps < N_STEPS; steps++) {
-            filename.str("");
-            filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_off"
-                     << steps << ".vtk";
-
-            solver.integrationStep();
-
-            save_particles_to_vtk(filename.str(), solver.getSystem().getPositions(),
+            filename << SOURCE_DIR << "/res/integration/test_semi_euler_smooth_on"
+                     << 0 << ".vtk";
+            save_particles_to_vtk(filename.str(), particles.getPositions(),
                                   solver.getSystem().getDensities());
 
-            std::cout << "Results saved to " << filename.str() << std::endl;            
+            for (size_t steps = 1; steps < N_STEPS; steps++) {
+                filename.str("");
+                filename << SOURCE_DIR
+                         << "/res/integration/test_semi_euler_smooth_off" << steps
+                         << ".vtk";
+
+                solver.integrationStep();
+
+                save_particles_to_vtk(filename.str(),
+                                      solver.getSystem().getPositions(),
+                                      solver.getSystem().getDensities());
+
+                std::cout << "Results saved to " << filename.str() << std::endl;
+            }
         }
     }
 }
 
 TEST_CASE("SolverRun", "[simulation]") {
-    std::cout << "Testing time constant simulation.." << std::endl;
+    SECTION("SPHSolver") {
+        std::cout << "Testing time constant simulation.." << std::endl;
 
-    const double particleDiameter = 0.1;
+        const double particleDiameter = 0.1;
 
-    // Sample Particles in a Box
-    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0.0, 0.25, 0),
-                                                     Eigen::Vector3d(1.0, 1.25, 1.0),
-                                                     particleDiameter);
+        // Sample Particles in a Box
+        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0.0, 0.25, 0),
+                                                         Eigen::Vector3d(1.0, 1.25, 1.0),
+                                                         particleDiameter);
 
-    SolverSPH solver(particles);
-    solver.setSnapShotAfterMS(40);
-    solver.setParamStiffness(0.0);
-    solver.setFluidViscosity(0.0);
-    solver.enableGravity(false);
-    solver.enableSmoothing(true);
+        SolverSPH solver(particles);
+        solver.setSnapShotAfterMS(40);
+        solver.setParamStiffness(0.0);
+        solver.setFluidViscosity(0.0);
+        solver.enableGravity(false);
+        solver.enableSmoothing(true);
 
-    SECTION("SimpleSolverI") {      
-        solver.run("solver_test_I", 12000);
-    }
+        SECTION("SimpleSolverI") {      
+            solver.run("solver_test_I", 12000);
+        }
 
-    solver.setParamStiffness(1000);
+        solver.setParamStiffness(1000);
     
-    SECTION("SimpleSolverII") {        
-        solver.run("solver_test_II", 6000);
-    }
+        SECTION("SimpleSolverII") {        
+            solver.run("solver_test_II", 6000);
+        }
 
-    solver.addBoundary(System::Emitter().sampleBoundaryPlane(
-        Eigen::Vector3d(0.0, 0.0, 0.0),
-        Eigen::Vector3d(1.0, 0.0, 0.0),
-        Eigen::Vector3d(0.0, 0.0, 1.0),
-        Eigen::Vector3d(1.0, 0.0, 1.0),
-        particleDiameter));
+        solver.addBoundary(System::Emitter().sampleBoundaryPlane(
+                               Eigen::Vector3d(0.0, 0.0, 0.0),
+                               Eigen::Vector3d(1.0, 0.0, 0.0),
+                               Eigen::Vector3d(0.0, 0.0, 1.0),
+                               Eigen::Vector3d(1.0, 0.0, 1.0),
+                               particleDiameter));
     
-    solver.enableGravity(true);
+        solver.enableGravity(true);
     
-    SECTION("SimpleSolverIII") {       
-        solver.run("solver_test_III", 6000);
-    }
+        SECTION("SimpleSolverIII") {       
+            solver.run("solver_test_III", 6000);
+        }
 
-    solver.setFluidViscosity(0.1);
+        solver.setFluidViscosity(0.1);
     
-    SECTION("SimpleSolverIV") {
-        solver.run("solver_test_IV", 6000);
-    }
+        SECTION("SimpleSolverIV") {
+            solver.run("solver_test_IV", 6000);
+        }
 
-    SECTION("SimpleSolverV") {
-        solver.setBoundaryViscosity(0, 1000);
-        solver.run("solver_test_V", 6000);
-    }
+        SECTION("SimpleSolverV") {
+            solver.setBoundaryViscosity(0, 1000);
+            solver.run("solver_test_V", 6000);
+        }
 
-    solver.enableSmoothing(true);
-    
-    SECTION("SimpleSolverVI") {
-        solver.run("solver_test_VI", 6000);
+        solver.enableSmoothing(true);
+
+        SECTION("SimpleSolverVI") {
+            solver.run("solver_test_VI", 6000);
+        }
     }
 }
  
 TEST_CASE("ComplexRun", "[complex]") {
-    SECTION("DAMNBREAK") {
+    SECTION("SphDambreak") {
         std::cout << "Testing complex simulation.." << std::endl;
 
         const double particleDiameter = 0.05;

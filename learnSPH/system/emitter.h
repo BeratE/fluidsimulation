@@ -38,6 +38,10 @@ namespace learnSPH::System {
                                            Eigen::Vector3d topRight,
                                            double samplingDistance,
                                            double restDensity = 1000.0);
+
+        BoundarySystem sampleBoundaryMesh(std::string filepath,
+                                          double samplingDistance,
+                                          double restDensity = 1000.0);
         
         std::vector<Eigen::Vector3d> samplePosTriangle(Eigen::Vector3d a,
                                                     Eigen::Vector3d b,
@@ -47,6 +51,9 @@ namespace learnSPH::System {
         std::vector<Eigen::Vector3d> samplePosHollowBox(Eigen::Vector3d bottomLeft,
                                                         Eigen::Vector3d topRight,
                                                         double samplingDistance);
+
+        std::vector<Eigen::Vector3d> samplePosMesh(std::string filepath,
+                                                   double samplingDistance);
     };
 
 } // namespace learnSPH

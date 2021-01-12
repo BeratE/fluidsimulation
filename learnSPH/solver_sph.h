@@ -14,8 +14,9 @@ class SolverSPH : public Solver {
     SolverSPH(System::FluidSystem system);
     ~SolverSPH();
     
-    double integrationStep();      
-    void run(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr);
+    double integrationStep();
+    void run(std::string file, double milliseconds,
+             std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr) override;
     
     // Setter & Getter        
     void setParamStiffness(double val) { m_stiffness = val; }

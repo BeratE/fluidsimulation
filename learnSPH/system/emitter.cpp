@@ -1,4 +1,5 @@
 #include "emitter.h"
+#include "obj_reader.h"
 #include <math.h>
 
 using namespace learnSPH;
@@ -66,6 +67,17 @@ BoundarySystem ParticleEmitter::sampleBoundaryPlane(Eigen::Vector3d bottomLeft,
     
     BoundarySystem boundary(samplingDistance/2, restDensity, triangle1.size());
     boundary.m_positions = triangle1;
+    boundary.updateVolumes();
+    return boundary;
+}
+
+BoundarySystem ParticleEmitter::sampleBoundaryMesh(std::string filepath,
+                                    double samplingDistance,
+                                    double restDensity)
+{
+    auto pos = samplePosMesh(filepath, samplingDistance);
+    BoundarySystem boundary(samplingDistance/2, restDensity, pos.size());
+    boundary.m_positions = pos;
     boundary.updateVolumes();
     return boundary;
 }
@@ -186,4 +198,26 @@ std::vector<Vector3d> ParticleEmitter::samplePosHollowBox(Vector3d bottomLeft,
     }
 
     return positions;
+}
+
+std::vector<Eigen::Vector3d> ParticleEmitter::samplePosMesh(std::string filepath,
+                                                            double samplingDistance)
+{
+    std::vector<TriMesh> meshes = readTriMeshesFromObj(filepath);
+
+    std::vector<Eigen::Vector3d> particles;
+    for (size_t m = 0; m < meshes.size(); m++) {
+        const auto &vertices = meshes[m].vertices;
+        const auto &triangles = meshes[m].triangles;
+        for (auto &triangle : triangles) {
+            auto pos = samplePosTriangle(vertices[triangle[0]],
+                                         vertices[triangle[1]],
+                                         vertices[triangle[2]],
+                                         samplingDistance);
+            
+            particles.insert(particles.end(), pos.begin(), pos.end());
+        }
+    }
+    
+    return particles;
 }

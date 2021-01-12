@@ -14,9 +14,9 @@ class SolverPBF : public Solver {
     SolverPBF(System::FluidSystem system);
     ~SolverPBF();
     
-    double integrationStep();      
+    double integrationStep();
     void run(std::string file, double milliseconds,
-             std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr);
+             std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr) override;
     
     // Setter & Getter
     void setNumIterations(size_t value) {m_npbfIterations = value;}
