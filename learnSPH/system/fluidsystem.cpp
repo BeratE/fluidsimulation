@@ -14,6 +14,9 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
     m_pressures.resize(size);
     m_accelerations.resize(size);
     m_normalizedDensities.resize(size);
+    m_normals.resize(size);
+    m_tensionForces.resize(size);
+    m_adhesionForces.resize(size);
 
     
     if (fill) {
@@ -21,7 +24,30 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
         std::fill(m_pressures.begin(), m_pressures.end(), 0.0);
         std::fill(m_accelerations.begin(), m_accelerations.end(), Vector3d(0.0, 0.0, 0.0));
         std::fill(m_normalizedDensities.begin(), m_normalizedDensities.end(), 0.0);
+        std::fill(m_normals.begin(), m_normals.end(), Vector3d(0.0, 0.0, 0.0));
+        std::fill(m_tensionForces.begin(), m_tensionForces.end(), Vector3d(0.0, 0.0, 0.0));
+        std::fill(m_adhesionForces.begin(), m_adhesionForces.end(), Vector3d(0.0, 0.0, 0.0));
     }
+}
+
+void FluidSystem::clearTensionForces()
+{
+    std::fill(m_tensionForces.begin(), m_tensionForces.end(), Vector3d(0.0, 0.0, 0.0));
+}
+
+void FluidSystem::clearAdhesionForces()
+{
+    std::fill(m_adhesionForces.begin(), m_adhesionForces.end(), Vector3d(0.0, 0.0, 0.0));
+}
+
+void FluidSystem::addParticleTensionForce(size_t i, Vector3d force)
+{
+    m_tensionForces[i] += force;
+}
+
+void FluidSystem::addParticleAdhesionForce(size_t i, Vector3d force)
+{
+    m_adhesionForces[i] += force;
 }
 
 void FluidSystem::updatePressures(double stiffness)
@@ -72,7 +98,7 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
 
 
 void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundaries,
-                                      bool pressure, bool viscosity, bool external)
+                                      bool pressure, bool viscosity, bool external, bool tension, bool adhesion)
 {
     //#pragma omp parallel for
     for (size_t i = 0; i < getSize(); i++) {
@@ -89,6 +115,15 @@ void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundar
     if (external) {
       for (size_t i = 0; i < getSize(); i++) 
           m_accelerations[i] += m_forces[i] / m_restDensity;
+    }
+    if (tension) {
+        for (size_t i = 0; i < getSize(); i++)
+            m_accelerations[i] += m_tensionForces[i] / m_restDensity;
+    }
+
+    if (adhesion) {
+        for (size_t i = 0; i < getSize(); i++)
+            m_accelerations[i] += m_adhesionForces[i] / m_restDensity;
     }
 }
 
@@ -174,4 +209,21 @@ Vector3d FluidSystem::particleViscosityAcc(size_t i, const std::vector<BoundaryS
     }
     
     return 2.0 * (fluidContrib + boundaryContrib);
+}
+
+void FluidSystem::updateNormals(const double c) {
+    for (size_t i = 0; i < getSize(); i++) {
+        m_normals[i] = normal(i, c);
+    }
+}
+
+Eigen::Vector3d FluidSystem::normal(const size_t i, const double c) {
+    Eigen::Vector3d normal;
+    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_pointSetID);
+    for (size_t j = 0; j < fluidPS.n_neighbors(m_pointSetID, i); j++) {
+        normal += (m_particleMass / getParticleDensity(j)) * m_kernelLookup
+            .gradWeight(getParticlePos(i), getParticlePos(j));
+    }
+
+    return c * normal;
 }

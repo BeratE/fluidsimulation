@@ -1,8 +1,6 @@
 #pragma once
 #include <Eigen/Dense>
-#include <learnSPH/system/fluidsystem.h>
 
-using namespace learnSPH::System;
 
 namespace tension {
 	// TODO: Find out appropriate values
@@ -13,7 +11,7 @@ namespace tension {
 	}
 	namespace Cohesion {
 		namespace Kernel {
-			double weight(double r);
+			double weight(const double r);
 		}
 
 		Eigen::Vector3d forceCohesion(const double mass_i, 
@@ -23,7 +21,6 @@ namespace tension {
 	}
 
 	namespace Curvature {
-		Eigen::Vector3d normal(const size_t idx, const FluidSystem fluid);
 		Eigen::Vector3d forceCurvature(const double mass_i,
 			const Eigen::Vector3d normal_i,
 			const Eigen::Vector3d normal_j);
@@ -35,9 +32,9 @@ namespace tension {
 		}
 
 		Eigen::Vector3d forceAdhesion(const double mass_i,
-			const double repVolume,
+			const double repVolume_k,
 			const Eigen::Vector3d pos_i,
-			const Eigen::Vector3d pos_j);
+			const Eigen::Vector3d pos_k);
 	}
 
 	Eigen::Vector3d forceTension(const double restDensity, 

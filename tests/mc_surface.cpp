@@ -11,6 +11,7 @@
 #include "learnSPH/system/particlesystem.h"
 #include "learnSPH/kernel.h"
 #include "learnSPH/solver_sph.h"
+#include <CompactNSearch/CompactNSearch.h>
 
 using namespace learnSPH;
 using namespace learnSPH::Surface;

@@ -3,6 +3,7 @@
 #include "config.h"
 #include "vtk_writer.h"
 #include <iostream>
+#include <tension/tension.h>
 
 using namespace learnSPH;
 using namespace learnSPH::System;
@@ -27,9 +28,12 @@ double SolverPBF::integrationStep()
     mp_nsearch->find_neighbors();
     
     m_system.updateDensities(m_boundaries);
+    m_system.updateNormals(tension::Parameter::C);
 
     applyExternalForces();
-    m_system.updateAccelerations(m_boundaries, false, true, true);    
+    applyTensionForces();
+    applyAdhesionForces();
+    m_system.updateAccelerations(m_boundaries, false, true, true, true, true);    
     
     semiImplicitEulerStep(deltaT);
     

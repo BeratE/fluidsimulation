@@ -3,6 +3,7 @@
 #include "config.h"
 #include "vtk_writer.h"
 #include <iostream>
+#include <tension/tension.h>
 
 using namespace learnSPH;
 using namespace learnSPH::System;
@@ -27,15 +28,18 @@ double SolverSPH::integrationStep()
     
     m_system.updateDensities(m_boundaries);
     m_system.updatePressures(m_stiffness);
+    m_system.updateNormals(tension::Parameter::C);
 
     applyExternalForces();
+    applyTensionForces();
+    applyAdhesionForces();
     // drag force
     for (size_t i = 0; i < m_system.getSize(); i++) {
         auto drag_force = -m_drag * m_system.getParticleVel(i);
         m_system.addParticleForce(i, drag_force);        
     }
     
-    m_system.updateAccelerations(m_boundaries, true, true, true);    
+    m_system.updateAccelerations(m_boundaries, true, true, true, true, true);    
     
     semiImplicitEulerStep(deltaT);
     m_system.updateNormalizedDensities();

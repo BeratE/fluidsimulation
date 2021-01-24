@@ -32,6 +32,6 @@ endif()
 
 ### Target Library
 add_library(${TARGET_NAME} ${SOURCE_FILES})
-add_dependencies(${TARGET_NAME} learnSPH)
+add_dependencies(${TARGET_NAME} CompactNSearch learnSPH)
 target_link_libraries(${TARGET_NAME} ${LIBRARIES})
 target_include_directories(${TARGET_NAME} ${INCLUDE_DIRS})

@@ -58,6 +58,8 @@ public:
 
 protected:        
     void applyExternalForces();
+    void applyTensionForces();
+    void applyAdhesionForces();
     void semiImplicitEulerStep(double deltaT);
 
     double m_snapShotMS = 20;

@@ -10,6 +10,7 @@
 #include "learnSPH/system/emitter.h"
 #include "learnSPH/system/fluidsystem.h"
 #include "learnSPH/system/particlesystem.h"
+#include <CompactNSearch/CompactNSearch.h>
 
 using namespace learnSPH;
 using namespace learnSPH::Kernel;

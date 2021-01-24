@@ -4,6 +4,7 @@
 #include "vtk_writer.h"
 #include <iostream>
 #include <surface/surface.h>
+#include <tension/tension.h>
 
 using namespace learnSPH;
 using namespace learnSPH::System;
@@ -57,6 +58,56 @@ void Solver::applyExternalForces()
     }
     // Iterate force objects
     // ...
+}
+
+void Solver::applyTensionForces()
+{
+    using namespace tension;
+    
+    m_system.clearTensionForces();
+
+    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
+    for (size_t i = 0; i < m_system.getSize(); i++) {
+        for (size_t j = 0; j < fluidPS.n_neighbors(m_system.getPointSetID(), i); j++) {
+            m_system.addParticleTensionForce(i, forceTension(
+                m_system.getRestDensity(),
+                m_system.getParticleDensity(i),
+                m_system.getParticleDensity(j),
+                Cohesion::forceCohesion(
+                    m_system.getParticleMass(),
+                    m_system.getParticleMass(),
+                    m_system.getParticlePos(i),
+                    m_system.getParticlePos(j)
+                ),
+                Curvature::forceCurvature(
+                    m_system.getParticleMass(),
+                    m_system.getParticleNormal(i),
+                    m_system.getParticleNormal(j)
+                )
+            ));
+        }
+    }
+}
+
+void Solver::applyAdhesionForces()
+{
+    using namespace tension;
+
+    m_system.clearAdhesionForces();
+
+    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
+    for (size_t i = 0; i < m_system.getSize(); i++) {
+        for (System::BoundarySystem boundary : m_boundaries) {
+            for (size_t k = 0; k < fluidPS.n_neighbors(boundary.getPointSetID(), i); k++) {
+                m_system.addParticleAdhesionForce(i, Adhesion::forceAdhesion(
+                    m_system.getParticleMass(),
+                    boundary.getParticleVolume(k),
+                    m_system.getParticlePos(i),
+                    boundary.getParticlePos(k)
+                ));
+            }
+        }
+    }
 }
 
 void Solver::semiImplicitEulerStep(double deltaT)
