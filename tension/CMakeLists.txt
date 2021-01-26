@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(TARGET_NAME tension)
 
 set(LIBRARIES
-	CompartNSearch
+	CompactNSearch
 	learnSPH)
 
 set(INCLUDE_DIRS

@@ -114,16 +114,16 @@ void FluidSystem::updateAccelerations(const std::vector<BoundarySystem> &boundar
     }
     if (external) {
       for (size_t i = 0; i < getSize(); i++) 
-          m_accelerations[i] += m_forces[i] / m_restDensity;
+          m_accelerations[i] += m_forces[i] / m_particleMass; // Check if this is actually correct, division should be by mass
     }
     if (tension) {
         for (size_t i = 0; i < getSize(); i++)
-            m_accelerations[i] += m_tensionForces[i] / m_restDensity;
+            m_accelerations[i] += m_tensionForces[i] / m_particleMass; // Check if this is actually correct, division should be by mass
     }
 
     if (adhesion) {
         for (size_t i = 0; i < getSize(); i++)
-            m_accelerations[i] += m_adhesionForces[i] / m_restDensity;
+            m_accelerations[i] += m_adhesionForces[i] / m_particleMass; // Check if this is actually correct, division should be by mass
     }
 }
 
@@ -211,19 +211,21 @@ Vector3d FluidSystem::particleViscosityAcc(size_t i, const std::vector<BoundaryS
     return 2.0 * (fluidContrib + boundaryContrib);
 }
 
-void FluidSystem::updateNormals(const double c) {
+void FluidSystem::updateNormals() {
     for (size_t i = 0; i < getSize(); i++) {
-        m_normals[i] = normal(i, c);
+        m_normals[i] = normal(i);
     }
 }
 
-Eigen::Vector3d FluidSystem::normal(const size_t i, const double c) {
-    Eigen::Vector3d normal;
+Eigen::Vector3d FluidSystem::normal(const size_t i) {
+    Eigen::Vector3d normal = (m_particleMass / getParticleDensity(i)) * m_kernelLookup
+        .gradWeight(getParticlePos(i), getParticlePos(i));
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_pointSetID);
     for (size_t j = 0; j < fluidPS.n_neighbors(m_pointSetID, i); j++) {
-        normal += (m_particleMass / getParticleDensity(j)) * m_kernelLookup
-            .gradWeight(getParticlePos(i), getParticlePos(j));
+        const unsigned int pid = fluidPS.neighbor(m_pointSetID, i, j);
+        normal += (m_particleMass / getParticleDensity(pid)) * m_kernelLookup
+            .gradWeight(getParticlePos(i), getParticlePos(pid));
     }
 
-    return c * normal;
+    return m_c * normal;
 }

@@ -24,6 +24,7 @@ set(SOURCE_FILES
     sph_kernel.cpp
     sph_sampling.cpp
     sph_simulation.cpp
+    tension_test.cpp
    )
 
 ### Target  

@@ -8,7 +8,7 @@
 #include <surface/surface.h>
 
 
-#define VEC_GRAVITY Eigen::Vector3d(0.0, -0.980665, 0.0)
+#define VEC_GRAVITY Eigen::Vector3d(0.0, -9.80665, 0.0)
 
 template<typename T>
 std::vector<T> interpolateVector(const std::vector<T>& previous,
@@ -55,6 +55,8 @@ public:
     void setBoundaryViscosity(size_t i, double val) {m_boundaries[i].setViscosity(val);}
     void enableGravity(bool val) { m_gravityEnable = val; }
     void enableSmoothing(bool val) { m_smoothingEnable = val; }
+    void enableTension(bool val) { m_tensionEnable = val; }
+    void enableAdhesion(bool val) { m_adhesionEnable = val; }
 
 protected:        
     void applyExternalForces();
@@ -67,6 +69,8 @@ protected:
     double m_xsphSmoothing = 0.5;
     bool m_gravityEnable = true;
     bool m_smoothingEnable = true;
+    bool m_tensionEnable = true;
+    bool m_adhesionEnable = true;
         
     System::FluidSystem m_system;
     std::vector<System::BoundarySystem> m_boundaries;

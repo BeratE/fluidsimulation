@@ -28,7 +28,9 @@ double SolverPBF::integrationStep()
     mp_nsearch->find_neighbors();
     
     m_system.updateDensities(m_boundaries);
-    m_system.updateNormals(tension::Parameter::C);
+    if (m_tensionEnable) {
+        m_system.updateNormals();
+    }
 
     applyExternalForces();
     applyTensionForces();
@@ -36,8 +38,6 @@ double SolverPBF::integrationStep()
     m_system.updateAccelerations(m_boundaries, false, true, true, true, true);    
     
     semiImplicitEulerStep(deltaT);
-    
-    m_system.updateNormalizedDensities();
     
     return deltaT;
 }
@@ -70,6 +70,9 @@ void SolverPBF::run(std::string file, double milliseconds,
         std::vector<Eigen::Vector3d> previousPos(m_system.getPositions());
         
         double deltaT_s = integrationStep();
+        if (pOutSurfaceInfos) {
+            m_system.updateNormalizedDensities();
+        }
         runTime_s += deltaT_s;
 
         // constraint solver

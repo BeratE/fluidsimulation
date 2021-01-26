@@ -16,10 +16,13 @@ namespace learnSPH::System {
 
         // Setter & Getter
         double getParticleVolume(size_t i) const { return m_volumes[i]; }
-        
+        double getBeta() const { return m_beta; }
         const std::vector<double>& getVolumes() const {return m_volumes; }
+        
+        void setBeta(const double beta) { m_beta = beta; }
 
       private:
         std::vector<double> m_volumes; 
+        double m_beta = 1.0;
     };
 } // namespace learnSPH::System

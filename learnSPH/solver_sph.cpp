@@ -28,7 +28,9 @@ double SolverSPH::integrationStep()
     
     m_system.updateDensities(m_boundaries);
     m_system.updatePressures(m_stiffness);
-    m_system.updateNormals(tension::Parameter::C);
+    if (m_tensionEnable) {
+        m_system.updateNormals();
+    }
 
     applyExternalForces();
     applyTensionForces();
@@ -42,7 +44,6 @@ double SolverSPH::integrationStep()
     m_system.updateAccelerations(m_boundaries, true, true, true, true, true);    
     
     semiImplicitEulerStep(deltaT);
-    m_system.updateNormalizedDensities();
 
     return deltaT;
 }
@@ -96,6 +97,9 @@ void SolverSPH::run(std::string file, double milliseconds, std::vector<Surface::
         std::cout << iteration << " " << runTime_s <<std::endl;
         
         double deltaT_s = integrationStep();
+        if (pOutSurfaceInfos) {
+            m_system.updateNormalizedDensities();
+        }
         runTime_s += deltaT_s;
         
         // Snapshot

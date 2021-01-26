@@ -49,7 +49,7 @@ void Solver::applyExternalForces()
     
     Eigen::Vector3d grav_force(0.0, 0.0, 0.0);
     if (m_gravityEnable)
-        grav_force = VEC_GRAVITY * m_system.getRestDensity();
+        grav_force = VEC_GRAVITY * m_system.getParticleMass();
 
     //#pragma omp parallel for
     for (size_t i = 0; i < m_system.getSize(); i++) {
@@ -63,28 +63,33 @@ void Solver::applyExternalForces()
 void Solver::applyTensionForces()
 {
     using namespace tension;
-    
-    m_system.clearTensionForces();
+    if (m_tensionEnable) {
+        m_system.clearTensionForces();
 
-    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
-    for (size_t i = 0; i < m_system.getSize(); i++) {
-        for (size_t j = 0; j < fluidPS.n_neighbors(m_system.getPointSetID(), i); j++) {
-            m_system.addParticleTensionForce(i, forceTension(
-                m_system.getRestDensity(),
-                m_system.getParticleDensity(i),
-                m_system.getParticleDensity(j),
-                Cohesion::forceCohesion(
-                    m_system.getParticleMass(),
-                    m_system.getParticleMass(),
-                    m_system.getParticlePos(i),
-                    m_system.getParticlePos(j)
-                ),
-                Curvature::forceCurvature(
-                    m_system.getParticleMass(),
-                    m_system.getParticleNormal(i),
-                    m_system.getParticleNormal(j)
-                )
-            ));
+        CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
+        for (size_t i = 0; i < m_system.getSize(); i++) {
+            for (size_t j = 0; j < fluidPS.n_neighbors(m_system.getPointSetID(), i); j++) {
+                const unsigned int pid = fluidPS.neighbor(m_system.getPointSetID(), i, j);
+                m_system.addParticleTensionForce(i, forceTension(
+                    m_system.getRestDensity(),
+                    m_system.getParticleDensity(i),
+                    m_system.getParticleDensity(pid),
+                    Cohesion::forceCohesion(
+                        m_system.getParticleMass(),
+                        m_system.getParticleMass(),
+                        m_system.getParticlePos(i),
+                        m_system.getParticlePos(pid),
+                        m_system.getGamma(),
+                        m_system.getC()
+                    ),
+                    Curvature::forceCurvature(
+                        m_system.getParticleMass(),
+                        m_system.getParticleNormal(i),
+                        m_system.getParticleNormal(pid),
+                        m_system.getC()
+                    )
+                ));
+            }
         }
     }
 }
@@ -92,19 +97,23 @@ void Solver::applyTensionForces()
 void Solver::applyAdhesionForces()
 {
     using namespace tension;
+    if (m_adhesionEnable) {
+        m_system.clearAdhesionForces();
 
-    m_system.clearAdhesionForces();
-
-    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
-    for (size_t i = 0; i < m_system.getSize(); i++) {
-        for (System::BoundarySystem boundary : m_boundaries) {
-            for (size_t k = 0; k < fluidPS.n_neighbors(boundary.getPointSetID(), i); k++) {
-                m_system.addParticleAdhesionForce(i, Adhesion::forceAdhesion(
-                    m_system.getParticleMass(),
-                    boundary.getParticleVolume(k),
-                    m_system.getParticlePos(i),
-                    boundary.getParticlePos(k)
-                ));
+        CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
+        for (size_t i = 0; i < m_system.getSize(); i++) {
+            for (System::BoundarySystem boundary : m_boundaries) {
+                for (size_t k = 0; k < fluidPS.n_neighbors(boundary.getPointSetID(), i); k++) {
+                    const unsigned int pid = fluidPS.neighbor(boundary.getPointSetID(), i, k);
+                    m_system.addParticleAdhesionForce(i, Adhesion::forceAdhesion(
+                        m_system.getParticleMass(),
+                        boundary.getParticleVolume(pid),
+                        m_system.getParticlePos(i),
+                        boundary.getParticlePos(pid),
+                        boundary.getBeta(),
+                        m_system.getC()
+                    ));
+                }
             }
         }
     }
