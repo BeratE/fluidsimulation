@@ -17,6 +17,18 @@ class SolverSPH : public Solver {
     void newRun(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr);
     void newSemiImplicitEulerStep(double deltaT);
 
+    void updateAccFluidContribution(std::vector<Eigen::Vector3d>& accelerations,
+        const size_t i,
+        const size_t j,
+        const double ratio_i,
+        const double ratio_j);
+
+    void updateAccBoundaryContribution(std::vector<Eigen::Vector3d>& accelerations,
+        const size_t i,
+        const size_t k,
+        const double ratio_i,
+        System::BoundarySystem& boundary);
+
     double integrationStep();
     double newIntegrationStep();
 

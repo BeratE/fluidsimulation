@@ -230,36 +230,18 @@ void SolverSPH::newSemiImplicitEulerStep(double deltaT)
             pressureDensityRatios[i],
             pressureDensityRatios[i]);
 
-        // Iterate over fluid neighbors and add contributions to forces and smoothingTerm
+        // Iterate over fluid neighbors and add contributions to forces 
         for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
             const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
-
-            // add fluid contribution to pressure acceleration
-            accelerations[i] -= m_system.pressureAccFluid(i, j,
-                pressureDensityRatios[i],
-                pressureDensityRatios[j]);
-
-            // add fluid contribution to viscosity acceleration
-            accelerations[i] += m_system.viscAccFluid(i, j);
-
-            // add fluid contribution to tension accelerations. DIVIDE BY PARTICLE MASS
-            if (m_tensionEnable)
-                accelerations[i] += m_system.tensionForce(i, j) / m_system.getParticleMass();
+            updateAccFluidContribution(accelerations, i, j, pressureDensityRatios[i], pressureDensityRatios[j]);
         }
 
-        // Iterate over boundaries
+        // Iterate over boundaries and add contributions to forces
         for (BoundarySystem boundary : m_boundaries) {
             // Iterate over neighboring boundary particles
             for (size_t idx = 0; idx < fluidPS.n_neighbors(boundary.getPointSetID(), i); idx++) {
                 const unsigned int k = fluidPS.neighbor(boundary.getPointSetID(), i, idx);
-
-                // add boundary contribution to pressure acceleration
-                accelerations[i] -= m_system.pressureAccBoundary(i, k, pressureDensityRatios[i], boundary);
-                // add boundary contribution to viscosity acceleration
-                accelerations[i] += m_system.viscAccBoundary(i, k, boundary);
-                // add boundary contribution to adhesion accelerations. DIVIDE BY PARTICLE MASS
-                if (m_adhesionEnable)
-                    accelerations[i] += m_system.adhesionForce(i, k, boundary) / m_system.getParticleMass();
+                updateAccBoundaryContribution(accelerations, i, k, pressureDensityRatios[i], boundary);
             }
         }
     }
@@ -307,6 +289,38 @@ double SolverSPH::newIntegrationStep()
     newSemiImplicitEulerStep(deltaT);
 
     return deltaT;
+}
+
+void SolverSPH::updateAccFluidContribution(std::vector<Eigen::Vector3d>& accelerations, 
+    const size_t i, 
+    const size_t j, 
+    const double ratio_i, 
+    const double ratio_j) {
+    // add fluid contribution to pressure acceleration
+    accelerations[i] -= m_system.pressureAccFluid(i, j,
+        ratio_i,
+        ratio_j);
+
+    // add fluid contribution to viscosity acceleration
+    accelerations[i] += m_system.viscAccFluid(i, j);
+
+    // add fluid contribution to tension accelerations. DIVIDE BY PARTICLE MASS
+    if (m_tensionEnable)
+        accelerations[i] += m_system.tensionForce(i, j) / m_system.getParticleMass();
+}
+
+void SolverSPH::updateAccBoundaryContribution(std::vector<Eigen::Vector3d>& accelerations,
+    const size_t i,
+    const size_t k,
+    const double ratio_i,
+    BoundarySystem& boundary) {
+    // add boundary contribution to pressure acceleration
+    accelerations[i] -= m_system.pressureAccBoundary(i, k, ratio_i, boundary);
+    // add boundary contribution to viscosity acceleration
+    accelerations[i] += m_system.viscAccBoundary(i, k, boundary);
+    // add boundary contribution to adhesion accelerations. DIVIDE BY PARTICLE MASS
+    if (m_adhesionEnable)
+        accelerations[i] += m_system.adhesionForce(i, k, boundary) / m_system.getParticleMass();
 }
 
 
