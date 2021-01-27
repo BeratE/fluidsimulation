@@ -161,3 +161,4 @@ void Solver::semiImplicitEulerStep(double deltaT)
         m_system.setParticlePos(i, fpPos + deltaT * fpVelStar);
     }
 }
+

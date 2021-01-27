@@ -1,5 +1,7 @@
+#define _USE_MATH_DEFINES
 #include "fluidsystem.h"
 #include "boundarysystem.h"
+#include <math.h>
 #include <algorithm>
 
 using namespace learnSPH;
@@ -204,7 +206,7 @@ Vector3d FluidSystem::particleViscosityAcc(size_t i, const std::vector<BoundaryS
             boundaryContrib += boundary.getViscosity() 
                 * boundary.getParticleVolume(k) * getParticleVel(i)
                 * posDiff.dot(m_kernelLookup.gradWeight(pos, boundary.getParticlePos(k)))
-                * (pow(posDiff.norm(), 2) + 0.01 * pow(m_smoothingLength, 2));
+                * (pow(posDiff.norm(), 2) + 0.01 * pow(m_smoothingLength, 2)); // should be / in the beginning of the line
         }
     }
     
@@ -228,4 +230,74 @@ Eigen::Vector3d FluidSystem::normal(const size_t i) {
     }
 
     return m_c * normal;
+}
+
+Eigen::Vector3d FluidSystem::pressureAccFluid(const size_t i, const size_t j, const double ratio_i, const double ratio_j) {
+    return m_particleMass * (ratio_i + ratio_j) * m_kernelLookup.gradWeight(m_positions[i], m_positions[j]);
+}
+
+Eigen::Vector3d FluidSystem::viscAccFluid(const size_t i, const size_t j) {
+    const Eigen::Vector3d posDiff = m_positions[i] - m_positions[j];
+    const double posDiffNorm = posDiff.norm();
+
+    const Eigen::Vector3d velDiff = m_velocities[i] - m_velocities[j];
+
+    return 2.0 * m_viscosity * (m_particleMass / m_densities[i]) * velDiff 
+        * (posDiff.transpose() * m_kernelLookup.gradWeight(m_positions[i], m_positions[j])) 
+        / (pow(posDiff.norm(), 2) + 0.01 * pow(m_smoothingLength, 2));
+}
+
+Eigen::Vector3d FluidSystem::pressureAccBoundary(const size_t i, const size_t k, const double ratio, const BoundarySystem& boundary) {
+    return m_restDensity* boundary.getParticleVolume(k)* ratio* m_kernelLookup.gradWeight(m_positions[i], m_positions[k]);
+}
+
+Eigen::Vector3d FluidSystem::viscAccBoundary(const size_t i, const size_t k, const BoundarySystem& boundary) {
+    const Eigen::Vector3d posDiff = m_positions[i] - m_positions[k];
+    const double posDiffNorm = posDiff.norm();
+    return 2.0 * boundary.getViscosity()
+        * boundary.getParticleVolume(k) * getParticleVel(i)
+        * posDiff.dot(m_kernelLookup.gradWeight(m_positions[i], boundary.getParticlePos(k)))
+        / (pow(posDiff.norm(), 2) + 0.01 * pow(m_smoothingLength, 2));
+}
+
+Eigen::Vector3d FluidSystem::tensionForce(const size_t i, const size_t j) {
+    const double K = (2.0 * m_restDensity) / (m_densities[i] + m_densities[j]);
+    return K * (cohesionForce(i, j) + curvatureForce(i, j));
+}
+
+Eigen::Vector3d FluidSystem::cohesionForce(const size_t i, const size_t j) {
+    const Eigen::Vector3d diff = m_positions[i] - m_positions[j];
+    const double diffNorm = diff.norm();
+
+    return -m_gamma * m_particleMass * m_particleMass * cohesionWeight(diffNorm) * diff.normalized();
+}
+
+Eigen::Vector3d FluidSystem::curvatureForce(const size_t i, const size_t j) {
+    -m_gamma * m_particleMass * (m_normals[i] - m_normals[j]);
+}
+
+Eigen::Vector3d FluidSystem::adhesionForce(const size_t i, const size_t k, const BoundarySystem& boundary) {
+    const Eigen::Vector3d diff = m_positions[i] - boundary.getParticlePos(k);
+    const double diffNorm = diff.norm();
+    return -boundary.getBeta() * m_particleMass * boundary.getParticleVolume(k) * adhesionWeight(diffNorm)* diff.normalized();
+}
+
+double FluidSystem::cohesionWeight(const double r) {
+    const double alpha = 32.0 / (M_PI * pow(m_c, 9));
+    if (0.0 <= r && r <= m_c / 2.0) {
+        return alpha * 2 * pow((m_c - r), 3) * pow(r, 3) - pow(m_c, 6) / 64.0;
+    }
+    else if (m_c / 2.0 < r && r <= m_c) {
+        return alpha * pow((m_c - r), 3) * pow(r, 3);
+    }
+    return 0.0;
+}
+
+double FluidSystem::adhesionWeight(const double r) {
+    const double alpha = 0.007 / pow(m_c, 3.25);
+
+    if (m_c / 2.0 <= r && r <= m_c) {
+        return alpha * pow((-4.0 * pow(r, 2)) / m_c + 6.0 * r - 2.0 * m_c, 1.0 / 4.0);
+    }
+    return 0;
 }

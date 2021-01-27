@@ -45,7 +45,6 @@ public:
         std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr) {}
 
     size_t addBoundary(const System::BoundarySystem &boundary);
-
     // Setter & Getter
     const System::FluidSystem &getSystem() const { return m_system; }
 

@@ -21,7 +21,19 @@ namespace learnSPH::System {
         void updateAccelerations(const std::vector<BoundarySystem> &boundaries,
                                  bool pressure = true, bool viscosity = true, bool external = true, bool tension = true, bool adhesion = true);
         void updateNormals();
-        
+
+        Eigen::Vector3d pressureAccFluid(const size_t i, const size_t j, const double ratio_i, const double ratio_j);
+        Eigen::Vector3d viscAccFluid(const size_t i, const size_t j);
+        Eigen::Vector3d FluidSystem::pressureAccBoundary(const size_t i, const size_t k, const double ratio, const BoundarySystem& boundary);
+        Eigen::Vector3d FluidSystem::viscAccBoundary(const size_t i, const size_t k, const BoundarySystem& boundary);
+        Eigen::Vector3d FluidSystem::tensionForce(const size_t i, const size_t j);
+        Eigen::Vector3d FluidSystem::cohesionForce(const size_t i, const size_t j);
+        Eigen::Vector3d FluidSystem::curvatureForce(const size_t i, const size_t j);
+        Eigen::Vector3d FluidSystem::adhesionForce(const size_t i, const size_t j, const BoundarySystem& boundary);
+
+        double cohesionWeight(const double r);
+        double adhesionWeight(const double r);
+
         // Setter & Getter
         double getParticleDensity(size_t i) const { return m_densities[i]; }
         double getParticlePressure(size_t i) const { return m_pressures[i]; }

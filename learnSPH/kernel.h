@@ -41,5 +41,4 @@ namespace learnSPH::Kernel {
             std::vector<double> m_gradMagnitudes;
         };
     } // namespace CubicSpline
-    
 } // namespace learnSPH::Kernel

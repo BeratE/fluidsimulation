@@ -14,14 +14,17 @@ class SolverSPH : public Solver {
     SolverSPH(System::FluidSystem system);
     ~SolverSPH();
     
+    void newRun(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos);
+    void newSemiImplicitEulerStep(double deltaT);
+
     double integrationStep();
     void run(std::string file, double milliseconds,
              std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr) override;
     
     // Setter & Getter        
     void setParamStiffness(double val) { m_stiffness = val; }
-    void setParameterDrag(double val) { m_drag = val; }     
-    
+    void setParameterDrag(double val) { m_drag = val; }    
+
   private:
     double m_drag = 0.2;    
     double m_stiffness = 1000.0;
