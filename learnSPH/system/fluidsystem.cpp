@@ -204,7 +204,7 @@ Vector3d FluidSystem::particleViscosityAcc(size_t i, const std::vector<BoundaryS
             boundaryContrib += boundary.getViscosity() 
                 * boundary.getParticleVolume(k) * getParticleVel(i)
                 * posDiff.dot(m_kernelLookup.gradWeight(pos, boundary.getParticlePos(k)))
-                * (pow(posDiff.norm(), 2) + 0.01 * pow(m_smoothingLength, 2));
+                / (pow(posDiff.norm(), 2) + 0.01 * pow(m_smoothingLength, 2));
         }
     }
     
