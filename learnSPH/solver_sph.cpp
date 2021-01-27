@@ -145,42 +145,22 @@ void SolverSPH::run(std::string file, double milliseconds, std::vector<Surface::
 
 void SolverSPH::newRun(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos)
 {
-    if (pOutSurfaceInfos) {
-        mp_nsearch->find_neighbors(); // needed to allow surface reconstruction of boundaries and initial fluid
-    }
-
     // Store information regarding boundaries
     int boundaryIdx = 0;
     std::stringstream filename;
     for (BoundarySystem& boundary : m_boundaries) {
         // Write boundary particles to file
         filename.str(std::string());
-        filename << SOURCE_DIR << "/res/simulation/"
+        filename << SOURCE_DIR << "/res2/simulation/"
             << file << "_boundary" << boundaryIdx << ".vtk";
         save_particles_to_vtk(filename.str(), boundary.getPositions(), boundary.getVolumes());
         std::cout << "save results to " << filename.str() << std::endl;
-
-        // Store information for surface reconstruction of boundaries
-        if (pOutSurfaceInfos) {
-            boundary.updateNormalizedDensities();
-            std::stringstream surfaceFilename;
-            surfaceFilename << file << "_boundary_surface" << boundaryIdx;
-            pOutSurfaceInfos->push_back(SurfaceInformation(boundary.getPositions(), boundary.getNormalizedDensities(),
-                boundary.getKernelLookUp(), boundary.getSmoothingLength(), surfaceFilename.str()));
-        }
 
         boundaryIdx++;
     }
 
     // Required for interpolation between simulation steps 
     std::vector<Eigen::Vector3d> previousPos(m_system.getPositions());
-    std::vector<double> previousNormalizedDensities;
-
-    // Store information for surface reconstruction of initial fluid configuration
-    if (pOutSurfaceInfos) {
-        m_system.updateNormalizedDensities();
-        previousNormalizedDensities = m_system.getNormalizedDensities();
-    }
 
     // Controll variables
     double runTime_s = 0.0;
@@ -192,8 +172,26 @@ void SolverSPH::newRun(std::string file, double milliseconds, std::vector<Surfac
 
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s << std::endl;
+        double deltaT_s = newIntegrationStep();
+        runTime_s += deltaT_s;
 
+        if (runTime_s > nextSnapShotTime_s) {
+            filename.str(std::string());
+            filename << SOURCE_DIR << "/res/simulation/" << file << snapShotNr << ".vtk";
+            std::vector<Eigen::Vector3d> interpolPos
+                = interpolateVector<Eigen::Vector3d>(previousPos,
+                    m_system.getPositions(),
+                    prevSnapShotTime_s,
+                    runTime_s,
+                    nextSnapShotTime_s);
+            save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
 
+            prevSnapShotTime_s = nextSnapShotTime_s;
+            nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS * pow(10, -3);
+
+            previousPos = m_system.getPositions();
+            std::cout << "save results to " << filename.str() << std::endl;
+        }
     }
 }
 
@@ -205,14 +203,18 @@ void SolverSPH::newSemiImplicitEulerStep(double deltaT)
     const size_t id = m_system.getPointSetID();
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
 
+    // Intermediate results
     std::vector<Eigen::Vector3d> accelerations;
-    std::vector<Eigen::Vector3d> smoothingTerms;
-    std::vector<double> pressureDensityRatios;
 
     // Used in calculation of pressureAccelerations
+    std::vector<double> pressureDensityRatios;
     for (size_t i = 0; i < m_system.getSize(); i++) {
-        pressureDensityRatios.push_back(m_system.getParticlePressure(i) / pow(m_system.getParticleDensity(i), 2));
+        pressureDensityRatios.push_back(m_system.getParticlePressure(i) / (m_system.getParticleDensity(i) * m_system.getParticleDensity(i)));
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Calculate Accelerations
+    ////////////////////////////////////////////////////////////////////////
 
     // If gravity is enabled, we can add gravitational acceleration to every particle
     for (size_t i = 0; i < fluidPS.n_points(); i++) {
@@ -222,10 +224,11 @@ void SolverSPH::newSemiImplicitEulerStep(double deltaT)
         else {
             accelerations.push_back(Eigen::Vector3d::Zero());
         }
-        // If smoothing is enabled, we keep track of the smoothing term for every particle
-        if (m_smoothingEnable) {
-            smoothingTerms.push_back(Eigen::Vector3d::Zero());
-        }
+
+        // Contributions of pair (i, i) - NOT NECESSARY FOR VISCOSITY AND TENSION
+        accelerations[i] -= m_system.pressureAccFluid(i, i,
+            pressureDensityRatios[i],
+            pressureDensityRatios[i]);
 
         // Iterate over fluid neighbors and add contributions to forces and smoothingTerm
         for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
@@ -240,7 +243,8 @@ void SolverSPH::newSemiImplicitEulerStep(double deltaT)
             accelerations[i] += m_system.viscAccFluid(i, j);
 
             // add fluid contribution to tension accelerations. DIVIDE BY PARTICLE MASS
-            accelerations[i] += m_system.tensionForce(i, j) / m_system.getParticleMass();
+            if (m_tensionEnable)
+                accelerations[i] += m_system.tensionForce(i, j) / m_system.getParticleMass();
         }
 
         // Iterate over boundaries
@@ -254,10 +258,55 @@ void SolverSPH::newSemiImplicitEulerStep(double deltaT)
                 // add boundary contribution to viscosity acceleration
                 accelerations[i] += m_system.viscAccBoundary(i, k, boundary);
                 // add boundary contribution to adhesion accelerations. DIVIDE BY PARTICLE MASS
-                accelerations[i] += m_system.adhesionForce(i, k, boundary) / m_system.getParticleMass();
+                if (m_adhesionEnable)
+                    accelerations[i] += m_system.adhesionForce(i, k, boundary) / m_system.getParticleMass();
             }
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Update Velocities
+    ////////////////////////////////////////////////////////////////////////
+    for (size_t i = 0; i < m_system.getSize(); i++) {
+        m_system.updateVelocity(i, m_system.getParticleVel(i) + deltaT * accelerations[i]);
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Update Positions
+    ////////////////////////////////////////////////////////////////////////
+    for (size_t i = 0; i < fluidPS.n_points(); i++) {
+        if (m_smoothingEnable) {
+            // Calculate smoothingTerm from neighborhood
+            Eigen::Vector3d smoothingTerm = Eigen::Vector3d::Zero();
+            for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
+                const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
+                smoothingTerm += m_system.smoothingTerm(i, j);
+            }
+            m_system.updatePosition(i, m_system.getParticlePos(i) + deltaT * (m_system.getParticleVel(i) + m_xsphSmoothing * smoothingTerm));
+        }
+        else {
+            m_system.updatePosition(i, m_system.getParticlePos(i) + deltaT * m_system.getParticleVel(i));
+        }
+    }
+
+}
+
+double SolverSPH::newIntegrationStep()
+{
+    const double deltaT = timeStepCFL();
+    
+    mp_nsearch->find_neighbors();
+    
+    // preparations for the calculations in the semiImplicit Euler integration
+    m_system.updateDensities(m_boundaries);
+    m_system.updatePressures(m_stiffness);
+    if (m_tensionEnable) {
+        m_system.updateNormals();
+    }
+    // TODO: Maybe add drag forces
+    newSemiImplicitEulerStep(deltaT);
+
+    return deltaT;
 }
 
 

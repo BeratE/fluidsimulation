@@ -21,15 +21,19 @@ namespace learnSPH::System {
         void updateAccelerations(const std::vector<BoundarySystem> &boundaries,
                                  bool pressure = true, bool viscosity = true, bool external = true, bool tension = true, bool adhesion = true);
         void updateNormals();
+        void updateVelocity(const size_t i, const Eigen::Vector3d vel) { m_velocities[i] = vel; }
+        void updatePosition(const size_t i, const Eigen::Vector3d pos) { m_positions[i] = pos; }
 
         Eigen::Vector3d pressureAccFluid(const size_t i, const size_t j, const double ratio_i, const double ratio_j);
         Eigen::Vector3d viscAccFluid(const size_t i, const size_t j);
-        Eigen::Vector3d FluidSystem::pressureAccBoundary(const size_t i, const size_t k, const double ratio, const BoundarySystem& boundary);
-        Eigen::Vector3d FluidSystem::viscAccBoundary(const size_t i, const size_t k, const BoundarySystem& boundary);
-        Eigen::Vector3d FluidSystem::tensionForce(const size_t i, const size_t j);
-        Eigen::Vector3d FluidSystem::cohesionForce(const size_t i, const size_t j);
-        Eigen::Vector3d FluidSystem::curvatureForce(const size_t i, const size_t j);
-        Eigen::Vector3d FluidSystem::adhesionForce(const size_t i, const size_t j, const BoundarySystem& boundary);
+        Eigen::Vector3d pressureAccBoundary(const size_t i, const size_t k, const double ratio, const BoundarySystem& boundary);
+        Eigen::Vector3d viscAccBoundary(const size_t i, const size_t k, const BoundarySystem& boundary);
+        Eigen::Vector3d tensionForce(const size_t i, const size_t j);
+        Eigen::Vector3d cohesionForce(const size_t i, const size_t j);
+        Eigen::Vector3d curvatureForce(const size_t i, const size_t j);
+        Eigen::Vector3d adhesionForce(const size_t i, const size_t j, const BoundarySystem& boundary);
+
+        Eigen::Vector3d smoothingTerm(const size_t i, const size_t j);
 
         double cohesionWeight(const double r);
         double adhesionWeight(const double r);

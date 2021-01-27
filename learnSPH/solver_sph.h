@@ -14,10 +14,12 @@ class SolverSPH : public Solver {
     SolverSPH(System::FluidSystem system);
     ~SolverSPH();
     
-    void newRun(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos);
+    void newRun(std::string file, double milliseconds, std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr);
     void newSemiImplicitEulerStep(double deltaT);
 
     double integrationStep();
+    double newIntegrationStep();
+
     void run(std::string file, double milliseconds,
              std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr) override;
     
