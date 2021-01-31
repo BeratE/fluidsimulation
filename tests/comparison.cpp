@@ -196,8 +196,8 @@ TEST_CASE("BigCompare")
             
             SECTION("ArmadilloPBF_I") {
                 filename << "complex_armadillo_pbf_I";
-                iterations = 4;
-                viscosity = 0.1;
+                iterations = 3;
+                viscosity = 0.04;
                 smoothing = false;
             }
 

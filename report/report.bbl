@@ -1,0 +1,18 @@
+\begin{thebibliography}{1}
+
+\bibitem{ihmsen2014}
+M.~Ihmsen, J.~Orthmann, B.~Solenthaler, A.~Kolb, and M.~Teschner, ``{SPH Fluids
+  in Computer Graphics},'' in {\em Eurographics 2014 - State of the Art
+  Reports} (S.~Lefebvre and M.~Spagnuolo, eds.), The Eurographics Association,
+  2014.
+
+\bibitem{macklin2013}
+M.~Macklin and M.~M{\"u}ller, ``Position based fluids,'' {\em ACM Transactions
+  on Graphics (TOG)}, vol.~32, no.~4, pp.~1--12, 2013.
+
+\bibitem{pineda1988}
+J.~Pineda, ``A parallel algorithm for polygon rasterization,'' in {\em
+  Proceedings of the 15th annual conference on Computer graphics and
+  interactive techniques}, pp.~17--20, 1988.
+
+\end{thebibliography}
