@@ -27,6 +27,7 @@
    (LaTeX-add-labels
     "sec:introduction"
     "sec:methods"
+    "fig:systemuml"
     "fig:mesh"
     "eq:localtriangle"
     "fig:trianglesampling"

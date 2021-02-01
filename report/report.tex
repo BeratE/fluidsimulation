@@ -7,6 +7,7 @@
 \usepackage[margin=1.0in]{geometry}
 \usepackage{titlesec}
 \titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\bfseries}
 % Fonts
 %\usepackage{fontspec}
 %xs\setmainfont{Arial}
@@ -47,7 +48,7 @@
 ]
 
 
-\section*{Introduction} \label{sec:introduction}
+\section{Introduction} \label{sec:introduction}
 
 \epigraph{Reading maketh a full man; conference a ready man; and writing an exact man.}
 {\textit{Sir Francis Bacon}}
@@ -56,15 +57,27 @@
 % jargon
 % relevant reviews, papers, studies
 
-\section*{Methods} \label{sec:methods}
+\section{Methods} \label{sec:methods}
 
 In the following section we will give an overview of our implementation of a fluidsolver based on the SPH and PBF frameworks.
-We will take a look at the general structure of the implementation and discuss specific parts that are different from the given assignment.
+We will take a look at the general structure of the implementation and discuss specific points of interest that were done differently than in the given assignment.
 For a thorough discussion of the SPH and PBF framework we refer the reader to the review of SPH fluids by Ihmsen et al. \cite{ihmsen2014} and to the original paper about position based fluids by Macklin et al. \cite{macklin2013}.
 
+\subsection{Implementation}
 The implementation uses a C-style imperative approach with the exception of a few object oriented paradigms. Data encapsulation in the form of C++ classes is applied to ensure data consistency during computation. Basic inheritance is used to be able to reuse code for different parts of the program. This style of programming allows us to be flexible enough to incrementially implement the practical assignment tasks while sacrificing little to no performance due to design overload.  
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/system.pdf}
+    \caption{Schematic overview of the implementation.}
+    \label{fig:systemuml}
+\end{figure}
+  
+The implementation is divided into two broad categories, systems and solvers.
+What we define as a 'system', includes fluid- and boundaryparticles, their generalization as particlesystems and auxilary constructs concerning particles. These represent the creation, state and behaviour of fluid- and boundary particles.
+On the other hand, we have two seperate specific solvers for WCSPH fluids and PBF. They aggregate fluid- and particlesystems to model the progression of the given system. Figure \ref{fig:systemuml} gives a schematic UML diagram of the relation between the different parts of the implementation.
 
-The implementation is divided into three general categories. The solvers, the emitter and particlesystems and the category of auxilary functions. A particlesystem is a collection of particles which are represented by basic attributes, such as mass, density, position, velocity and the accumulated external forces on the particles. Since it is vital to keep all attributes of a particlesystem consistent during computation a particlesystem object is only allowed to be created by the emitter object. The emitter object is a singleton, which means that there is always one and only one single instance of the object during the runtime of the program. During runtime a particlesystem is present in two forms, either as fluid particles or as boundary particles. These subtypes posess attributes and methods responsible for the behaviour of fluid or boundary particles in a system. For example, boundary particles possess a seperate variable volume attribute and a method to compute the volume for each particle depending on the density, e.g. the number of boundary particles in close neighbourhood.
+
+A particlesystem is a collection of particles which are represented by basic attributes, such as mass, density, position, velocity and the accumulated external forces on the particles. Since it is vital to keep all attributes of a particlesystem consistent during computation a particlesystem object is only allowed to be created by the emitter object. The emitter object is a singleton, which means that there is always one and only one single instance of the object during the runtime of the program. During runtime a particlesystem is present in two forms, either as fluid particles or as boundary particles. These subtypes posess attributes and methods responsible for the behaviour of fluid or boundary particles in a system. For example, boundary particles possess a seperate variable volume attribute and a method to compute the volume for each particle depending on the density, e.g. the number of boundary particles in close neighbourhood.
 
 Boundary particles are used to realise the interaction between the fluid and rigid boundaries. As boundaries in a scene are usually represented by triangular mesh models, we create a boundary particlesystem by sampling each triangle of a given input mesh. To this end, it is reasonable to dissolve a higher resolution mesh into a low resolution mesh which still contains the shape information and use this low resoltion mesh for the simulation and keep the original high resolution mesh for rendering the final simulation. This will reduce the overall number of triangles and therefore the number of sampled particles.
 
@@ -89,7 +102,7 @@ To sample the particles on a triangle surface we perform a variation of the Pine
 \label{eq:localtriangle}
 \end{equation}
 
-Note that the projected point is in homogeneous two dimensional space, as we are only interested in sampling the surface of the triangle. Applying the pineda algorithm is now straight forward. We first enclose the triangle by a bounding box by determining the minimal and maximal coordinates in the projected space. We then go along the bounding box and check for each sample point if its inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}. We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Note that sample points that slightly touch the border are also taken to be in the surface of the triangle. This is achieved by allowing an offset of the particle radius and is used to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet. The oversampling is later compensated by recomputing the volume of each sample depending on the number of samples in its close neighbourhood.
+Note that the projected point is in homogeneous two dimensional space, as we are only interested in sampling the surface of the triangle. Applying the pineda algorithm is now straight forward. We first enclose the triangle by a bounding box by determining the minimal and maximal coordinates in the projected space. We then go along the bounding box and check for each sample point if its inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}. We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Sample points inside the triangle are shaded oqaue blue and sample points outside are shaded transparently. Note that sample points that slightly touch the border are also taken to be in the surface of the triangle. This is achieved by allowing an offset of the particle radius and is used to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet. The oversampling is later compensated by recomputing the volume of each sample depending on the number of samples in its close neighbourhood.
 
 \begin{figure}[ht]
     \centering
@@ -121,6 +134,7 @@ The boundary particle radius should optimally be the same as the fluid particle 
 
 \section*{Outlook}
 \label{sec:future}
+The WCSPH and PBF implementation as well as the surface reconstruction offers a high level of concurency in the form of data parallelism. This means, that there are many parts in the programm where sequentially processed data can be split into independant groups which can be processed in parallel.
 
 % what are the next steps?
 % what did we learn from this and how could we apply this for the future?
