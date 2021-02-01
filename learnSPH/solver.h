@@ -39,10 +39,6 @@ public:
     ~Solver();
 
     double timeStepCFL();
-    //double integrationStep() {}
-    virtual void
-    run(std::string file, double milliseconds,
-        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr) {}
 
     size_t addBoundary(const System::BoundarySystem &boundary);
     // Setter & Getter
@@ -58,11 +54,6 @@ public:
     void enableAdhesion(bool val) { m_adhesionEnable = val; }
 
 protected:        
-    void applyExternalForces();
-    void applyTensionForces();
-    void applyAdhesionForces();
-    void semiImplicitEulerStep(double deltaT);
-
     double m_snapShotMS = 20;
     double m_maxTimeStep_s = 0.002;
     double m_xsphSmoothing = 0.5;

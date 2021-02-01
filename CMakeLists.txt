@@ -56,7 +56,6 @@ add_subdirectory(learnSPH)
 add_subdirectory(surface)
 add_subdirectory(app)
 add_subdirectory(tests)
-add_subdirectory(tension)
 
 # Copy res folder
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_BINARY_DIR})

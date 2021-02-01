@@ -6,8 +6,7 @@ set(TARGET_NAME learnSPH)
 
 set(LIBRARIES 
   CompactNSearch
-  surface
-  tension)
+  surface)
 
 set(INCLUDE_DIRS
   PUBLIC
