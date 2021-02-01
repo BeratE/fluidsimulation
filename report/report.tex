@@ -1,31 +1,37 @@
 \documentclass[11pt, letterpaper, twocolumn]{article}
 
+% Input
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
-\usepackage{epigraph}
+% Geometry
 \usepackage[margin=1.0in]{geometry}
+\usepackage{titlesec}
+\titleformat*{\section}{\large\bfseries}
+% Fonts
 %\usepackage{fontspec}
 %xs\setmainfont{Arial}
-\usepackage{fancyhdr}
-\setlength{\headheight}{14.5pt}
+% Figures and Symbols
 \usepackage{graphicx}
 \usepackage{caption}
 \captionsetup[figure]{font=small}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage[]{siunitx}
-\usepackage{titlesec}
-\titleformat*{\section}{\large\bfseries}
+% Misc
+\usepackage{epigraph}
+% Fancy Header
+\usepackage{fancyhdr}
+\setlength{\headheight}{14.5pt}
 \pagestyle{fancy}
 \fancyhf{}
-%\renewcommand{\headrulewidth}{0pt}
+% \renewcommand{\headrulewidth}{0pt}
+
 \lhead{Fluid Simulation in Computergraphics} 
 \rhead{Group 4: Ertural, Ledwon} 
 \rfoot{\thepage}
 
 
 \begin{document}
-
 % Title, Abstract
 \twocolumn[
 \begin{@twocolumnfalse}
@@ -70,14 +76,29 @@ Boundary particles are used to realise the interaction between the fluid and rig
 \end{figure}
 
 
-To sample the particles on a triangle surface we perform a variation of the Pineda algorithm \cite{pineda1988} in the local coordinate system of the triangle surface. Given a triangle specified by the three vertex points \(a, b, c \in \mathbb{R}^3\), we construct the orthonormal base vectors \(u,v,n \in \mathbb{R}^3\) defining the triangle surface. 
+To sample the particles on a triangle surface we perform a variation of the Pineda algorithm \cite{pineda1988} in the local coordinate system of the triangle surface. Given a triangle specified by the three vertex points \(a, b, c \in \mathbb{R}^3\), we construct the orthonormal base vectors \(u,v,n \in \mathbb{R}^3\) defining the triangle surface. The basis transform that will yield the local triangle coordiantes \(p \in \mathbb{R^2}\) for a point in global space \(x \in \mathbb{R}^3\) is given in equation \ref{eq:localtriangle}.
+
+\begin{equation}
+  p = 
+  \begin{pmatrix}
+    u_x & u_v & u_z & u^T a\\
+    v_x & v_v & v_z & v^T a\\
+    0 & 0 & 0 & 1 \\
+  \end{pmatrix}
+  \cdot x 
+\label{eq:localtriangle}
+\end{equation}
+
+Note that the projected point is in homogeneous two dimensional space, as we are only interested in sampling the surface of the triangle. Applying the pineda algorithm is now straight forward. We first enclose the triangle by a bounding box by determining the minimal and maximal coordinates in the projected space. We then go along the bounding box and check for each sample point if its inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}. We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Note that sample points that slightly touch the border are also taken to be in the surface of the triangle. This is achieved by allowing an offset of the particle radius and is used to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet. The oversampling is later compensated by recomputing the volume of each sample depending on the number of samples in its close neighbourhood.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{images/triangle.pdf}
     \caption{Hexagonal sampling using pineda algorithm in local triangle space.}
-    \label{fig:triangle}
+    \label{fig:trianglesampling}
 \end{figure}
+
+Given the sample points computed in the two dimensional surface plane, we transform the points back into three dimensional global space by multiplying them by the inverse of the matrix given in equation \ref{eq:localtriangle}. Since the matrix is orthonormal its inverse is given by simply transposing the matrix.
 
 
 The boundary particle radius should optimally be the same as the fluid particle radius. This is due to the timestep being determined by the Courant-Friedrich-Levy (CFL) condition, e.g. \( \Delta t \leq \lambda \frac{h}{v^{max}}\) which dictates, that a particle moves a maximum distance of its own radius \(h\) per time-stamp \(\Delta t \). If the boundary particle radius is much smaller. The fluid particles may tunnel through the boundary if the timestep is too high. If the boundaryparticle radius is too high, the boundary shape information is lost and the interaction therefore incorrect. The constant factor \(\lambda\) in the CFL is set around 0.4 in all further simulations.
