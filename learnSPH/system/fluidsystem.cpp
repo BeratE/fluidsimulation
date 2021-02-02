@@ -141,7 +141,7 @@ Eigen::Vector3d FluidSystem::curvatureForce(const size_t i, const size_t j) {
 Eigen::Vector3d FluidSystem::adhesionForce(const size_t i, const size_t k, const BoundarySystem& boundary) {
     const Eigen::Vector3d diff = m_positions[i] - boundary.getParticlePos(k);
     const double diffNorm = diff.norm();
-    return -boundary.getBeta() * m_particleMass * m_particleMass * adhesionWeight(diffNorm)* diff.normalized();
+    return -boundary.getBeta() * m_particleMass * boundary.getParticleMass(k) * adhesionWeight(diffNorm)* diff.normalized();
 }
 
 Eigen::Vector3d FluidSystem::smoothingTerm(const size_t i, const size_t j) {
