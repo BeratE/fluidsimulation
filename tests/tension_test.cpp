@@ -20,7 +20,7 @@ TEST_CASE("Simple surface tension, no gravity cube") {
         FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
                                                          Eigen::Vector3d(1, 1, 1),
                                                          particleDiameter);
-        particles.setGamma(0.05);
+        particles.setGamma(0.01);
         
         Solver *solver;
         std::stringstream filename;
@@ -61,7 +61,7 @@ TEST_CASE("Simple surface tension, no gravity cube") {
         solver->enableSmoothing(true);
         solver->enableAdhesion(false);
 
-        solver->newRun(filename.str(), 2000);       
+        solver->run(filename.str(), 2000);       
     }        
 }
 
@@ -126,7 +126,7 @@ TEST_CASE("Adhesion", "[ahesion]") {
         solver->enableSmoothing(true);
         solver->enableTension(false);
 
-        solver->newRun(filename.str(), 2000);       
+        solver->run(filename.str(), 2000);       
     }
 }
 
@@ -196,13 +196,13 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
             solver.enableTension(false);
 
             SECTION("OFF") {
-                solver.newRun("sph_funnel_no_tension_no_adhesion", 3000);
+                solver.run("sph_funnel_no_tension_no_adhesion", 3000);
             }
 
             SECTION("BETA250") {
                 solver.enableAdhesion(true);
                 solver.enableTension(true);
-                solver.newRun("sph_funnel_1_beta", 3000);
+                solver.run("sph_funnel_1_beta", 3000);
             }
         }
 
@@ -224,13 +224,13 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
             solver.setNumIterations(3);
 
             SECTION("OFF") {
-                solver.newRun("pbf_funnel_no_tension_no_adhesion", 3000);
+                solver.run("pbf_funnel_no_tension_no_adhesion", 3000);
             }
 
             SECTION("BETA250") {
                 solver.enableAdhesion(true);
                 solver.enableTension(true);
-                solver.newRun("pbf_funnel_1_beta", 3000);
+                solver.run("pbf_funnel_1_beta", 3000);
             }
         }
     }
@@ -309,13 +309,13 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
         solver.enableTension(false);
 
         SECTION("SPH_tension_complex_no_tension") {
-            solver.newRun("sph_tension_complex_no_tension", 3000);
+            solver.run("sph_tension_complex_no_tension", 3000);
         }
 
         SECTION("SPH_tension_complex_no_tension") {
             solver.enableAdhesion(true);
             solver.enableTension(true);
-            solver.newRun("sph_tension_complex", 3000);
+            solver.run("sph_tension_complex", 3000);
         }
     }
 
@@ -339,13 +339,13 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
         solver.setNumIterations(3);
 
         SECTION("PBF_tension_complex") {
-            solver.newRun("pbf_tension_complex_no_tension", 3000);
+            solver.run("pbf_tension_complex_no_tension", 3000);
         }
 
         SECTION("SPH_tension_complex_no_tension") {
             solver.enableAdhesion(true);
             solver.enableTension(true);
-            solver.newRun("pbf_tension_complex", 3000);
+            solver.run("pbf_tension_complex", 3000);
         }
     }
 }

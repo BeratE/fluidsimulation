@@ -38,8 +38,6 @@ void ParticleSystem::addParticleVel(size_t i, Vector3d vel)
     m_velocities[i] += vel;
 }
 
-
-
 void ParticleSystem::updateNormalizedDensities() {
     CompactNSearch::PointSet const ps = mp_nsearch->point_set(m_pointSetID);
     for (int fpIdx = 0; fpIdx < ps.n_points(); fpIdx++) {

@@ -44,4 +44,108 @@ size_t Solver::addBoundary(const BoundarySystem &boundary)
 }
 
 
+void Solver::run(
+    std::string file, double milliseconds,
+    std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos) {
 
+    // Store information regarding boundaries
+    int boundaryIdx = 0;
+    std::stringstream filename;
+    for (BoundarySystem& boundary : m_boundaries) {
+        // Write boundary particles to file
+        filename.str(std::string());
+        filename << SOURCE_DIR << "/res/simulation/"
+            << file << "_boundary" << boundaryIdx << ".vtk";
+        save_particles_to_vtk(filename.str(),
+                              boundary.getPositions(), boundary.getVolumes());
+        std::cout << "save results to " << filename.str() << std::endl;
+
+        boundaryIdx++;
+    }
+
+    // Required for interpolation between simulation steps 
+    std::vector<Eigen::Vector3d> previousPos(m_system.getPositions());
+
+    // Controll variables
+    double runTime_s = 0.0;
+    size_t iteration = 0;
+    size_t snapShotNr = 0;
+    double prevTime_s = 0.0;
+    double nextSnapShotTime_s = 0.0;
+    const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
+        * m_snapShotMS * pow(10, -3);
+
+    while (runTime_s <= END_TIME_s && ++iteration) {
+        std::cout << iteration << " " << runTime_s << std::endl;
+        double deltaT_s = integrationStep(previousPos);
+        runTime_s += deltaT_s;
+
+        if (runTime_s > nextSnapShotTime_s) {
+            filename.str(std::string());
+            filename << SOURCE_DIR << "/res/simulation/" << file << snapShotNr << ".vtk";
+            std::vector<Eigen::Vector3d> interpolPos
+                = interpolateVector<Eigen::Vector3d>(previousPos,
+                    m_system.getPositions(),
+                    prevTime_s,
+                    runTime_s,
+                    nextSnapShotTime_s);
+            save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
+
+            nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS * pow(10, -3);
+
+            std::cout << "save results to " << filename.str() << std::endl;
+        }
+        prevTime_s = runTime_s;
+        previousPos = m_system.getPositions();
+    }
+}
+
+void Solver::semiImplicitEulerStep(double deltaT) {
+    const size_t id = m_system.getPointSetID();
+    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
+    
+    ////////////////////////////////////////////////////////////////////////
+    // Update Velocities
+    ////////////////////////////////////////////////////////////////////////
+    #pragma omp parallel for schedule(static) 
+    for (int i = 0; i < m_system.getSize(); i++) {
+        m_system.addToParticleVel(i, deltaT * m_system.getParticleAcc(i));
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Update Positions
+    ////////////////////////////////////////////////////////////////////////    
+    if (m_smoothingEnable) {
+        std::vector<Eigen::Vector3d> smoothingTerms(m_system.getSize(), Eigen::Vector3d::Zero());
+        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
+                const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
+                smoothingTerms[i] += m_system.smoothingTerm(i, j);
+            }
+        }
+        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            m_system.addToParticlePos(i, deltaT * (m_system.getParticleVel(i)
+                                                   + m_xsphSmoothing * smoothingTerms[i]));
+        }
+    }
+    else {
+        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            m_system.addToParticlePos(i, deltaT * m_system.getParticleVel(i));
+        }
+    }
+}
+
+void Solver::initAccelerations() {
+    // If gravity is enabled, we can add gravitational acceleration to every particle
+    for (int i = 0; i < m_system.getSize(); i++) {
+        Eigen::Vector3d acc(Eigen::Vector3d::Zero());
+        if (m_gravityEnable) {
+            acc += VEC_GRAVITY;
+        }
+
+        m_system.setParticleAcc(i, acc);
+    }
+}

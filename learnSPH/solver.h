@@ -38,13 +38,18 @@ public:
     Solver(System::FluidSystem system);
     ~Solver();
 
-    virtual void newRun(
+    void run(
         std::string file, double milliseconds,
-        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr) {}
+        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr);
+
+    virtual double integrationStep(const std::vector<Eigen::Vector3d> &previousPos) {return 0;}
+    void semiImplicitEulerStep(double deltaT);
+    void initAccelerations();
 
     double timeStepCFL();
 
     size_t addBoundary(const System::BoundarySystem &boundary);
+    
     // Setter & Getter
     const System::FluidSystem &getSystem() const { return m_system; }
 
