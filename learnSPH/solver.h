@@ -38,12 +38,17 @@ public:
     Solver(System::FluidSystem system);
     ~Solver();
 
+    virtual void newRun(
+        std::string file, double milliseconds,
+        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr) {}
+
     double timeStepCFL();
 
     size_t addBoundary(const System::BoundarySystem &boundary);
     // Setter & Getter
     const System::FluidSystem &getSystem() const { return m_system; }
 
+    void setMaxTimeStepSeconds(double val) { m_maxTimeStep_s = val; }
     void setParamSmoothing(double val) { m_xsphSmoothing = val; }
     void setSnapShotAfterMS(double ms) { m_snapShotMS = ms; }
     void setFluidViscosity(double val) { m_system.setViscosity(val); }

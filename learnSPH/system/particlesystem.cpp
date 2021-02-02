@@ -8,7 +8,6 @@ ParticleSystem::ParticleSystem(double radius, double density, size_t size, bool 
     : m_particleRadius(radius), m_restDensity(density)
 {
     m_smoothingLength = 2 * m_particleRadius * Kernel::Parameter::TUNING;
-    std::cout << 2 * m_smoothingLength;
     m_kernelLookup.generateTable(m_smoothingLength, 1000);
     m_particleMass = pow(2 * m_particleRadius, 3) * m_restDensity;
     

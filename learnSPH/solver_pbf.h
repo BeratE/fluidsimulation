@@ -14,8 +14,10 @@ class SolverPBF : public Solver {
     SolverPBF(System::FluidSystem system);
     ~SolverPBF();
 
-    void newRun(std::string file, double milliseconds,
-        std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr);
+    void newRun(
+        std::string file, double milliseconds,
+        std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos = nullptr) override;
+    
     double newIntegrationStep(std::vector<Eigen::Vector3d>& previousPos);
     void newSemiImplicitEulerStep(const double deltaT);
     void updateAccFluidContribution(std::vector<Eigen::Vector3d>& accelerations,
