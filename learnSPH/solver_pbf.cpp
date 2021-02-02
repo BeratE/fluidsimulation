@@ -96,8 +96,7 @@ double SolverPBF::newIntegrationStep(std::vector<Eigen::Vector3d>& previousPos) 
     #pragma omp parallel for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         m_system.updateVelocity(i,(m_system.getParticlePos(i) - previousPos[i]) / deltaT);
-    }
-        
+    }        
 
     return deltaT;
 }

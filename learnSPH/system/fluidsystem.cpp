@@ -12,9 +12,9 @@ using namespace CompactNSearch;
 FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
     : ParticleSystem(radius, density, size, fill)
 {   
-    m_cohesionWeightLookup.generateTable(2 * m_smoothingLength, 1000);
-    m_adhesionWeightLookup.generateTable(2 * m_smoothingLength, 1000);
     m_c = 2 * m_smoothingLength;
+    m_cohesionWeightLookup.generateTable(m_c, 1000);
+    m_adhesionWeightLookup.generateTable(m_c, 1000);
     m_densities.resize(size);
     m_pressures.resize(size);
     m_normalizedDensities.resize(size);

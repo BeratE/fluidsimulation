@@ -56,10 +56,13 @@ double CubicSpline::gradCubicSpline(const double q)
     return alpha * value;
 }
 
+
+
+
 double Cohesion::weight(const double r, const double c) {
     const double alpha = 32.0 / (M_PI * c * c * c * c * c * c * c * c * c);
     if (0.0 <= r && r <= c / 2.0) {
-        return alpha * 2 * (c - r) * (c - r) * (c - r) * r * r * r - (c * c * c * c * c * c) / 64.0;
+        return (alpha * 2 * (c - r) * (c - r) * (c - r) * r * r * r) - ((c * c * c * c * c * c) / 64.0);
     }
     else if (c / 2.0 < r && r <= c) {
         return alpha * (c - r) * (c - r) * (c - r) * r * r * r;
@@ -127,6 +130,7 @@ Eigen::Vector3d CubicSpline::Table::gradWeight(Eigen::Vector3d x_i,
     size_t i = (size_t)floor(d/m_stepSize);
     return m_gradMagnitudes[i] * posDiff.normalized();
 }
+
 
 Cohesion::Table::Table(const double c, size_t numBins)
 {
