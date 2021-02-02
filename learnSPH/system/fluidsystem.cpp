@@ -43,7 +43,7 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_pointSetID);
 
     // iterate fluid particles
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < fluidPS.n_points(); i++) {
         const Eigen::Vector3d &fpPos = m_positions[i];
 
@@ -76,7 +76,7 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
 }
 
 void FluidSystem::updateNormals() {
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < getSize(); i++) {
         m_normals[i] = normal(i);
     }

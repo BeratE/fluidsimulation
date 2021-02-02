@@ -5,6 +5,7 @@
 #include "learnSPH/solver_pbf.h"
 #include "learnSPH/system/fluidsystem.h"
 #include "learnSPH/system/emitter.h"
+#include <omp.h>
 
 using namespace learnSPH;
 using namespace learnSPH::System;
@@ -73,6 +74,9 @@ TEST_CASE("PBF Solver with Surface Tension", "[pbf_tension]") {
 }
 
 TEST_CASE("Tension on funnel", "[tension_funnel]") {
+    omp_set_dynamic(0);
+    omp_set_num_threads(1);
+    
 	std::cout << "Funnel with tension and adhesion" << std::endl;
 
 	const double particleDiameter = 0.05;

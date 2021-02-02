@@ -93,7 +93,7 @@ double SolverPBF::newIntegrationStep(std::vector<Eigen::Vector3d>& previousPos) 
     }
 
     // Update Velocities
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         m_system.updateVelocity(i,(m_system.getParticlePos(i) - previousPos[i]) / deltaT);
     }
@@ -131,7 +131,7 @@ void SolverPBF::newSemiImplicitEulerStep(const double deltaT) {
             accelerations.push_back(Eigen::Vector3d::Zero());
         }
     }
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < fluidPS.n_points(); i++) {
         // Iterate over fluid neighbors and add contributions to forces 
         for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
@@ -152,7 +152,7 @@ void SolverPBF::newSemiImplicitEulerStep(const double deltaT) {
     ////////////////////////////////////////////////////////////////////////
     // Update Velocities
     ////////////////////////////////////////////////////////////////////////
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         m_system.updateVelocity(i, m_system.getParticleVel(i) + deltaT * accelerations[i]);
     }
@@ -160,7 +160,6 @@ void SolverPBF::newSemiImplicitEulerStep(const double deltaT) {
     ////////////////////////////////////////////////////////////////////////
     // Update Positions
     ////////////////////////////////////////////////////////////////////////
-    
     if (m_smoothingEnable) {
         std::vector<Eigen::Vector3d> smoothingTerms(m_system.getSize(), Eigen::Vector3d::Zero());
         #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
@@ -222,7 +221,7 @@ void SolverPBF::updatePositionsWithConstraints() {
     // Compute constraint lambdas
     std::vector<double> lambdas(m_system.getSize(), 0.0);
     {
-        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+        #pragma omp parallel for schedule(static) 
         for (int idx = 0; idx < high_density_particles.size(); idx++) {
             const size_t i = high_density_particles[idx];
             const Eigen::Vector3d pos_i = m_system.getParticlePos(i);
@@ -257,7 +256,7 @@ void SolverPBF::updatePositionsWithConstraints() {
     // Calculate deltaX
     std::vector<Eigen::Vector3d> deltaX(m_system.getSize(), Eigen::Vector3d::Zero());
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < fluidPS.n_points(); i++) {
         // Fluid neighbors
         Eigen::Vector3d fluidContrib = Eigen::Vector3d::Zero();
@@ -277,7 +276,7 @@ void SolverPBF::updatePositionsWithConstraints() {
     }
 
     // Update positions
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         m_system.addParticlePos(i, deltaX[i]);
     }

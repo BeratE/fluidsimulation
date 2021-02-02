@@ -9,9 +9,10 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/cmake/config.h.in"
   "${PROJECT_SOURCE_DIR}/common/inc/config.h")
 
-### CUDA
 option(USE_CUDA "Use CUDA" OFF)
 
+
+### CUDA
 if (USE_CUDA)
   enable_language(CUDA)
   add_definitions(-DUSE_CUDA)
@@ -36,13 +37,15 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") # Parallel compilation in Visual Studio
 endif()
 
-# OpenMP
 find_package(OpenMP)
 if (OPENMP_FOUND)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
+else () 
+   # Disable warnings for all the unknown OpenMP pragmas. 
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas") 
+endif () 
 
 
 # Dependencies

@@ -101,7 +101,7 @@ void SolverSPH::newSemiImplicitEulerStep(double deltaT)
             accelerations.push_back(Eigen::Vector3d::Zero());
         }
     }
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < fluidPS.n_points(); i++) {
         // Contributions of pair (i, i) - NOT NECESSARY FOR VISCOSITY AND TENSION
         accelerations[i] -= m_system.pressureAccFluid(i, i,
@@ -127,7 +127,7 @@ void SolverSPH::newSemiImplicitEulerStep(double deltaT)
     ////////////////////////////////////////////////////////////////////////
     // Update Velocities
     ////////////////////////////////////////////////////////////////////////
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp parallel for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         m_system.updateVelocity(i, m_system.getParticleVel(i) + deltaT * accelerations[i]);
     }
@@ -135,7 +135,6 @@ void SolverSPH::newSemiImplicitEulerStep(double deltaT)
     ////////////////////////////////////////////////////////////////////////
     // Update Positions
     ////////////////////////////////////////////////////////////////////////
-
     if (m_smoothingEnable) {
         std::vector<Eigen::Vector3d> smoothingTerms(m_system.getSize(), Eigen::Vector3d::Zero());
         #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
