@@ -14,6 +14,7 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
 {   
     m_cohesionWeightLookup.generateTable(2 * m_smoothingLength, 1000);
     m_adhesionWeightLookup.generateTable(2 * m_smoothingLength, 1000);
+    m_c = 2 * m_smoothingLength;
     m_densities.resize(size);
     m_pressures.resize(size);
     m_normalizedDensities.resize(size);
@@ -140,7 +141,7 @@ Eigen::Vector3d FluidSystem::curvatureForce(const size_t i, const size_t j) {
 Eigen::Vector3d FluidSystem::adhesionForce(const size_t i, const size_t k, const BoundarySystem& boundary) {
     const Eigen::Vector3d diff = m_positions[i] - boundary.getParticlePos(k);
     const double diffNorm = diff.norm();
-    return -boundary.getBeta() * m_particleMass * m_particleMass * m_adhesionWeightLookup.weight(diffNorm)* diff.normalized();
+    return -boundary.getBeta() * m_particleMass * m_particleMass * adhesionWeight(diffNorm)* diff.normalized();
 }
 
 Eigen::Vector3d FluidSystem::smoothingTerm(const size_t i, const size_t j) {

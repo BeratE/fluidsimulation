@@ -46,7 +46,6 @@ namespace learnSPH::System {
         double getC() const { return m_c; }
         double getGamma() const { return m_gamma; }
 
-        void setC(const double c) { m_c = c; }
         void setGamma(const double gamma) { m_gamma = gamma; }
       private:            
         Eigen::Vector3d normal(const size_t i);

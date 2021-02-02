@@ -160,18 +160,24 @@ void SolverPBF::newSemiImplicitEulerStep(const double deltaT) {
     ////////////////////////////////////////////////////////////////////////
     // Update Positions
     ////////////////////////////////////////////////////////////////////////
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
-    for (int i = 0; i < fluidPS.n_points(); i++) {
-        if (m_smoothingEnable) {
-            // Calculate smoothingTerm from neighborhood
-            Eigen::Vector3d smoothingTerm = Eigen::Vector3d::Zero();
+    
+    if (m_smoothingEnable) {
+        std::vector<Eigen::Vector3d> smoothingTerms(m_system.getSize(), Eigen::Vector3d::Zero());
+        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+        for (int i = 0; i < fluidPS.n_points(); i++) {
             for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
                 const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
-                smoothingTerm += m_system.smoothingTerm(i, j);
+                smoothingTerms[i] += m_system.smoothingTerm(i, j);
             }
-            m_system.updatePosition(i, m_system.getParticlePos(i) + deltaT * (m_system.getParticleVel(i) + m_xsphSmoothing * smoothingTerm));
         }
-        else {
+        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            m_system.updatePosition(i, m_system.getParticlePos(i) + deltaT * (m_system.getParticleVel(i) + m_xsphSmoothing * smoothingTerms[i]));
+        }
+    }
+    else {
+        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+        for (int i = 0; i < fluidPS.n_points(); i++) {
             m_system.updatePosition(i, m_system.getParticlePos(i) + deltaT * m_system.getParticleVel(i));
         }
     }

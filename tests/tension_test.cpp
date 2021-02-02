@@ -18,7 +18,6 @@ TEST_CASE("SPH Solver with Surface Tension", "[sph_tension]") {
 		FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
 														 Eigen::Vector3d(1, 1, 1),
 														 particleDiameter);
-		particles.setC(0.281);
 		SolverSPH solver(particles);
 		solver.setSnapShotAfterMS(40);
 		solver.setParamStiffness(3000);
@@ -82,8 +81,7 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
 	FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
 		Eigen::Vector3d(1, 1, 1),
 		particleDiameter);
-	particles.setC(0.15); // Because particleDiameter went from 0.1 to 0.05
-	particles.setGamma(0.5);
+	particles.setGamma(0.2);
 
 	BoundarySystem plane1 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(-1, 0, -1),
 		Eigen::Vector3d(0.3, -1, 0.3),
@@ -141,21 +139,7 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
 		SECTION("BETA250") {
 			solver.enableAdhesion(true);
 			solver.enableTension(true);
-			plane1.setBeta(250);
-			plane2.setBeta(250);
-			plane3.setBeta(250);
-			plane4.setBeta(250);
-			solver.newRun("sph_funnel_250_beta", 3000);
-		}
-
-		SECTION("BETA500") {
-			solver.enableAdhesion(true);
-			solver.enableTension(true);
-			plane1.setBeta(500);
-			plane2.setBeta(500);
-			plane3.setBeta(500);
-			plane4.setBeta(500);
-			solver.newRun("sph_funnel_500_beta", 3000);
+			solver.newRun("sph_funnel_1_beta", 3000);
 		}
 	}
 
@@ -183,21 +167,7 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
 		SECTION("BETA250") {
 			solver.enableAdhesion(true);
 			solver.enableTension(true);
-			plane1.setBeta(250);
-			plane2.setBeta(250);
-			plane3.setBeta(250);
-			plane4.setBeta(250);
-			solver.newRun("pbf_funnel", 3000);
-		}
-
-		SECTION("BETA500") {
-			solver.enableAdhesion(true);
-			solver.enableTension(true);
-			plane1.setBeta(500);
-			plane2.setBeta(500);
-			plane3.setBeta(500);
-			plane4.setBeta(500);
-			solver.newRun("pbf_funnel", 3000);
+			solver.newRun("pbf_funnel_1_beta", 3000);
 		}
 	}
 
@@ -212,7 +182,7 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
 	FluidSystem particles = Emitter().sampleFluidBox( Eigen::Vector3d(0.1, 1.1, 1.9),//Eigen::Vector3d(0.05, 1.05, 1.95),
 		Eigen::Vector3d(1.9, 1.9, 0.1),
 		particleDiameter);
-	particles.setC(0.15);
+	particles.setGamma(0.2);
 
 	BoundarySystem bigBoundary = Emitter().sampleBoundaryHollowBox(Eigen::Vector3d(0.0, 0.0, 0.0),
 		Eigen::Vector3d(4.0, 2.0, 2.0),
@@ -282,11 +252,6 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
 		SECTION("SPH_tension_complex_no_tension") {
 			solver.enableAdhesion(true);
 			solver.enableTension(true);
-			bigBoundary.setBeta(500);
-			plane1.setBeta(500);
-			plane2.setBeta(500);
-			plane3.setBeta(500);
-			plane4.setBeta(500);
 			solver.newRun("sph_tension_complex", 3000);
 		}
 	}
@@ -317,11 +282,6 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
 		SECTION("SPH_tension_complex_no_tension") {
 			solver.enableAdhesion(true);
 			solver.enableTension(true);
-			bigBoundary.setBeta(500);
-			plane1.setBeta(500);
-			plane2.setBeta(500);
-			plane3.setBeta(500);
-			plane4.setBeta(500);
 			solver.newRun("pbf_tension_complex", 3000);
 		}
 	}
