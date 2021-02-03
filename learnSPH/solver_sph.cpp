@@ -51,7 +51,7 @@ void SolverSPH::updateAccelerations(double deltaT)
     static std::vector<double> ratios(m_system.getSize());
     
     #pragma omp for schedule(static)
-    for (size_t i = 0; i < m_system.getSize(); i++) {
+    for (int i = 0; i < m_system.getSize(); i++) {
         ratios[i] = (m_system.getParticlePressure(i)
                                       / (m_system.getParticleDensity(i)
                                          * m_system.getParticleDensity(i)));
