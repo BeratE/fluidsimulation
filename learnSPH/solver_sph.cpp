@@ -18,23 +18,23 @@ SolverSPH::~SolverSPH()
 {
 }
 
-double SolverSPH::integrationStep(const std::vector<Eigen::Vector3d>& previousPos)
-{
-    const double deltaT = timeStepCFL();
+void SolverSPH::integrationStep(double deltaT,
+                                const std::vector<Eigen::Vector3d>& previousPos)
+{   
+    mp_nsearch->find_neighbors();    
     
-    mp_nsearch->find_neighbors();
-    
-    // preparations for the calculations in the semiImplicit Euler integration
-    m_system.updateDensities(m_boundaries);
-    m_system.updatePressures(m_stiffness);
-    if (m_tensionEnable) {
-        m_system.updateNormals();
-    }
+    #pragma omp parallel default(none), firstprivate(deltaT)
+    {
+        // preparations for the calculations in the semiImplicit Euler integration
+        m_system.updateDensities(m_boundaries);
+        m_system.updatePressures(m_stiffness);
+        if (m_tensionEnable) {
+          m_system.updateNormals();
+        }
 
-    updateAccelerations(deltaT);
-    semiImplicitEulerStep(deltaT);
-
-    return deltaT;
+        updateAccelerations(deltaT);
+        semiImplicitEulerStep(deltaT);
+    }    
 }
 
 
@@ -47,15 +47,17 @@ void SolverSPH::updateAccelerations(double deltaT)
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
 
     // Used in calculation of pressureAccelerations
-    std::vector<double> pressureDensityRatios;
+    std::vector<double> pressureDensityRatios(m_system.getSize());
+
+    #pragma omp for schedule(static)
     for (size_t i = 0; i < m_system.getSize(); i++) {
-        pressureDensityRatios.push_back(m_system.getParticlePressure(i)
-                                        / (m_system.getParticleDensity(i)
-                                           * m_system.getParticleDensity(i)));
+        pressureDensityRatios[i] = (m_system.getParticlePressure(i)
+                                    / (m_system.getParticleDensity(i)
+                                       * m_system.getParticleDensity(i)));
     }
     
-    #pragma omp parallel for schedule(static) 
-    for (int i = 0; i < fluidPS.n_points(); i++) {
+    #pragma omp for schedule(static) 
+    for (int i = 0; i < m_system.getSize(); i++) {
         // Contributions of pair (i, i) - NOT NECESSARY FOR VISCOSITY AND TENSION
         m_system.addToParticleAcc(i, -m_system.pressureAccFluid(i, i,
                                                                 pressureDensityRatios[i],

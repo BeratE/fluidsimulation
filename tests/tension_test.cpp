@@ -13,7 +13,7 @@ using namespace learnSPH::System;
 TEST_CASE("Simple surface tension, no gravity cube") {
     SECTION("Tension") {
         // omp_set_dynamic(0);
-        // omp_set_num_threads(1);
+        // omp_set_num_threads(1);        
         
         const double particleDiameter = 0.08;
 
@@ -24,7 +24,7 @@ TEST_CASE("Simple surface tension, no gravity cube") {
         
         Solver *solver;
         std::stringstream filename;
-        filename << "tension";
+        filename << SOURCE_DIR << "/res/simulation/" << "tension";
         
         SECTION("SPH") {
             solver = new SolverSPH(particles);
@@ -61,14 +61,22 @@ TEST_CASE("Simple surface tension, no gravity cube") {
         solver->enableSmoothing(true);
         solver->enableAdhesion(false);
 
-        solver->run(filename.str(), 3000);       
+        double startTime = omp_get_wtime();
+        
+        solver->run(filename.str(), 3000);
+
+        double endTime = omp_get_wtime();
+
+        std::cout << "Runtime: " << endTime-startTime << std::endl;
     }        
 }
 
 
 TEST_CASE("Adhesion", "[ahesion]") {
     SECTION("Adhesion") {
-        const double particleDiameter = 0.08;
+        double startTime = omp_get_wtime();
+        
+        const double particleDiameter = 0.1;
 
         FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.75, 1.5, -.75),
                                                          Eigen::Vector3d( .75, 3.5,  .75),
@@ -85,7 +93,7 @@ TEST_CASE("Adhesion", "[ahesion]") {
         
         Solver *solver;
         std::stringstream filename;
-        filename << "adhesion";
+        filename << SOURCE_DIR << "/res/simulation/" << "adhesion";
         
         SECTION("SPH") {
             solver = new SolverSPH(particles);
@@ -126,7 +134,11 @@ TEST_CASE("Adhesion", "[ahesion]") {
         solver->enableSmoothing(true);
         solver->enableTension(false);
 
-        solver->run(filename.str(), 2000);       
+        solver->run(filename.str(), 2000);
+
+        double endTime = omp_get_wtime();
+
+        std::cout << "Runtime: " << endTime-startTime << std::endl;
     }
 }
 

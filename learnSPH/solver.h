@@ -36,17 +36,11 @@ namespace learnSPH {
 class Solver {
 public:
     Solver(System::FluidSystem system);
-    ~Solver();
-
-    // Specific solvers will overwrite this function. Overhead is minimal.
-    virtual double integrationStep(const std::vector<Eigen::Vector3d> &previousPos) {return 0;}
+    ~Solver();    
     
     void run(
         std::string file, double milliseconds,
-        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr);
-    
-    void semiImplicitEulerStep(double deltaT);
-    void initAccelerations();
+        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr);        
 
     double timeStepCFL();
 
@@ -65,7 +59,13 @@ public:
     void enableTension(bool val) { m_tensionEnable = val; }
     void enableAdhesion(bool val) { m_adhesionEnable = val; }
 
-protected:        
+protected:
+    // Specific solvers will overwrite this function. Overhead is minimal.
+    virtual void integrationStep(double deltaT,
+                                 const std::vector<Eigen::Vector3d> &previousPos) {}
+    void semiImplicitEulerStep(double deltaT);
+    void initAccelerations();
+    
     double m_snapShotMS = 20;
     double m_maxTimeStep_s = 0.002;
     double m_xsphSmoothing = 0.5;

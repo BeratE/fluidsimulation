@@ -19,9 +19,8 @@ SolverPBF::~SolverPBF()
 {
 }
 
-double SolverPBF::integrationStep(const std::vector<Eigen::Vector3d>& previousPos) {
-    const double deltaT = timeStepCFL();
-
+void SolverPBF::integrationStep(double deltaT,
+                                  const std::vector<Eigen::Vector3d>& previousPos) {
     mp_nsearch->find_neighbors();
 
     // preparations for the calculations in the semiImplicit Euler integration
@@ -45,8 +44,6 @@ double SolverPBF::integrationStep(const std::vector<Eigen::Vector3d>& previousPo
     for (int i = 0; i < m_system.getSize(); i++) {
         m_system.setParticleVel(i, (m_system.getParticlePos(i) - previousPos[i]) / deltaT);
     }        
-
-    return deltaT;
 }
 
 void SolverPBF::updateAccelerations(const double deltaT)

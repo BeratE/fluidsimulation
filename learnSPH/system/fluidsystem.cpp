@@ -33,7 +33,7 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
 
 void FluidSystem::updatePressures(double stiffness)
 {
-    #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+    #pragma omp for schedule(static)
     for (int i = 0; i < getSize(); i++) {
         m_pressures[i] = std::max(0.0, stiffness * (m_densities[i] - m_restDensity));
     }
@@ -45,7 +45,7 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_pointSetID);
 
     // iterate fluid particles
-    #pragma omp parallel for schedule(static) 
+    #pragma omp for schedule(static) 
     for (int i = 0; i < fluidPS.n_points(); i++) {
         const Eigen::Vector3d &fpPos = m_positions[i];
 
@@ -74,24 +74,25 @@ void FluidSystem::updateDensities(const std::vector<BoundarySystem> &boundaries)
         }
 
         m_densities[i] = fluidDensity + boundaryDensity;
-    }  
+    }
 }
 
 void FluidSystem::updateNormals() {
-    #pragma omp parallel for schedule(static) 
+    #pragma omp for schedule(static) 
     for (int i = 0; i < getSize(); i++) {
         m_normals[i] = normal(i);
     }
 }
 
 Eigen::Vector3d FluidSystem::normal(const size_t i) {
-    Eigen::Vector3d normal = (m_particleMass / getParticleDensity(i)) * m_kernelLookup
-        .gradWeight(getParticlePos(i), getParticlePos(i));
+    Eigen::Vector3d normal = (m_particleMass / getParticleDensity(i))
+        * m_kernelLookup.gradWeight(getParticlePos(i), getParticlePos(i));
+    
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_pointSetID);
     for (size_t j = 0; j < fluidPS.n_neighbors(m_pointSetID, i); j++) {
         const unsigned int pid = fluidPS.neighbor(m_pointSetID, i, j);
-        normal += (m_particleMass / getParticleDensity(pid)) * m_kernelLookup
-            .gradWeight(getParticlePos(i), getParticlePos(pid));
+        normal += (m_particleMass / getParticleDensity(pid))
+            * m_kernelLookup.gradWeight(getParticlePos(i), getParticlePos(pid));
     }
 
     return m_c * normal;

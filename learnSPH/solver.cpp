@@ -76,13 +76,14 @@ void Solver::run(
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s << std::endl;
         // Propagate System
-        double deltaT_s = integrationStep(previousPos);
+        double deltaT_s = timeStepCFL();
+        integrationStep(deltaT_s, previousPos);
         runTime_s += deltaT_s;
 
         // Take Snapshot
         if (runTime_s > nextSnapShotTime_s) {
             filename.str(std::string());
-            filename << SOURCE_DIR << "/res/simulation/" << file << snapShotNr << ".vtk";
+            filename << file << snapShotNr << ".vtk";
             std::vector<Eigen::Vector3d> interpolPos
                 = interpolateVector<Eigen::Vector3d>(previousPos,
                     m_system.getPositions(),
@@ -105,7 +106,7 @@ void Solver::semiImplicitEulerStep(double deltaT) {
     ////////////////////////////////////////////////////////////////////////
     // Update Velocities
     ////////////////////////////////////////////////////////////////////////
-    #pragma omp parallel for schedule(static) 
+    #pragma omp for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         m_system.addToParticleVel(i, deltaT * m_system.getParticleAcc(i));
     }
@@ -114,30 +115,40 @@ void Solver::semiImplicitEulerStep(double deltaT) {
     // Update Positions
     ////////////////////////////////////////////////////////////////////////    
     if (m_smoothingEnable) {
-        std::vector<Eigen::Vector3d> smoothingTerms(m_system.getSize(), Eigen::Vector3d::Zero());
-        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
-        for (int i = 0; i < fluidPS.n_points(); i++) {
-            for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
-                const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
-                smoothingTerms[i] += m_system.smoothingTerm(i, j);
+        std::vector<Eigen::Vector3d> smoothingTerms(fluidPS.n_points());
+        #pragma omp shared(smoothingTerms)
+        {        
+            #pragma omp for schedule(static)
+            for (int i = 0; i < fluidPS.n_points(); i++) {
+                smoothingTerms[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
+                for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
+                    const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
+                    smoothingTerms[i] += m_system.smoothingTerm(i, j);
+                }
             }
-        }
-        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
-        for (int i = 0; i < fluidPS.n_points(); i++) {
-            m_system.addToParticlePos(i, deltaT * (m_system.getParticleVel(i)
-                                                   + m_xsphSmoothing * smoothingTerms[i]));
+ 
+            #pragma omp barrier // synchronization of smoothingTerms
+            
+            #pragma omp for schedule(static)
+            for (int i = 0; i < fluidPS.n_points(); i++) {
+                m_system.addToParticlePos(
+                    i, deltaT * (m_system.getParticleVel(i) +
+                                 m_xsphSmoothing * smoothingTerms[i]));
+            }
         }
     }
     else {
-        #pragma omp parallel for schedule(static) num_threads(omp_get_num_procs())
+        #pragma omp for schedule(static)
         for (int i = 0; i < fluidPS.n_points(); i++) {
             m_system.addToParticlePos(i, deltaT * m_system.getParticleVel(i));
         }
     }
 }
 
-void Solver::initAccelerations() {
+void Solver::initAccelerations()
+{
     // If gravity is enabled, we can add gravitational acceleration to every particle
+    #pragma omp for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         Eigen::Vector3d acc(Eigen::Vector3d::Zero());
         if (m_gravityEnable) {
