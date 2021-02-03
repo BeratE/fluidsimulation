@@ -38,11 +38,13 @@ public:
     Solver(System::FluidSystem system);
     ~Solver();
 
+    // Specific solvers will overwrite this function. Overhead is minimal.
+    virtual double integrationStep(const std::vector<Eigen::Vector3d> &previousPos) {return 0;}
+    
     void run(
         std::string file, double milliseconds,
         std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr);
-
-    virtual double integrationStep(const std::vector<Eigen::Vector3d> &previousPos) {return 0;}
+    
     void semiImplicitEulerStep(double deltaT);
     void initAccelerations();
 
@@ -74,6 +76,6 @@ protected:
         
     System::FluidSystem m_system;
     std::vector<System::BoundarySystem> m_boundaries;
-    std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch;
+    std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch; 
 };
 } // namespace learnSPH

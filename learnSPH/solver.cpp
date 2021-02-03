@@ -28,7 +28,7 @@ double Solver::timeStepCFL()
     const double lambda = 0.5;
 
     auto const &velocities = m_system.getVelocities();
-    double maxVelNorm = pow(10, -6);
+    double maxVelNorm = 0.000001; // some small number
     for (const auto &vel : velocities) 
         if (maxVelNorm < vel.norm()) {
             maxVelNorm = vel.norm();
@@ -54,11 +54,9 @@ void Solver::run(
     for (BoundarySystem& boundary : m_boundaries) {
         // Write boundary particles to file
         filename.str(std::string());
-        filename << SOURCE_DIR << "/res/simulation/"
-            << file << "_boundary" << boundaryIdx << ".vtk";
+        filename << file << "_boundary" << boundaryIdx << ".vtk";
         save_particles_to_vtk(filename.str(),
-                              boundary.getPositions(), boundary.getVolumes());
-        std::cout << "save results to " << filename.str() << std::endl;
+                              boundary.getPositions(), boundary.getVolumes());        
 
         boundaryIdx++;
     }
@@ -77,9 +75,11 @@ void Solver::run(
 
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s << std::endl;
+        // Propagate System
         double deltaT_s = integrationStep(previousPos);
         runTime_s += deltaT_s;
 
+        // Take Snapshot
         if (runTime_s > nextSnapShotTime_s) {
             filename.str(std::string());
             filename << SOURCE_DIR << "/res/simulation/" << file << snapShotNr << ".vtk";
@@ -91,9 +91,7 @@ void Solver::run(
                     nextSnapShotTime_s);
             save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
 
-            nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS * pow(10, -3);
-
-            std::cout << "save results to " << filename.str() << std::endl;
+            nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS*0.001;            
         }
         prevTime_s = runTime_s;
         previousPos = m_system.getPositions();

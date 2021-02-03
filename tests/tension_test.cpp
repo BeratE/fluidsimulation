@@ -20,7 +20,7 @@ TEST_CASE("Simple surface tension, no gravity cube") {
         FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
                                                          Eigen::Vector3d(1, 1, 1),
                                                          particleDiameter);
-        particles.setGamma(0.01);
+        particles.setGamma(0.1);
         
         Solver *solver;
         std::stringstream filename;
@@ -61,7 +61,7 @@ TEST_CASE("Simple surface tension, no gravity cube") {
         solver->enableSmoothing(true);
         solver->enableAdhesion(false);
 
-        solver->run(filename.str(), 2000);       
+        solver->run(filename.str(), 3000);       
     }        
 }
 

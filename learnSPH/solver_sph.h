@@ -15,8 +15,9 @@ namespace learnSPH {
         ~SolverSPH();
 
         double integrationStep(const std::vector<Eigen::Vector3d> &previousPos) override;
+        
         void updateAccelerations(double deltaT);
-    
+        
         void updateAccFluidContribution(const size_t i,
                                         const size_t j,
                                         const double ratio_i,

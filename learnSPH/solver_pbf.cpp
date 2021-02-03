@@ -49,7 +49,10 @@ double SolverPBF::integrationStep(const std::vector<Eigen::Vector3d>& previousPo
     return deltaT;
 }
 
-void SolverPBF::updateAccelerations(const double deltaT) {
+void SolverPBF::updateAccelerations(const double deltaT)
+{
+    initAccelerations();
+    
     const size_t id = m_system.getPointSetID();
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
 
@@ -110,6 +113,7 @@ void SolverPBF::updateAccBoundaryContribution(
         m_system.addToParticleAcc(i, m_system.adhesionForce(i, k, boundary)
                                   / m_system.getParticleMass());
 }
+
 
 void SolverPBF::updatePositionsWithConstraints() {
     m_system.updateDensities(m_boundaries);
