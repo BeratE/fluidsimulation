@@ -24,7 +24,7 @@ TEST_CASE("Simple surface tension, no gravity cube") {
         
         Solver *solver;
         std::stringstream filename;
-        filename << SOURCE_DIR << "/res/simulation/" << "tension";
+        filename << SOURCE_DIR << "/res/simulation/" << "tension_two";
         
         SECTION("SPH") {
             solver = new SolverSPH(particles);
@@ -93,7 +93,7 @@ TEST_CASE("Adhesion", "[ahesion]") {
         
         Solver *solver;
         std::stringstream filename;
-        filename << SOURCE_DIR << "/res/simulation/" << "adhesion";
+        filename << SOURCE_DIR << "/res/simulation/" << "adhesion_two";
         
         SECTION("SPH") {
             solver = new SolverSPH(particles);

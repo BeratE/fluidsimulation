@@ -29,12 +29,12 @@ void SolverSPH::integrationStep(double deltaT,
         m_system.updateDensities(m_boundaries);
         m_system.updatePressures(m_stiffness);
         if (m_tensionEnable) {
-          m_system.updateNormals();
+            m_system.updateNormals();
         }
 
         updateAccelerations(deltaT);
         semiImplicitEulerStep(deltaT);
-    }    
+    }
 }
 
 
@@ -46,37 +46,42 @@ void SolverSPH::updateAccelerations(double deltaT)
     const size_t id = m_system.getPointSetID();
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
 
-    // Used in calculation of pressureAccelerations
-    std::vector<double> pressureDensityRatios(m_system.getSize());
-
+    // Precalculated pressure density rations
+    
+    static std::vector<double> ratios(m_system.getSize());
+    
     #pragma omp for schedule(static)
     for (size_t i = 0; i < m_system.getSize(); i++) {
-        pressureDensityRatios[i] = (m_system.getParticlePressure(i)
-                                    / (m_system.getParticleDensity(i)
-                                       * m_system.getParticleDensity(i)));
+        ratios[i] = (m_system.getParticlePressure(i)
+                                      / (m_system.getParticleDensity(i)
+                                         * m_system.getParticleDensity(i)));
     }
-    
+
+    // Synchronization barrier for m_pressureDensityRatios
+    #pragma omp barrier 
+        
     #pragma omp for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         // Contributions of pair (i, i) - NOT NECESSARY FOR VISCOSITY AND TENSION
         m_system.addToParticleAcc(i, -m_system.pressureAccFluid(i, i,
-                                                                pressureDensityRatios[i],
-                                                                pressureDensityRatios[i]));
+                                                                ratios[i],
+                                                                ratios[i]));
 
         // Iterate over fluid neighbors and add contributions to forces 
         for (size_t idx = 0; idx < fluidPS.n_neighbors(id, i); idx++) {
             const unsigned int j = fluidPS.neighbor(id, i, idx);
-            updateAccFluidContribution(i, j, pressureDensityRatios[i],
-                                       pressureDensityRatios[j]);
+            updateAccFluidContribution(i, j, ratios[i], ratios[j]);
         }
 
         // Iterate over boundaries and add contributions to forces
         for (BoundarySystem boundary : m_boundaries) {
             // Iterate over neighboring boundary particles
             const size_t boundaryID = boundary.getPointSetID();
-            for (size_t idx = 0; idx < fluidPS.n_neighbors(boundaryID, i); idx++) {
+            for (size_t idx = 0; idx < fluidPS.n_neighbors(boundaryID, i);
+                 idx++) {
                 const unsigned int k = fluidPS.neighbor(boundaryID, i, idx);
-                updateAccBoundaryContribution(i, k, pressureDensityRatios[i], boundary);
+                updateAccBoundaryContribution(i, k, ratios[i],
+                                              boundary);
             }
         }
     }

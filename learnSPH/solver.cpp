@@ -115,27 +115,26 @@ void Solver::semiImplicitEulerStep(double deltaT) {
     // Update Positions
     ////////////////////////////////////////////////////////////////////////    
     if (m_smoothingEnable) {
-        std::vector<Eigen::Vector3d> smoothingTerms(fluidPS.n_points());
-        #pragma omp shared(smoothingTerms)
-        {        
-            #pragma omp for schedule(static)
-            for (int i = 0; i < fluidPS.n_points(); i++) {
-                smoothingTerms[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
-                for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
-                    const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
-                    smoothingTerms[i] += m_system.smoothingTerm(i, j);
-                }
-            }
- 
-            #pragma omp barrier // synchronization of smoothingTerms
-            
-            #pragma omp for schedule(static)
-            for (int i = 0; i < fluidPS.n_points(); i++) {
-                m_system.addToParticlePos(
-                    i, deltaT * (m_system.getParticleVel(i) +
-                                 m_xsphSmoothing * smoothingTerms[i]));
+        static std::vector<Eigen::Vector3d> smoothingTerms(fluidPS.n_points());
+
+        #pragma omp for schedule(static)
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            smoothingTerms[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
+            for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
+                const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
+                smoothingTerms[i] += m_system.smoothingTerm(i, j);
             }
         }
+ 
+        #pragma omp barrier // synchronization of smoothingTerms
+            
+        #pragma omp for schedule(static)
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            m_system.addToParticlePos(
+                i, deltaT * (m_system.getParticleVel(i) +
+                             m_xsphSmoothing * smoothingTerms[i]));
+        }
+
     }
     else {
         #pragma omp for schedule(static)
