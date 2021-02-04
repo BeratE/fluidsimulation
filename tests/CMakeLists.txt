@@ -17,15 +17,16 @@ set(INCLUDE_DIRS
 
 ### Sources
 set(SOURCE_FILES
-    main.cpp
-    comparison.cpp
-    mc_surface.cpp
-    pbf_simulation.cpp
-    sph_kernel.cpp
-    sph_sampling.cpp
-    sph_simulation.cpp
-    tension_test.cpp
-   )
+  util.h
+  main.cpp  
+  comparison.cpp
+  mc_surface.cpp
+  pbf_simulation.cpp
+  sph_kernel.cpp
+  sph_sampling.cpp
+  sph_simulation.cpp
+  tension_test.cpp
+  )
 
 ### Target  
 add_executable(${TARGET_NAME} ${SOURCE_FILES})

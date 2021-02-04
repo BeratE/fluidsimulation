@@ -48,21 +48,45 @@ void Solver::run(
     std::string file, double milliseconds,
     std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos) {
 
+    if (pOutSurfaceInfos) {
+        mp_nsearch->find_neighbors();
+    }
+    
     // Store information regarding boundaries
     int boundaryIdx = 0;
     std::stringstream filename;
+    std::stringstream surfaceFilename;
+        
     for (BoundarySystem& boundary : m_boundaries) {
         // Write boundary particles to file
         filename.str(std::string());
         filename << file << "_boundary" << boundaryIdx << ".vtk";
         save_particles_to_vtk(filename.str(),
-                              boundary.getPositions(), boundary.getVolumes());        
+                              boundary.getPositions(), boundary.getVolumes());
+
+         if (pOutSurfaceInfos) {
+             boundary.updateNormalizedDensities();
+             surfaceFilename.str(std::string());
+             surfaceFilename << file << "_boundary_surface" << boundaryIdx;
+             pOutSurfaceInfos->push_back(
+                 Surface::SurfaceInformation(
+                     boundary.getPositions(), boundary.getNormalizedDensities(), 
+                     boundary.getKernelLookUp(), boundary.getSmoothingLength(),
+                     surfaceFilename.str()));
+         }
 
         boundaryIdx++;
     }
+    
 
     // Required for interpolation between simulation steps 
     std::vector<Eigen::Vector3d> previousPos(m_system.getPositions());
+    std::vector<double> previousNormalizedDensities;
+
+    if (pOutSurfaceInfos) {
+        m_system.updateNormalizedDensities();
+        previousNormalizedDensities = m_system.getNormalizedDensities();
+    }
 
     // Controll variables
     double runTime_s = 0.0;
@@ -73,6 +97,7 @@ void Solver::run(
     const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
         * m_snapShotMS * pow(10, -3);
 
+    
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s << std::endl;
         // Propagate System
@@ -86,16 +111,35 @@ void Solver::run(
             filename << file << snapShotNr << ".vtk";
             std::vector<Eigen::Vector3d> interpolPos
                 = interpolateVector<Eigen::Vector3d>(previousPos,
-                    m_system.getPositions(),
-                    prevTime_s,
-                    runTime_s,
-                    nextSnapShotTime_s);
+                                                     m_system.getPositions(),
+                                                     prevTime_s,
+                                                     runTime_s,
+                                                     nextSnapShotTime_s);
             save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
+
+            if (pOutSurfaceInfos) {
+                surfaceFilename.str(std::string());
+                surfaceFilename << file + "_surface" << snapShotNr;
+                std::vector<double> interpolNormalizedDensities
+                    = interpolateVector<double>(previousNormalizedDensities,
+                                                m_system.getNormalizedDensities(),
+                                                prevTime_s,
+                                                runTime_s,
+                                                nextSnapShotTime_s);                
+                pOutSurfaceInfos->push_back(Surface::SurfaceInformation(
+                                                interpolPos, interpolNormalizedDensities,
+                                                m_system.getKernelLookUp(),
+                                                m_system.getSmoothingLength(),
+                                                surfaceFilename.str()));
+            }
 
             nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS*0.001;            
         }
         prevTime_s = runTime_s;
         previousPos = m_system.getPositions();
+        if (pOutSurfaceInfos) {
+            previousNormalizedDensities = m_system.getNormalizedDensities();
+        }
     }
 }
 

@@ -85,4 +85,6 @@ void learnSPH::save_mesh_to_vtk(std::string path,
     vtk_file.set_point_data_from_twice_indexable("normals", normals, vtkio::AttributeType::Normals);
 
     vtk_file.write(path);
+
+    std::cout << "Saved results to " << path << std::endl;
 }
