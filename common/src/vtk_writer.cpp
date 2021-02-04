@@ -38,6 +38,8 @@ void learnSPH::save_particles_to_vtk(std::string path,
                                                      vector_data,
                                                      vtkio::AttributeType::Vectors);
     vtk_file.write(path);
+
+    std::cout << "Saved results to " << path << std::endl;
 }
 
 

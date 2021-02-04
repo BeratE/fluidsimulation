@@ -41,6 +41,34 @@ FluidSystem ParticleEmitter::sampleFluidBox(Vector3d bottomLeft,
     return particles;
 }
 
+FluidSystem ParticleEmitter::sampleFluidSDF(
+    std::function<double(Eigen::Vector3d)> const &sdf,            
+    Eigen::Vector3d sampleRegionStart,
+    Eigen::Vector3d sampleRegionSize,
+    double samplingDistance,
+    double restDensity)    
+{
+    Eigen::Vector3d numVerts = sampleRegionSize / samplingDistance;
+    std::vector<Eigen::Vector3d> positions;
+    
+    for (size_t x = 0; x < numVerts(0); x++) {
+        for (size_t y = 0; y < numVerts(1); y++) {
+            for (size_t z = 0; z < numVerts(2); z++) {
+                Eigen::Vector3d sample = sampleRegionStart
+                    + Eigen::Vector3d(x, y, z) * samplingDistance;
+
+                    if (sdf(sample) <= 0.0)
+                        positions.push_back(sample);
+            }
+        }
+    }
+
+    FluidSystem particles(samplingDistance/2, restDensity, positions.size());
+    particles.m_positions = positions;
+
+    return particles;
+}
+
 BoundarySystem ParticleEmitter::sampleBoundaryHollowBox(Vector3d bottomLeft,
                                                         Vector3d topRight,
                                                         double samplingDistance,

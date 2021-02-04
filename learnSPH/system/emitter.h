@@ -25,6 +25,17 @@ namespace learnSPH::System {
                                    double samplingDistance,
                                    double restDensity = 1000.0);
 
+        FluidSystem sampleFluidSDF(std::function<double(Eigen::Vector3d)> const &sdf,
+                                   double samplingDistance,
+                                   double restDensity = 1000.0);
+
+        FluidSystem sampleFluidSDF(
+            std::function<double(Eigen::Vector3d)> const &sdf,            
+            Eigen::Vector3d sampleRegionStart,
+            Eigen::Vector3d sampleRegionSize,
+            double samplingDistance,
+            double restDensity = 1000.0);
+
         
         BoundarySystem sampleBoundaryHollowBox(Eigen::Vector3d bottomLeft,
                                                Eigen::Vector3d topRight,

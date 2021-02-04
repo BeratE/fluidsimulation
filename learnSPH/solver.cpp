@@ -4,7 +4,6 @@
 #include "vtk_writer.h"
 #include <iostream>
 #include <surface/surface.h>
-#include <tension/tension.h>
 
 using namespace learnSPH;
 using namespace learnSPH::System;
@@ -29,10 +28,11 @@ double Solver::timeStepCFL()
     const double lambda = 0.5;
 
     auto const &velocities = m_system.getVelocities();
-    double maxVelNorm = pow(10, -6);
+    double maxVelNorm = 0.000001; // some small number
     for (const auto &vel : velocities) 
-        maxVelNorm = maxVelNorm > vel.norm() ? maxVelNorm : vel.norm();
-    
+        if (maxVelNorm < vel.norm()) {
+            maxVelNorm = vel.norm();
+        }
     return std::min(m_maxTimeStep_s, lambda * (2*m_system.getParticleRadius() / maxVelNorm));
 }
 
@@ -43,121 +43,117 @@ size_t Solver::addBoundary(const BoundarySystem &boundary)
     return m_boundaries.size()-1;
 }
 
-void Solver::applyExternalForces()
-{
-    m_system.clearForces();
-    
-    Eigen::Vector3d grav_force(0.0, 0.0, 0.0);
-    if (m_gravityEnable)
-        grav_force = VEC_GRAVITY * m_system.getParticleMass();
 
-    //#pragma omp parallel for
-    for (size_t i = 0; i < m_system.getSize(); i++) {
-        // gravity
-        m_system.addParticleForce(i, grav_force);     
+void Solver::run(
+    std::string file, double milliseconds,
+    std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos) {
+
+    // Store information regarding boundaries
+    int boundaryIdx = 0;
+    std::stringstream filename;
+    for (BoundarySystem& boundary : m_boundaries) {
+        // Write boundary particles to file
+        filename.str(std::string());
+        filename << file << "_boundary" << boundaryIdx << ".vtk";
+        save_particles_to_vtk(filename.str(),
+                              boundary.getPositions(), boundary.getVolumes());        
+
+        boundaryIdx++;
     }
-    // Iterate force objects
-    // ...
-}
 
-void Solver::applyTensionForces()
-{
-    using namespace tension;
-    if (m_tensionEnable) {
-        m_system.clearTensionForces();
+    // Required for interpolation between simulation steps 
+    std::vector<Eigen::Vector3d> previousPos(m_system.getPositions());
 
-        CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
-        for (size_t i = 0; i < m_system.getSize(); i++) {
-            for (size_t j = 0; j < fluidPS.n_neighbors(m_system.getPointSetID(), i); j++) {
-                const unsigned int pid = fluidPS.neighbor(m_system.getPointSetID(), i, j);
-                m_system.addParticleTensionForce(i, forceTension(
-                    m_system.getRestDensity(),
-                    m_system.getParticleDensity(i),
-                    m_system.getParticleDensity(pid),
-                    Cohesion::forceCohesion(
-                        m_system.getParticleMass(),
-                        m_system.getParticleMass(),
-                        m_system.getParticlePos(i),
-                        m_system.getParticlePos(pid),
-                        m_system.getGamma(),
-                        m_system.getC()
-                    ),
-                    Curvature::forceCurvature(
-                        m_system.getParticleMass(),
-                        m_system.getParticleNormal(i),
-                        m_system.getParticleNormal(pid),
-                        m_system.getC()
-                    )
-                ));
-            }
+    // Controll variables
+    double runTime_s = 0.0;
+    size_t iteration = 0;
+    size_t snapShotNr = 0;
+    double prevTime_s = 0.0;
+    double nextSnapShotTime_s = 0.0;
+    const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
+        * m_snapShotMS * pow(10, -3);
+
+    while (runTime_s <= END_TIME_s && ++iteration) {
+        std::cout << iteration << " " << runTime_s << std::endl;
+        // Propagate System
+        double deltaT_s = timeStepCFL();
+        integrationStep(deltaT_s, previousPos);
+        runTime_s += deltaT_s;
+
+        // Take Snapshot
+        if (runTime_s > nextSnapShotTime_s) {
+            filename.str(std::string());
+            filename << file << snapShotNr << ".vtk";
+            std::vector<Eigen::Vector3d> interpolPos
+                = interpolateVector<Eigen::Vector3d>(previousPos,
+                    m_system.getPositions(),
+                    prevTime_s,
+                    runTime_s,
+                    nextSnapShotTime_s);
+            save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
+
+            nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS*0.001;            
         }
+        prevTime_s = runTime_s;
+        previousPos = m_system.getPositions();
     }
 }
 
-void Solver::applyAdhesionForces()
-{
-    using namespace tension;
-    if (m_adhesionEnable) {
-        m_system.clearAdhesionForces();
-
-        CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
-        for (size_t i = 0; i < m_system.getSize(); i++) {
-            for (System::BoundarySystem boundary : m_boundaries) {
-                for (size_t k = 0; k < fluidPS.n_neighbors(boundary.getPointSetID(), i); k++) {
-                    const unsigned int pid = fluidPS.neighbor(boundary.getPointSetID(), i, k);
-                    m_system.addParticleAdhesionForce(i, Adhesion::forceAdhesion(
-                        m_system.getParticleMass(),
-                        boundary.getParticleVolume(pid),
-                        m_system.getParticlePos(i),
-                        boundary.getParticlePos(pid),
-                        boundary.getBeta(),
-                        m_system.getC()
-                    ));
-                }
-            }
-        }
-    }
-}
-
-void Solver::semiImplicitEulerStep(double deltaT)
-{    
+void Solver::semiImplicitEulerStep(double deltaT) {
     const size_t id = m_system.getPointSetID();
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
     
-    // Update velocities
-    const std::vector<Eigen::Vector3d> &accelerations = m_system.getAccelerations();
-    const std::vector<Eigen::Vector3d> &velocities = m_system.getVelocities();
-    
-    //#pragma omp parallel for
-    for (size_t i = 0; i < fluidPS.n_points(); i++) {
-        Eigen::Vector3d dV = deltaT * accelerations[i];
-        m_system.addParticleVel(i,  dV);
+    ////////////////////////////////////////////////////////////////////////
+    // Update Velocities
+    ////////////////////////////////////////////////////////////////////////
+    #pragma omp for schedule(static) 
+    for (int i = 0; i < m_system.getSize(); i++) {
+        m_system.addToParticleVel(i, deltaT * m_system.getParticleAcc(i));
     }
 
-    // Update positions
-    //#pragma omp parallel for
-    for (size_t i = 0; i < fluidPS.n_points(); i++) {
-        const Eigen::Vector3d &fpPos = m_system.getParticlePos(i);
-        const Eigen::Vector3d &fpVel = m_system.getParticleVel(i);
-        const double fpDensity = m_system.getParticleDensity(i);        
-        Eigen::Vector3d fpVelStar = fpVel;
-        
-        // perform XSPH smoothing
-        if (m_smoothingEnable) { 
-            Eigen::Vector3d fpVelSumOverNeighbors(0.0, 0.0, 0.0);
-            
-            for (size_t j = 0; j < fluidPS.n_neighbors(id, i); j++) {
-                const unsigned int k = fluidPS.neighbor(id, i, j);
-                fpVelSumOverNeighbors +=
-                    (2 * m_system.getParticleMass() *
-                    (m_system.getParticleVel(k) - fpVel)  *
-                    Kernel::CubicSpline::weight(fpPos, m_system.getParticlePos(k),
-                                                m_system.getSmoothingLength()))
-                    / (m_system.getParticleDensity(k) + fpDensity);
+    ////////////////////////////////////////////////////////////////////////
+    // Update Positions
+    ////////////////////////////////////////////////////////////////////////    
+    if (m_smoothingEnable) {
+        static std::vector<Eigen::Vector3d> smoothingTerms(fluidPS.n_points());
+
+        #pragma omp for schedule(static)
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            smoothingTerms[i] = Eigen::Vector3d(0.0, 0.0, 0.0);
+            for (size_t idx = 0; idx < fluidPS.n_neighbors(m_system.getPointSetID(), i); idx++) {
+                const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, idx);
+                smoothingTerms[i] += m_system.smoothingTerm(i, j);
             }
-            
-            fpVelStar += m_xsphSmoothing * fpVelSumOverNeighbors;
         }
-        m_system.setParticlePos(i, fpPos + deltaT * fpVelStar);
+ 
+        #pragma omp barrier // synchronization of smoothingTerms
+            
+        #pragma omp for schedule(static)
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            m_system.addToParticlePos(
+                i, deltaT * (m_system.getParticleVel(i) +
+                             m_xsphSmoothing * smoothingTerms[i]));
+        }
+
+    }
+    else {
+        #pragma omp for schedule(static)
+        for (int i = 0; i < fluidPS.n_points(); i++) {
+            m_system.addToParticlePos(i, deltaT * m_system.getParticleVel(i));
+        }
+    }
+}
+
+void Solver::initAccelerations()
+{
+    // If gravity is enabled, we can add gravitational acceleration to every particle
+    #pragma omp for schedule(static) 
+    for (int i = 0; i < m_system.getSize(); i++) {
+        Eigen::Vector3d acc(Eigen::Vector3d::Zero());
+        if (m_gravityEnable) {
+            acc += VEC_GRAVITY;
+        }
+
+        m_system.setParticleAcc(i, acc);
     }
 }

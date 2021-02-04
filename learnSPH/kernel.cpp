@@ -57,6 +57,29 @@ double CubicSpline::gradCubicSpline(const double q)
 }
 
 
+
+
+double Cohesion::weight(const double r, const double c) {
+    const double alpha = 32.0 / (M_PI * c * c * c * c * c * c * c * c * c);
+    if (0.0 <= r && r <= c / 2.0) {
+        return (alpha * 2 * (c - r) * (c - r) * (c - r) * r * r * r) - ((c * c * c * c * c * c) / 64.0);
+    }
+    else if (c / 2.0 < r && r <= c) {
+        return alpha * (c - r) * (c - r) * (c - r) * r * r * r;
+    }
+    return 0.0;
+}
+
+double Adhesion::weight(const double r, const double c) {
+    const double alpha = 0.007 / pow(c, 3.25);
+
+    if (c / 2.0 <= r && r <= c) {
+        return alpha * pow((-4.0 * r * r) / c + 6.0 * r - 2.0 * c, (1.0 / 4.0));
+    }
+    return 0;
+}
+
+
 // Table
 CubicSpline::Table::Table(double smoothingLength, size_t numBins)
 {
@@ -106,4 +129,55 @@ Eigen::Vector3d CubicSpline::Table::gradWeight(Eigen::Vector3d x_i,
     
     size_t i = (size_t)floor(d/m_stepSize);
     return m_gradMagnitudes[i] * posDiff.normalized();
+}
+
+
+Cohesion::Table::Table(const double c, size_t numBins)
+{
+    generateTable(c, numBins);
+}
+
+void Cohesion::Table::generateTable(double c, size_t numBins)
+{
+    m_stepSize = m_support / numBins;
+
+    for (int i = 0; i < numBins; i++) {
+        double r = (float(i) / float(numBins)) * m_support;
+        m_weights.push_back(Cohesion::weight(r, c));
+    }
+}
+
+double Cohesion::Table::weight(const double r) {
+    if (r > m_support) {
+        return 0.0;
+    }
+
+    size_t i = (size_t)floor(r / m_stepSize);
+    return m_weights[i];
+}
+
+Adhesion::Table::Table(const double c, size_t numBins)
+{
+    generateTable(c, numBins);
+}
+
+void Adhesion::Table::generateTable(double c, size_t numBins)
+{
+    m_c = c;
+    m_support = c / 2.0;
+    m_stepSize = m_support / numBins;
+
+    for (int i = 0; i < numBins; i++) {
+        double r = c / 2.0 + i * m_stepSize;
+        m_weights.push_back(Adhesion::weight(r, c));
+    }
+}
+
+double Adhesion::Table::weight(const double r) {
+    if (r - m_c / 2.0 > m_support) {
+        return 0.0;
+    }
+
+    size_t i = (size_t)floor( ( r - m_c / 2.0 ) / m_stepSize);
+    return m_weights[i];
 }

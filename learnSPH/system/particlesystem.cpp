@@ -13,13 +13,11 @@ ParticleSystem::ParticleSystem(double radius, double density, size_t size, bool 
     
     m_positions.resize(size);
     m_velocities.resize(size);
-    m_forces.resize(size);
     m_normalizedDensities.resize(size);
     
     if (fill) {
         std::fill(m_positions.begin(), m_positions.end(), Vector3d(0.0, 0.0, 0.0));
         std::fill(m_velocities.begin(), m_velocities.end(), Vector3d(0.0, 0.0, 0.0));
-        std::fill(m_forces.begin(), m_forces.end(), Vector3d(0.0, 0.0, 0.0));
     }
 }
 
@@ -38,17 +36,6 @@ void ParticleSystem::addParticlePos(size_t i, Vector3d pos)
 void ParticleSystem::addParticleVel(size_t i, Vector3d vel)
 {
     m_velocities[i] += vel;
-}
-
-
-void ParticleSystem::addParticleForce(size_t i, Vector3d force)
-{
-    m_forces[i] += force;
-}
-
-void ParticleSystem::clearForces()
-{
-    std::fill(m_forces.begin(), m_forces.end(), Vector3d(0.0, 0.0, 0.0));
 }
 
 void ParticleSystem::updateNormalizedDensities() {

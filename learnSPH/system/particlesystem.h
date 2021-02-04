@@ -19,10 +19,8 @@ namespace learnSPH::System {
 
         void addToNeighborhood(const std::shared_ptr<NeighborhoodSearch> &nsearch);
 
-        void clearForces();
         void addParticlePos(size_t i, Vector3d pos);
         void addParticleVel(size_t i, Vector3d vel);
-        void addParticleForce(size_t i, Vector3d force);
 
         void updateNormalizedDensities();
 
@@ -43,9 +41,7 @@ namespace learnSPH::System {
 
         Eigen::Vector3d getParticlePos(size_t i) const {return m_positions[i];}
         Eigen::Vector3d getParticleVel(size_t i) const {return m_velocities[i];}
-        Eigen::Vector3d getParticleForce(size_t i) const {return m_forces[i];}
 
-        const std::vector<Vector3d>& getForces() const { return m_forces; }
         const std::vector<Vector3d>& getPositions() const { return m_positions; }
         const std::vector<Vector3d>& getVelocities() const { return m_velocities; }
         const std::vector<double>& getNormalizedDensities() const { return m_normalizedDensities; }
@@ -62,7 +58,6 @@ namespace learnSPH::System {
         
         std::vector<Vector3d> m_positions; // Particle Positions
         std::vector<Vector3d> m_velocities; // Particle Velocities        
-        std::vector<Vector3d> m_forces; // Particle Force Accumulator
         std::vector<double> m_normalizedDensities; // last normalized densities for SDF calculation
 
         std::shared_ptr<NeighborhoodSearch> mp_nsearch; // reference to neighborhood information

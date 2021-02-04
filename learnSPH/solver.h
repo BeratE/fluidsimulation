@@ -36,19 +36,20 @@ namespace learnSPH {
 class Solver {
 public:
     Solver(System::FluidSystem system);
-    ~Solver();
+    ~Solver();    
+    
+    void run(
+        std::string file, double milliseconds,
+        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr);        
 
     double timeStepCFL();
-    //double integrationStep() {}
-    virtual void
-    run(std::string file, double milliseconds,
-        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr) {}
 
     size_t addBoundary(const System::BoundarySystem &boundary);
-
+    
     // Setter & Getter
     const System::FluidSystem &getSystem() const { return m_system; }
 
+    void setMaxTimeStepSeconds(double val) { m_maxTimeStep_s = val; }
     void setParamSmoothing(double val) { m_xsphSmoothing = val; }
     void setSnapShotAfterMS(double ms) { m_snapShotMS = ms; }
     void setFluidViscosity(double val) { m_system.setViscosity(val); }
@@ -58,12 +59,13 @@ public:
     void enableTension(bool val) { m_tensionEnable = val; }
     void enableAdhesion(bool val) { m_adhesionEnable = val; }
 
-protected:        
-    void applyExternalForces();
-    void applyTensionForces();
-    void applyAdhesionForces();
+protected:
+    // Specific solvers will overwrite this function. Overhead is minimal.
+    virtual void integrationStep(double deltaT,
+                                 const std::vector<Eigen::Vector3d> &previousPos) {}
     void semiImplicitEulerStep(double deltaT);
-
+    void initAccelerations();
+    
     double m_snapShotMS = 20;
     double m_maxTimeStep_s = 0.002;
     double m_xsphSmoothing = 0.5;
@@ -74,6 +76,6 @@ protected:
         
     System::FluidSystem m_system;
     std::vector<System::BoundarySystem> m_boundaries;
-    std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch;
+    std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch; 
 };
 } // namespace learnSPH
