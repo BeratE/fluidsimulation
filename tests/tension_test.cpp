@@ -79,9 +79,18 @@ TEST_CASE("Adhesion", "[adhesion]") {
         
         const double particleDiameter = 0.1;
 
-        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.75, 1.5, -.75),
-                                                         Eigen::Vector3d( .75, 3.5,  .75),
+        Eigen::Vector3d origin(0, 2.0, 0);
+        auto sphereSDF = [origin](Eigen::Vector3d x)
+            { return (x - origin).norm() - 0.5; };
+
+        FluidSystem particles = Emitter().sampleFluidSDF(sphereSDF,
+                                                         Eigen::Vector3d(-0.5,  1.5, -0.5),
+                                                         Eigen::Vector3d(   1,  1,  1),
                                                          particleDiameter);
+        
+        // FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.75, 1.5, -.75),
+        //                                                  Eigen::Vector3d( .75, 3.5,  .75),
+        //                                                  particleDiameter);
 
         particles.setGamma(0.1);
         
