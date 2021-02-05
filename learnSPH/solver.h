@@ -10,37 +10,13 @@
 
 #define VEC_GRAVITY Eigen::Vector3d(0.0, -9.80665, 0.0)
 
-template<typename T>
-std::vector<T> interpolateVector(const std::vector<T>& previous,
-                                 const std::vector<T>& current,
-                                 double prevTime,
-                                 double currTime,
-                                 double targetTime)
-{
-    double alpha = (targetTime - prevTime) / (currTime - prevTime);
-
-    auto inter_func =  [alpha](const T& prev, const T& curr)
-    {
-        return (1.0 - alpha) * prev + alpha * curr;
-    };
-    
-    std::vector<T> interpolation(previous);
-    std::transform(previous.begin(), previous.end(),
-                   current.begin(), interpolation.begin(), inter_func);
-    
-    return interpolation;
-}
-
-
 namespace learnSPH {
 class Solver {
 public:
     Solver(System::FluidSystem system);
     ~Solver();    
     
-    void run(
-        std::string file, double milliseconds,
-        std::vector<Surface::SurfaceInformation> *pOutSurfaceInfos = nullptr);        
+    void run(std::string file, double milliseconds);        
 
     double timeStepCFL();
 

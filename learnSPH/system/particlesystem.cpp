@@ -38,14 +38,15 @@ void ParticleSystem::addParticleVel(size_t i, Vector3d vel)
     m_velocities[i] += vel;
 }
 
-void ParticleSystem::updateNormalizedDensities() {
-    CompactNSearch::PointSet const ps = mp_nsearch->point_set(m_pointSetID);
-    for (int fpIdx = 0; fpIdx < ps.n_points(); fpIdx++) {
-        double normalizedDensity = m_kernelLookup.weight(m_positions[fpIdx], m_positions[fpIdx]);
-        for (size_t fnId = 0; fnId < ps.n_neighbors(m_pointSetID, fpIdx); fnId++) {
-            const unsigned int nId = ps.neighbor(m_pointSetID, fpIdx, fnId);
-            normalizedDensity += m_kernelLookup.weight(m_positions[fpIdx], m_positions[nId]);
-        }
-        m_normalizedDensities[fpIdx] = normalizedDensity;
-    }
-}
+// void ParticleSystem::updateNormalizedDensities() {
+//     CompactNSearch::PointSet const ps = mp_nsearch->point_set(m_pointSetID);
+//     #pragma omp parallel for schedule(static)
+//     for (int i = 0; i < ps.n_points(); i++) {
+//         double normDensity = m_kernelLookup.weight(m_positions[i], m_positions[i]);
+//         for (size_t j = 0; j < ps.n_neighbors(m_pointSetID, i); j++) {
+//             const size_t k = ps.neighbor(m_pointSetID, i, k);
+//             normDensity += m_kernelLookup.weight(m_positions[i], m_positions[k]);
+//         }
+//         m_normalizedDensities[i] = normDensity;
+//     }
+// }

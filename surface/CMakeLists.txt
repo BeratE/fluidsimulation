@@ -12,11 +12,12 @@ set(INCLUDE_DIRS
   PUBLIC
   ${PROJECT_SOURCE_DIR}/extern
   ${PROJECT_SOURCE_DIR}/common
-  ${PROJECT_SOURCE_DIR}/extern/Eigen
-  )
+  ${PROJECT_SOURCE_DIR}/extern/Eigen)
 
 ### Sources
 set(SOURCE_FILES
+  ${COMMON_SOURCES}
+  main.cpp
   mc_lut.h
   surface.h
   surface.cpp)
@@ -31,7 +32,7 @@ endif()
 
 
 ### Target Library
-add_library(${TARGET_NAME} ${SOURCE_FILES})
-add_dependencies(${TARGET_NAME} CompactNSearch learnSPH)
+add_executable(${TARGET_NAME} ${SOURCE_FILES})
+add_dependencies(${TARGET_NAME} ${LIBRARIES})
 target_link_libraries(${TARGET_NAME} ${LIBRARIES})
 target_include_directories(${TARGET_NAME} ${INCLUDE_DIRS})

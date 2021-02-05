@@ -5,8 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(TARGET_NAME learnSPH)
 
 set(LIBRARIES 
-  CompactNSearch
-  surface)
+  CompactNSearch)
 
 set(INCLUDE_DIRS
   PUBLIC

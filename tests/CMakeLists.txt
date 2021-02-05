@@ -6,7 +6,6 @@ set(TARGET_NAME tests)
 
 set(LIBRARIES
   CompactNSearch
-  surface
   learnSPH)
 
 set(INCLUDE_DIRS

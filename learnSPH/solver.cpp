@@ -5,6 +5,21 @@
 #include <iostream>
 #include <surface/surface.h>
 
+template<typename T>
+void interpolateVector(std::vector<T>& previous,
+                       const std::vector<T>& current,
+                       double prevTime,
+                       double currTime,
+                       double targetTime)
+{
+    const double alpha = (targetTime - prevTime) / (currTime - prevTime);
+
+    #pragma omp parallel for schedule(static)
+    for (size_t i = 0; i < previous.size(); i++) {
+        previous[i] = previous[i]*(1.0 - alpha) + current[i]*alpha;
+    }
+}
+
 using namespace learnSPH;
 using namespace learnSPH::System;
 
@@ -44,13 +59,9 @@ size_t Solver::addBoundary(const BoundarySystem &boundary)
 }
 
 
-void Solver::run(
-    std::string file, double milliseconds,
-    std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos) {
-
-    if (pOutSurfaceInfos) {
-        mp_nsearch->find_neighbors();
-    }
+void Solver::run(std::string file, double milliseconds)
+{
+    mp_nsearch->find_neighbors();
     
     // Store information regarding boundaries
     int boundaryIdx = 0;
@@ -61,32 +72,17 @@ void Solver::run(
         // Write boundary particles to file
         filename.str(std::string());
         filename << file << "_boundary" << boundaryIdx << ".vtk";
-        save_particles_to_vtk(filename.str(),
-                              boundary.getPositions(), boundary.getVolumes());
 
-         if (pOutSurfaceInfos) {
-             boundary.updateNormalizedDensities();
-             surfaceFilename.str(std::string());
-             surfaceFilename << file << "_boundary_surface" << boundaryIdx;
-             pOutSurfaceInfos->push_back(
-                 Surface::SurfaceInformation(
-                     boundary.getPositions(), boundary.getNormalizedDensities(), 
-                     boundary.getKernelLookUp(), boundary.getSmoothingLength(),
-                     surfaceFilename.str()));
-         }
+        save_particles_to_vtk(filename.str(),
+                              boundary.getPositions(),
+                              boundary.getVolumes());
 
         boundaryIdx++;
     }
     
 
-    // Required for interpolation between simulation steps 
-    std::vector<Eigen::Vector3d> previousPos(m_system.getPositions());
-    std::vector<double> previousNormalizedDensities;
-
-    if (pOutSurfaceInfos) {
-        m_system.updateNormalizedDensities();
-        previousNormalizedDensities = m_system.getNormalizedDensities();
-    }
+    // Required for interpolation between simulation steps
+    std::vector<Eigen::Vector3d> prevPos(m_system.getPositions());   
 
     // Controll variables
     double runTime_s = 0.0;
@@ -102,44 +98,26 @@ void Solver::run(
         std::cout << iteration << " " << runTime_s << std::endl;
         // Propagate System
         double deltaT_s = timeStepCFL();
-        integrationStep(deltaT_s, previousPos);
+        integrationStep(deltaT_s, prevPos);
         runTime_s += deltaT_s;
 
         // Take Snapshot
         if (runTime_s > nextSnapShotTime_s) {
             filename.str(std::string());
-            filename << file << snapShotNr << ".vtk";
-            std::vector<Eigen::Vector3d> interpolPos
-                = interpolateVector<Eigen::Vector3d>(previousPos,
-                                                     m_system.getPositions(),
-                                                     prevTime_s,
-                                                     runTime_s,
-                                                     nextSnapShotTime_s);
-            save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
-
-            if (pOutSurfaceInfos) {
-                surfaceFilename.str(std::string());
-                surfaceFilename << file + "_surface" << snapShotNr;
-                std::vector<double> interpolNormalizedDensities
-                    = interpolateVector<double>(previousNormalizedDensities,
-                                                m_system.getNormalizedDensities(),
-                                                prevTime_s,
-                                                runTime_s,
-                                                nextSnapShotTime_s);                
-                pOutSurfaceInfos->push_back(Surface::SurfaceInformation(
-                                                interpolPos, interpolNormalizedDensities,
-                                                m_system.getKernelLookUp(),
-                                                m_system.getSmoothingLength(),
-                                                surfaceFilename.str()));
-            }
+            filename << file << snapShotNr << ".vtk";            
+            interpolateVector<Eigen::Vector3d>(prevPos,
+                                               m_system.getPositions(),
+                                               prevTime_s,
+                                               runTime_s,
+                                               nextSnapShotTime_s);
+            
+            save_particles_to_vtk(filename.str(), prevPos, m_system.getDensities());
 
             nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS*0.001;            
         }
+        
         prevTime_s = runTime_s;
-        previousPos = m_system.getPositions();
-        if (pOutSurfaceInfos) {
-            previousNormalizedDensities = m_system.getNormalizedDensities();
-        }
+        prevPos = m_system.getPositions();
     }
 }
 

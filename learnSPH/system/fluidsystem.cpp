@@ -101,7 +101,8 @@ Eigen::Vector3d FluidSystem::normal(const size_t i) {
 
 
 Eigen::Vector3d FluidSystem::pressureAccFluid(const size_t i, const size_t j, const double ratio_i, const double ratio_j) {
-    return m_particleMass * (ratio_i + ratio_j) * m_kernelLookup.gradWeight(m_positions[i], m_positions[j]);
+    return m_particleMass * (ratio_i + ratio_j) *
+        m_kernelLookup.gradWeight(m_positions[i], m_positions[j]);
 }
 
 Eigen::Vector3d FluidSystem::viscAccFluid(const size_t i, const size_t j) {
@@ -116,7 +117,8 @@ Eigen::Vector3d FluidSystem::viscAccFluid(const size_t i, const size_t j) {
 }
 
 Eigen::Vector3d FluidSystem::pressureAccBoundary(const size_t i, const size_t k, const double ratio, const BoundarySystem& boundary) {
-    return m_restDensity * boundary.getParticleVolume(k) * ratio * m_kernelLookup.gradWeight(m_positions[i], boundary.getParticlePos(k));
+    return m_restDensity * boundary.getParticleVolume(k) * ratio *
+        m_kernelLookup.gradWeight(m_positions[i], boundary.getParticlePos(k));
 }
 
 Eigen::Vector3d FluidSystem::viscAccBoundary(const size_t i, const size_t k, const BoundarySystem& boundary) {
