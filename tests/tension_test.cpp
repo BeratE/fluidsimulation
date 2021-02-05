@@ -68,11 +68,11 @@ TEST_CASE("Adhesion", "[adhesion]") {
     SECTION("Adhesion") {
         double startTime = omp_get_wtime();
         
-        const double particleDiameter = 0.1;
-        const double boundaryDiameter = 0.1;
+        const double particleDiameter = 0.02;
+        const double boundaryDiameter = particleDiameter * 1.5;
         
-        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.25, 1.5, -.25),
-                                                         Eigen::Vector3d( .25, 3.5,  .25),
+        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.25, 1.02, -.25),
+                                                         Eigen::Vector3d( .25, 3.02,  .25),
                                                          particleDiameter);
         
         std::stringstream filepath;
@@ -82,8 +82,8 @@ TEST_CASE("Adhesion", "[adhesion]") {
         icosphere.setViscosity(0.02);
 
         BoundarySystem box = Emitter().sampleBoundaryHollowBox(
-            Eigen::Vector3d(-2.0, -4.0, -2.0) - particleDiameter * Eigen::Vector3d(1.0, 1.0, 1.0),
-            Eigen::Vector3d( 2.0,  6.0,  2.0) + particleDiameter * Eigen::Vector3d(1.0, 1.0, 1.0),
+            Eigen::Vector3d(-2.0, -3.0, -2.0) - particleDiameter * Eigen::Vector3d(1.0, 1.0, 1.0),
+            Eigen::Vector3d( 2.0,  3.7,  2.0) + particleDiameter * Eigen::Vector3d(1.0, 1.0, 1.0),
             boundaryDiameter);
         box.setViscosity(0.02);
         box.setBeta(0.5);
@@ -108,7 +108,7 @@ TEST_CASE("Adhesion", "[adhesion]") {
         }
 
         solver->addBoundary(icosphere);
-        solver->addBoundary(box);
+        // solver->addBoundary(box);
                 
         solver->setFluidTension(0.15);
         solver->setBoundaryAdhesion(0, 2.4);        
@@ -119,7 +119,7 @@ TEST_CASE("Adhesion", "[adhesion]") {
         solver->enableTension(true);
         solver->enableAdhesion(true);
 
-        solver->run(filename.str(), 3000);
+        solver->run(filename.str(), 1500);
 
         double endTime = omp_get_wtime();
 

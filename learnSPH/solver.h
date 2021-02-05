@@ -63,7 +63,7 @@ protected:
     bool m_tensionEnable = true;
     bool m_adhesionEnable = true;
         
-    unsigned int m_zSortIntervall = 20;
+    unsigned int m_zSortIntervall = 100;
     System::FluidSystem m_system;
     std::vector<System::BoundarySystem> m_boundaries;
     std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch; 
