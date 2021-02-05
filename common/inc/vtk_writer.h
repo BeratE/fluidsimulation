@@ -9,17 +9,21 @@
 
 namespace learnSPH
 {
-    void save_particles_to_vtk(std::string path,
-                               const std::vector<Eigen::Vector3d>& positions);
-    void save_particles_to_vtk(std::string path,
-                               const std::vector<Eigen::Vector3d>& positions,
-                               const std::vector<double>& scalar_data);
-    void save_particles_to_vtk(std::string path,
-                               const std::vector<Eigen::Vector3d>& positions,
-                               const std::vector<double>& scalar_data,
-                               const std::vector<Eigen::Vector3d>& vector_data);
+    const std::string lblDensities = "Densities";
+    
+    void writeParticlesToVTK(
+        std::string path,
+        const std::vector<Eigen::Vector3d> &positions,
+        const std::vector<double> &scalar_data,
+        std::string comments = "");
 
-    void save_mesh_to_vtk(std::string path,
-                          const std::vector<Eigen::Vector3d>& vertices,
-                          const std::vector<std::array<int, 3>>& triangles);
+    void writeMeshToVTK(
+        std::string path,
+        const std::vector<Eigen::Vector3d> &vertices,
+        const std::vector<std::array<int, 3>> &triangles);
+
+    void readParticlesFromVTK(
+        std::string path,
+        std::vector<Eigen::Vector3d> &positions,
+        std::string &comments);
 }

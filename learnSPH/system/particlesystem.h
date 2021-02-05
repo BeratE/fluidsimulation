@@ -22,7 +22,6 @@ namespace learnSPH::System {
         void addParticlePos(size_t i, Vector3d pos);
         void addParticleVel(size_t i, Vector3d vel);
 
-
         // Setter & Getter
         void setViscosity(double value) { m_viscosity = value; }
         void setPointSetID(double id) { m_pointSetID = id; }
@@ -41,8 +40,9 @@ namespace learnSPH::System {
         Eigen::Vector3d getParticlePos(size_t i) const {return m_positions[i];}
         Eigen::Vector3d getParticleVel(size_t i) const {return m_velocities[i];}
 
-        std::vector<Vector3d>& getPositions() { return m_positions; }
-        std::vector<Vector3d>& getVelocities() { return m_velocities; }
+        const std::vector<Vector3d>& getPositions() const { return m_positions; }
+        const std::vector<Vector3d>& getVelocities() const { return m_velocities; }
+
         const Kernel::CubicSpline::Table getKernelLookUp() const { return m_kernelLookup;  }
         const std::shared_ptr<NeighborhoodSearch> getNSearch() const { return mp_nsearch;  }
 

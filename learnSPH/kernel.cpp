@@ -56,9 +56,6 @@ double CubicSpline::gradCubicSpline(const double q)
     return alpha * value;
 }
 
-
-
-
 double Cohesion::weight(const double r, const double c) {
     const double alpha = 32.0 / (M_PI * c * c * c * c * c * c * c * c * c);
     if (0.0 <= r && r <= c / 2.0) {
@@ -91,6 +88,7 @@ void CubicSpline::Table::generateTable(double smoothingLength, size_t numBins)
     m_smoothingLength = smoothingLength;
     m_support = CubicSpline::support(smoothingLength);
     m_stepSize = m_support/numBins;
+    m_numBins = numBins;
 
     for (int i = 0; i < numBins; i++) {
         double d = i*m_stepSize;

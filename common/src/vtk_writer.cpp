@@ -1,24 +1,17 @@
 #include "vtk_writer.h"
 
-void learnSPH::save_particles_to_vtk(std::string path,
-                                     const std::vector<Eigen::Vector3d> &positions)
-{
-    save_particles_to_vtk(path, positions, std::vector<double>(), std::vector<Eigen::Vector3d>());
-}
+// void VTK::writeParticlesToVTK(
+//     std::string path,
+//     const std::vector<Eigen::Vector3d> &positions)
+// {
+//     VTK::writeParticlesToVTK(path, positions, std::vector<double>(), std::vector<Eigen::Vector3d>());
+// }
 
-
-void learnSPH::save_particles_to_vtk(std::string path,
-                                     const std::vector<Eigen::Vector3d> &positions,
-                                     const std::vector<double> &scalar_data)
-{
-    save_particles_to_vtk(path, positions, scalar_data, std::vector<Eigen::Vector3d>());
-}
-
-void learnSPH::save_particles_to_vtk(
+void learnSPH::writeParticlesToVTK(
     std::string path,
-    const std::vector<Eigen::Vector3d>& positions,
-    const std::vector<double>& scalar_data,
-    const std::vector<Eigen::Vector3d>& vector_data)
+    const std::vector<Eigen::Vector3d> &positions,
+    const std::vector<double> &scalar_data,
+    std::string comments)
 {
     if (positions.size() == 0)
         return;
@@ -30,24 +23,21 @@ void learnSPH::save_particles_to_vtk(
     // Convenient way to specify that we don't have cells, just points
     vtk_file.set_cells_as_particles(positions.size());
 
-    if (scalar_data.size() > 0)
-        vtk_file.set_point_data_from_indexable("scalar",
-                                               scalar_data,
-                                               vtkio::AttributeType::Scalars);
-
-    if (vector_data.size() > 0)
-        vtk_file.set_point_data_from_twice_indexable("vector",
-                                                     vector_data,
-                                                     vtkio::AttributeType::Vectors);
+    vtk_file.set_point_data_from_indexable("scalar", scalar_data,
+                                           vtkio::AttributeType::Scalars);
+    
+    vtk_file.set_comments(comments);
+    
     vtk_file.write(path);
 
     std::cout << "Saved results to " << path << std::endl;
 }
 
 
-static void compute_node_normals(std::vector<Eigen::Vector3d>& out_normals,
-                                  const std::vector<Eigen::Vector3d>& vertices,
-                                  const std::vector<std::array<int, 3>>& triangles)
+static void compute_node_normals(
+    std::vector<Eigen::Vector3d>& out_normals,
+    const std::vector<Eigen::Vector3d>& vertices,
+    const std::vector<std::array<int, 3>>& triangles)
 {
     out_normals.clear();
     out_normals.resize(vertices.size(), Eigen::Vector3d::Zero());
@@ -71,11 +61,10 @@ static void compute_node_normals(std::vector<Eigen::Vector3d>& out_normals,
     }
 }
 
-
-
-void learnSPH::save_mesh_to_vtk(std::string path,
-                                const std::vector<Eigen::Vector3d>& vertices,
-                                const std::vector<std::array<int, 3>>& triangles)
+void learnSPH::writeMeshToVTK (
+    std::string path,
+    const std::vector<Eigen::Vector3d>& vertices,
+    const std::vector<std::array<int, 3>>& triangles)
 {
     vtkio::VTKFile vtk_file;
 
@@ -89,4 +78,20 @@ void learnSPH::save_mesh_to_vtk(std::string path,
     vtk_file.write(path);
 
     std::cout << "Saved results to " << path << std::endl;
+}
+
+void learnSPH::readParticlesFromVTK(
+    std::string path,
+    std::vector<Eigen::Vector3d> &positions,
+    std::string &comments)
+{
+    vtkio::VTKFile vtk_file;
+    
+    vtk_file.read(path);
+   
+    const size_t numPoints = vtk_file.get_number_of_points();
+    positions.resize(numPoints);    
+
+    vtk_file.get_points_to_twice_indexable(positions);
+    comments = vtk_file.get_comments();
 }

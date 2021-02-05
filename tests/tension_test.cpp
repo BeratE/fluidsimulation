@@ -80,7 +80,14 @@ TEST_CASE("Adhesion", "[adhesion]") {
         BoundarySystem icosphere =
             System::Emitter().sampleBoundaryMesh(filepath.str(), boundaryDiameter);
         icosphere.setViscosity(0.02);
-        
+
+        BoundarySystem box = Emitter().sampleBoundaryHollowBox(
+            Eigen::Vector3d(-2.0, -4.0, -2.0) - particleDiameter * Eigen::Vector3d(1.0, 1.0, 1.0),
+            Eigen::Vector3d( 2.0,  6.0,  2.0) + particleDiameter * Eigen::Vector3d(1.0, 1.0, 1.0),
+            boundaryDiameter*2);
+        box.setViscosity(0.02);
+        box.setBeta(0.5);
+    
         Solver *solver;
         std::stringstream filename;
         filename << SOURCE_DIR << "/res/simulation2/" << "waterOnBall";
@@ -100,6 +107,7 @@ TEST_CASE("Adhesion", "[adhesion]") {
             filename << "_pbf";            
         }
 
+        //solver->addBoundary(box);
         solver->addBoundary(icosphere);
                 
         solver->setFluidTension(0.15);

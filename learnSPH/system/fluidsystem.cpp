@@ -20,11 +20,13 @@ FluidSystem::FluidSystem(double radius, double density, size_t size, bool fill)
     m_densities.resize(size);
     m_pressures.resize(size);
     m_accelerations.resize(size);
+    m_prevPositions.resize(size);
     
     if (fill) {
         std::fill(m_densities.begin(), m_densities.end(), 0.0);
         std::fill(m_pressures.begin(), m_pressures.end(), 0.0);
         std::fill(m_normals.begin(), m_normals.end(), Eigen::Vector3d(0.0, 0.0, 0.0));
+        std::fill(m_prevPositions.begin(), m_prevPositions.end(), Eigen::Vector3d(0.0, 0.0, 0.0));
         std::fill(m_accelerations.begin(), m_accelerations.end(), Eigen::Vector3d(0.0, 0.0, 0.0));
     }
 }

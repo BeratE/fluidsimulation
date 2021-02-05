@@ -140,7 +140,7 @@ std::vector<Vector3d> ParticleEmitter::samplePosTriangle(Vector3d a,
         normal(0) = normal(1);
         normal(1) = -tmp;
         normal.normalize();
-        Eigen::Vector2d offset = ((a+(b-a)/2)-o).normalized()*samplingDistance/2;
+        Eigen::Vector2d offset = ((a+(b-a)/2)-o).normalized()*samplingDistance*0.7;
         double distance = normal.dot(a + offset);
         return [=](Eigen::Vector2d point) mutable {
             return normal.dot(point) - distance;
@@ -179,6 +179,7 @@ std::vector<Vector3d> ParticleEmitter::samplePosTriangle(Vector3d a,
     }
 
     std::vector<Vector3d> positions;
+    positions.push_back(a);
     // Transform sample points back to 3d standard basis
     for (const auto &s : samples) {
         Vector3d sample_point = (planeBasis.transpose()

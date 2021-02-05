@@ -7,18 +7,6 @@
 using namespace learnSPH;
 using namespace learnSPH::Surface;
 
-SurfaceInformation::SurfaceInformation(
-    const std::vector<Eigen::Vector3d> positions,
-    const std::vector<double> normalizedDensities,
-    const Kernel::CubicSpline::Table kernelLookup,
-    double smoothingLength,
-    std::string filename)
-    : m_positions(positions), m_normalizedDensities(normalizedDensities),
-      m_kernelLookup(kernelLookup), m_smoothingLength(smoothingLength),
-      m_filename(filename)
-{
-}
-
 void Surface::discretizeSDF(
     const Eigen::Vector3d volSize,
     const Eigen::Vector3i volDims,
@@ -46,85 +34,85 @@ void Surface::discretizeSDF(
     }
 }
 
-void Surface::discretizeFluidSystemSDF(
-    const std::vector<Eigen::Vector3d>& positions,
-    const std::vector<double>& normalizedDensities,
-    const Kernel::CubicSpline::Table& kernelLookup,
-    double smoothingLength,
-    const double c,
-    const double samplingDistance,
-    std::vector<double>* pOutVolSDF,
-    std::vector<Eigen::Vector3d>* pOutVolVerts,
-    Eigen::Vector3i* pOutDims)
-{
-    // TODO: Find Bounding Box for the fluid
-    Eigen::Vector3d lowerLeft = Eigen::Vector3d::Zero();
-    Eigen::Vector3d upperRight = Eigen::Vector3d::Zero();
-    Surface::boundingBox(positions, lowerLeft, upperRight);
+// void Surface::discretizeFluidSystemSDF(
+//     const std::vector<Eigen::Vector3d>& positions,
+//     const std::vector<double>& normalizedDensities,
+//     const Kernel::CubicSpline::Table& kernelLookup,
+//     double smoothingLength,
+//     const double c,
+//     const double samplingDistance,
+//     std::vector<double>* pOutVolSDF,
+//     std::vector<Eigen::Vector3d>* pOutVolVerts,
+//     Eigen::Vector3i* pOutDims)
+// {
+//     // TODO: Find Bounding Box for the fluid
+//     Eigen::Vector3d lowerLeft = Eigen::Vector3d::Zero();
+//     Eigen::Vector3d upperRight = Eigen::Vector3d::Zero();
+//     Surface::boundingBox(positions, lowerLeft, upperRight);
 
-    // TODO: Increase the length of the bounding box by 3*samplingDistance in every direction
-    lowerLeft -= 2 * smoothingLength * Eigen::Vector3d::Ones();
-    upperRight += 2 * smoothingLength * Eigen::Vector3d::Ones();
+//     // TODO: Increase the length of the bounding box by 3*samplingDistance in every direction
+//     lowerLeft -= 2 * smoothingLength * Eigen::Vector3d::Ones();
+//     upperRight += 2 * smoothingLength * Eigen::Vector3d::Ones();
 
-    (*pOutDims) = Eigen::Vector3i(
-        (upperRight.x() - lowerLeft.x()) / samplingDistance,
-        (upperRight.y() - lowerLeft.y()) / samplingDistance,
-        (upperRight.z() - lowerLeft.z()) / samplingDistance
-        );
+//     (*pOutDims) = Eigen::Vector3i(
+//         (upperRight.x() - lowerLeft.x()) / samplingDistance,
+//         (upperRight.y() - lowerLeft.y()) / samplingDistance,
+//         (upperRight.z() - lowerLeft.z()) / samplingDistance
+//         );
 
-    // TODO: Create Vertices and initialize SDF values for bounding box
-    for (size_t x = 0; x < pOutDims->x(); x++) {
-        for (size_t y = 0; y < pOutDims->y(); y++) {
-            for (size_t z = 0; z < pOutDims->z(); z++) {
-                pOutVolSDF->push_back(-c);
-                pOutVolVerts->push_back(
-                    Eigen::Vector3d(
-                        lowerLeft.x() + x * samplingDistance,
-                        lowerLeft.y() + y * samplingDistance,
-                        lowerLeft.z() + z * samplingDistance));
-            }
-        }
-    }
+//     // TODO: Create Vertices and initialize SDF values for bounding box
+//     for (size_t x = 0; x < pOutDims->x(); x++) {
+//         for (size_t y = 0; y < pOutDims->y(); y++) {
+//             for (size_t z = 0; z < pOutDims->z(); z++) {
+//                 pOutVolSDF->push_back(-c);
+//                 pOutVolVerts->push_back(
+//                     Eigen::Vector3d(
+//                         lowerLeft.x() + x * samplingDistance,
+//                         lowerLeft.y() + y * samplingDistance,
+//                         lowerLeft.z() + z * samplingDistance));
+//             }
+//         }
+//     }
 
 
-    // TODO: Calculate number of steps required in every direction (positive and negative)
-    double support = learnSPH::Kernel::CubicSpline::support(smoothingLength);
-    int samplingSteps = ceil(support / samplingDistance);
+//     // TODO: Calculate number of steps required in every direction (positive and negative)
+//     double support = learnSPH::Kernel::CubicSpline::support(smoothingLength);
+//     int samplingSteps = ceil(support / samplingDistance);
 
-    for (size_t posIdx = 0; posIdx < positions.size(); posIdx++) {
-        const Eigen::Vector3d& position = positions[posIdx];
-        // TODO: Find the indiizes that belongs to the lower left vertex of the cell that the particle is positioned in 
-        Eigen::Vector3d offset = position - lowerLeft;
-        Eigen::Vector3i indizes = Eigen::Vector3i(
-            floor(offset.x() / samplingDistance),
-            floor(offset.y() / samplingDistance),
-            floor(offset.z() / samplingDistance));
+//     for (size_t posIdx = 0; posIdx < positions.size(); posIdx++) {
+//         const Eigen::Vector3d& position = positions[posIdx];
+//         // TODO: Find the indiizes that belongs to the lower left vertex of the cell that the particle is positioned in 
+//         Eigen::Vector3d offset = position - lowerLeft;
+//         Eigen::Vector3i indizes = Eigen::Vector3i(
+//             floor(offset.x() / samplingDistance),
+//             floor(offset.y() / samplingDistance),
+//             floor(offset.z() / samplingDistance));
 
-        // TODO: Sample from the bounding box using the determined numbers of steps in each direction
-        for (int xStepNr = -samplingSteps; xStepNr <= samplingSteps; xStepNr++) {
-            for (int yStepNr = -samplingSteps; yStepNr <= samplingSteps; yStepNr++) {
-                for (int zStepNr = -samplingSteps; zStepNr <= samplingSteps; zStepNr++) {
-                    Eigen::Vector3i gridVertexIndizes = Eigen::Vector3i(
-                        indizes.x() + xStepNr,
-                        indizes.y() + yStepNr,
-                        indizes.z() + zStepNr
-                        );
-                    if (gridVertexIndizes.x() < 0 || gridVertexIndizes.x() >= pOutDims->x() ||
-                        gridVertexIndizes.y() < 0 || gridVertexIndizes.y() >= pOutDims->y() ||
-                        gridVertexIndizes.z() < 0 || gridVertexIndizes.z() >= pOutDims->z()) {
-                        continue;
-                    }
-                    size_t gridVertexIdx = Surface::getVertIdx(gridVertexIndizes, (*pOutDims));
-                    Eigen::Vector3d gridVertex = pOutVolVerts->at(gridVertexIdx);
+//         // TODO: Sample from the bounding box using the determined numbers of steps in each direction
+//         for (int xStepNr = -samplingSteps; xStepNr <= samplingSteps; xStepNr++) {
+//             for (int yStepNr = -samplingSteps; yStepNr <= samplingSteps; yStepNr++) {
+//                 for (int zStepNr = -samplingSteps; zStepNr <= samplingSteps; zStepNr++) {
+//                     Eigen::Vector3i gridVertexIndizes = Eigen::Vector3i(
+//                         indizes.x() + xStepNr,
+//                         indizes.y() + yStepNr,
+//                         indizes.z() + zStepNr
+//                         );
+//                     if (gridVertexIndizes.x() < 0 || gridVertexIndizes.x() >= pOutDims->x() ||
+//                         gridVertexIndizes.y() < 0 || gridVertexIndizes.y() >= pOutDims->y() ||
+//                         gridVertexIndizes.z() < 0 || gridVertexIndizes.z() >= pOutDims->z()) {
+//                         continue;
+//                     }
+//                     size_t gridVertexIdx = Surface::getVertIdx(gridVertexIndizes, (*pOutDims));
+//                     Eigen::Vector3d gridVertex = pOutVolVerts->at(gridVertexIdx);
                     
-                    if ((gridVertex - position).norm() < support) {
-                        (*pOutVolSDF)[gridVertexIdx] += (1.0 / normalizedDensities[posIdx]) * kernelLookup.weight(gridVertex, position);
-                    }
-                }
-            }
-        }
-    }
-}
+//                     if ((gridVertex - position).norm() < support) {
+//                         (*pOutVolSDF)[gridVertexIdx] += (1.0 / normalizedDensities[posIdx]) * kernelLookup.weight(gridVertex, position);
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
 void Surface::boundingBox(const std::vector<Eigen::Vector3d>& positions, Eigen::Vector3d& bottomLeft, Eigen::Vector3d& upperRight) {
     double minX = DBL_MAX, minY = DBL_MAX, minZ = DBL_MAX;
@@ -150,35 +138,34 @@ void Surface::boundingBox(const std::vector<Eigen::Vector3d>& positions, Eigen::
     upperRight(1) = maxY;
     upperRight(2) = maxZ;
 }
+// void Surface::extractMesh(SurfaceInformation &surfaceInfo,
+//                  std::vector<Eigen::Vector3d> &vertices,
+//                  std::vector<std::array<int, 3>> &triangles)
+// {
+//     const double ratioSmoothingLengthSamplingStep = 2.0;
+//     std::vector<double> gridSDF;
+//     std::vector<Eigen::Vector3d> gridVerts;
+//     Eigen::Vector3i gridDims;
+//     discretizeFluidSystemSDF(
+//         surfaceInfo.getPositions(), surfaceInfo.getNormalizedDensities(),
+//         surfaceInfo.getKernelLookup(), surfaceInfo.getSmoothingLength(), 0.6,
+//         surfaceInfo.getSmoothingLength() / ratioSmoothingLengthSamplingStep,
+//         &gridSDF, &gridVerts, &gridDims);
 
-void Surface::extractMesh(SurfaceInformation &surfaceInfo,
-                 std::vector<Eigen::Vector3d> &vertices,
-                 std::vector<std::array<int, 3>> &triangles)
-{
-    const double ratioSmoothingLengthSamplingStep = 2.0;
-    std::vector<double> gridSDF;
-    std::vector<Eigen::Vector3d> gridVerts;
-    Eigen::Vector3i gridDims;
-    discretizeFluidSystemSDF(
-        surfaceInfo.getPositions(), surfaceInfo.getNormalizedDensities(),
-        surfaceInfo.getKernelLookup(), surfaceInfo.getSmoothingLength(), 0.6,
-        surfaceInfo.getSmoothingLength() / ratioSmoothingLengthSamplingStep,
-        &gridSDF, &gridVerts, &gridDims);
+//     marchCubes(gridDims, gridSDF, gridVerts, vertices, triangles);
+// }
 
-    marchCubes(gridDims, gridSDF, gridVerts, vertices, triangles);
-}
+// void Surface::saveMeshSurfaceInfo(std::vector<SurfaceInformation> &surfaceInfos)
+// {
+//     #pragma omp parallel for schedule(static)
+//     for(size_t i = 0; i < surfaceInfos.size(); i++) {
+//         std::vector<Eigen::Vector3d> vertices;
+//         std::vector<std::array<int, 3>> triangles;
+//         Surface::extractMesh(surfaceInfos[i], vertices, triangles);
 
-void Surface::saveMeshSurfaceInfo(std::vector<SurfaceInformation> &surfaceInfos)
-{
-    #pragma omp parallel for schedule(static)
-    for(int i = 0; i < surfaceInfos.size(); i++) {
-        std::vector<Eigen::Vector3d> vertices;
-        std::vector<std::array<int, 3>> triangles;
-        Surface::extractMesh(surfaceInfos[i], vertices, triangles);
-
-        std::stringstream fn;
-        fn << surfaceInfos[i].getFilename() << ".vtk";
+//         std::stringstream fn;
+//         fn << surfaceInfos[i].getFilename() << ".vtk";
            
-        save_mesh_to_vtk(fn.str(), vertices, triangles);
-    }
-}
+//         save_mesh_to_vtk(fn.str(), vertices, triangles);
+//     }
+// }

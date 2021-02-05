@@ -35,8 +35,11 @@ namespace learnSPH::Kernel {
             Eigen::Vector3d gradWeight(Eigen::Vector3d x_i,
                                        Eigen::Vector3d x_j) const;
 
-        private:
+            size_t getNumBins() const {return m_numBins;} 
+
+          private:
             bool m_isInit = false;
+            size_t m_numBins;
             double m_support;
             double m_stepSize;
             double m_smoothingLength;

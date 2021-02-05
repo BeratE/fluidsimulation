@@ -5,6 +5,18 @@
 #include <iostream>
 #include <surface/surface.h>
 
+using namespace learnSPH;
+using namespace learnSPH::System;
+
+
+std::string attributesToStr(const ParticleSystem &system)
+{
+    std::stringstream ss;
+    ss << "Smoothing Length :" << system.getSmoothingLength() << ";"
+       << "N bins lookup table :" << system.getKernelLookUp().getNumBins() << ";";
+    return ss.str();
+}
+
 template<typename T>
 void interpolateVector(std::vector<T>& previous,
                        const std::vector<T>& current,
@@ -20,8 +32,6 @@ void interpolateVector(std::vector<T>& previous,
     }
 }
 
-using namespace learnSPH;
-using namespace learnSPH::System;
 
 Solver::Solver(System::FluidSystem system)
     : m_system(system)
@@ -66,16 +76,16 @@ void Solver::run(std::string file, double milliseconds)
     // Store information regarding boundaries
     int boundaryIdx = 0;
     std::stringstream filename;
-    std::stringstream surfaceFilename;
         
     for (BoundarySystem& boundary : m_boundaries) {
         // Write boundary particles to file
         filename.str(std::string());
         filename << file << "_boundary" << boundaryIdx << ".vtk";
-
-        save_particles_to_vtk(filename.str(),
-                              boundary.getPositions(),
-                              boundary.getVolumes());
+               
+        writeParticlesToVTK(filename.str(),
+                            boundary.getPositions(),
+                            boundary.getVolumes(),
+                            attributesToStr(boundary));
 
         boundaryIdx++;
     }
@@ -115,7 +125,9 @@ void Solver::run(std::string file, double milliseconds)
                                                runTime_s,
                                                nextSnapShotTime_s);
             
-            save_particles_to_vtk(filename.str(), m_system.getPrevPos(), m_system.getDensities());
+            writeParticlesToVTK(filename.str(), m_system.getPrevPos(),
+                                m_system.getDensities(),
+                                attributesToStr(m_system));
 
             nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS*0.001;            
         }
