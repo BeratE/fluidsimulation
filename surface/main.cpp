@@ -3,6 +3,7 @@
 #include <vtkio/VTKFile.h>
 #include <CompactNSearch/CompactNSearch.h>
 #include "vtk_writer.h"
+#include "learnSPH/kernel.h"
 
 size_t getNumStr(std::string str, size_t i, std::string &outstr)
 {
