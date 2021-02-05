@@ -3,6 +3,7 @@
 #include <functional>
 #include <vector>
 #include <learnSPH/system/fluidsystem.h>
+#include <common/inc/vtk_writer.h>
 
 namespace learnSPH::Surface {
     //void printCudaVersion();
@@ -17,9 +18,9 @@ namespace learnSPH::Surface {
             std::string filename);
 
         // Setter & Getter
-        const std::vector<Eigen::Vector3d> getPositions() { return m_positions; }
-        const std::vector<double> getNormalizedDensities() { return m_normalizedDensities; }
-        const Kernel::CubicSpline::Table getKernelLookup() { return m_kernelLookup; };
+        const std::vector<Eigen::Vector3d> &getPositions() { return m_positions; }
+        const std::vector<double> &getNormalizedDensities() { return m_normalizedDensities; }
+        const Kernel::CubicSpline::Table &getKernelLookup() { return m_kernelLookup; };
         double getSmoothingLength() { return m_smoothingLength; };
         std::string getFilename() { return m_filename;  };
 
@@ -30,7 +31,7 @@ namespace learnSPH::Surface {
         double m_smoothingLength;
         std::string m_filename;
     };
-
+    
     void marchCubes(
         const Eigen::Vector3i volDim,
         const std::vector<double> &volSDF,
@@ -57,7 +58,14 @@ namespace learnSPH::Surface {
         std::vector<Eigen::Vector3d>* pOutVolVerts,
         Eigen::Vector3i* pOutDims);
 
+    void extractMesh(SurfaceInformation &surfaceInfo,
+                     std::vector<Eigen::Vector3d> &vertices,
+                     std::vector<std::array<int, 3>> &triangles);
+
+    void saveMeshSurfaceInfo(std::vector<SurfaceInformation> &surfaceInfo);
+    
     size_t getVertIdx(Eigen::Vector3i pos, Eigen::Vector3i volDim);
 
-    void boundingBox(const std::vector<Eigen::Vector3d>& positions, Eigen::Vector3d& bottomLeft, Eigen::Vector3d& upperRight);
+    void boundingBox(const std::vector<Eigen::Vector3d>& positions,
+                     Eigen::Vector3d& bottomLeft, Eigen::Vector3d& upperRight);
 }

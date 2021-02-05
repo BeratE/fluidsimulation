@@ -14,10 +14,11 @@ void learnSPH::save_particles_to_vtk(std::string path,
     save_particles_to_vtk(path, positions, scalar_data, std::vector<Eigen::Vector3d>());
 }
 
-void learnSPH::save_particles_to_vtk(std::string path,
-                                     const std::vector<Eigen::Vector3d>& positions,
-                                     const std::vector<double>& scalar_data,
-                                     const std::vector<Eigen::Vector3d>& vector_data)
+void learnSPH::save_particles_to_vtk(
+    std::string path,
+    const std::vector<Eigen::Vector3d>& positions,
+    const std::vector<double>& scalar_data,
+    const std::vector<Eigen::Vector3d>& vector_data)
 {
     if (positions.size() == 0)
         return;
@@ -25,6 +26,7 @@ void learnSPH::save_particles_to_vtk(std::string path,
     vtkio::VTKFile vtk_file;
 
     vtk_file.set_points_from_twice_indexable(positions);
+    
     // Convenient way to specify that we don't have cells, just points
     vtk_file.set_cells_as_particles(positions.size());
 
@@ -85,4 +87,6 @@ void learnSPH::save_mesh_to_vtk(std::string path,
     vtk_file.set_point_data_from_twice_indexable("normals", normals, vtkio::AttributeType::Normals);
 
     vtk_file.write(path);
+
+    std::cout << "Saved results to " << path << std::endl;
 }

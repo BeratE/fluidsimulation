@@ -5,6 +5,21 @@
 #include <iostream>
 #include <surface/surface.h>
 
+template<typename T>
+void interpolateVector(std::vector<T>& previous,
+                       const std::vector<T>& current,
+                       double prevTime,
+                       double currTime,
+                       double targetTime)
+{
+    const double alpha = (targetTime - prevTime) / (currTime - prevTime);
+
+    #pragma omp parallel for schedule(static)
+    for (size_t i = 0; i < previous.size(); i++) {
+        previous[i] = previous[i]*(1.0 - alpha) + current[i]*alpha;
+    }
+}
+
 using namespace learnSPH;
 using namespace learnSPH::System;
 
@@ -44,25 +59,30 @@ size_t Solver::addBoundary(const BoundarySystem &boundary)
 }
 
 
-void Solver::run(
-    std::string file, double milliseconds,
-    std::vector<Surface::SurfaceInformation>* pOutSurfaceInfos) {
-
+void Solver::run(std::string file, double milliseconds)
+{
+    mp_nsearch->find_neighbors();
+    
     // Store information regarding boundaries
     int boundaryIdx = 0;
     std::stringstream filename;
+    std::stringstream surfaceFilename;
+        
     for (BoundarySystem& boundary : m_boundaries) {
         // Write boundary particles to file
         filename.str(std::string());
         filename << file << "_boundary" << boundaryIdx << ".vtk";
+
         save_particles_to_vtk(filename.str(),
-                              boundary.getPositions(), boundary.getVolumes());        
+                              boundary.getPositions(),
+                              boundary.getVolumes());
 
         boundaryIdx++;
     }
+    
 
-    // Required for interpolation between simulation steps 
-    std::vector<Eigen::Vector3d> previousPos(m_system.getPositions());
+    // Required for interpolation between simulation steps
+    std::vector<Eigen::Vector3d> prevPos(m_system.getPositions());   
 
     // Controll variables
     double runTime_s = 0.0;
@@ -73,29 +93,31 @@ void Solver::run(
     const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
         * m_snapShotMS * pow(10, -3);
 
+    
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s << std::endl;
         // Propagate System
         double deltaT_s = timeStepCFL();
-        integrationStep(deltaT_s, previousPos);
+        integrationStep(deltaT_s, prevPos);
         runTime_s += deltaT_s;
 
         // Take Snapshot
         if (runTime_s > nextSnapShotTime_s) {
             filename.str(std::string());
-            filename << file << snapShotNr << ".vtk";
-            std::vector<Eigen::Vector3d> interpolPos
-                = interpolateVector<Eigen::Vector3d>(previousPos,
-                    m_system.getPositions(),
-                    prevTime_s,
-                    runTime_s,
-                    nextSnapShotTime_s);
-            save_particles_to_vtk(filename.str(), interpolPos, m_system.getDensities());
+            filename << file << snapShotNr << ".vtk";            
+            interpolateVector<Eigen::Vector3d>(prevPos,
+                                               m_system.getPositions(),
+                                               prevTime_s,
+                                               runTime_s,
+                                               nextSnapShotTime_s);
+            
+            save_particles_to_vtk(filename.str(), prevPos, m_system.getDensities());
 
             nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS*0.001;            
         }
+        
         prevTime_s = runTime_s;
-        previousPos = m_system.getPositions();
+        prevPos = m_system.getPositions();
     }
 }
 
