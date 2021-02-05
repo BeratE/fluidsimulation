@@ -23,22 +23,16 @@ namespace learnSPH::Surface {
         std::vector<double> *pOutVolSDF,
         std::vector<Eigen::Vector3d> *pOutVolVerts);
 
-    // void discretizeFluidSystemSDF(
-    //     const std::vector<Eigen::Vector3d>& positions,
-    //     const std::vector<double>& normalizedDensities,
-    //     const Kernel::CubicSpline::Table& kernelLookup,
-    //     double smoothingLength,
-    //     const double c,
-    //     const double samplingDistance,
-    //     std::vector<double>* pOutVolSDF,
-    //     std::vector<Eigen::Vector3d>* pOutVolVerts,
-    //     Eigen::Vector3i* pOutDims);
-
-    // void extractMesh(SurfaceInformation &surfaceInfo,
-    //                  std::vector<Eigen::Vector3d> &vertices,
-    //                  std::vector<std::array<int, 3>> &triangles);
-
-    // void saveMeshSurfaceInfo(std::vector<SurfaceInformation> &surfaceInfo);
+    void discretizeFluidSystemSDF(
+        const std::vector<Eigen::Vector3d>& positions,
+        const std::vector<double>& normalizedDensities,
+        const Kernel::CubicSpline::Table& kernelLookup,
+        double smoothingLength,
+        double samplingDistance,
+        double paramC,
+        std::vector<double>* pOutVolSDF,
+        std::vector<Eigen::Vector3d>* pOutVolVerts,
+        Eigen::Vector3i* pOutDims);   
     
     size_t getVertIdx(Eigen::Vector3i pos, Eigen::Vector3i volDim);
 

@@ -74,9 +74,6 @@ void Surface::marchCubes(const Eigen::Vector3i volDim,
     std::unordered_map<size_t, size_t> edgeIdxToVertIdx;    
     collectVertices(volDim, volSDF, volVerts, outVertices, edgeIdxToVertIdx);
 
-    // for (auto &v : edgeIdxToVertIdx)
-    //     std::cout << v.first << " " << v.second << std::endl;
-
     // Iterate cubes
     // Cube dimensions = number of vertices - 1
     Eigen::Vector3i numCells = volDim - Eigen::Vector3i(1, 1, 1);
@@ -107,9 +104,7 @@ void Surface::marchCubes(const Eigen::Vector3i volDim,
                 
                 size_t originIdx  = vertIdx[CELL_EDGES[edgeIdx][0]];
                 size_t globalEdgeIdx = 3*originIdx + EDGE_DIR[edgeIdx];
-                printf("%d", globalEdgeIdx);
                 triangle[j] = edgeIdxToVertIdx[globalEdgeIdx];
-                printf(", %d\n", triangle[j]);
             }
             outTriangles.push_back(triangle);
         }
@@ -117,8 +112,4 @@ void Surface::marchCubes(const Eigen::Vector3i volDim,
       endloop:
         continue;
     }
-
-    // for (auto &v : outTriangles) {
-    //     printf("%d, %d, %d\n", v[0], v[1], v[2]);
-    // }
 }

@@ -4,6 +4,9 @@
 #include <CompactNSearch/CompactNSearch.h>
 #include "vtk_writer.h"
 #include "learnSPH/kernel.h"
+#include "surface.h"
+
+using namespace learnSPH::Surface;
 
 size_t getNumStr(std::string str, size_t i, std::string &outstr)
 {
@@ -27,6 +30,8 @@ int main(int argc, char *argv[])
 
     const std::string filename(argv[1]);
 
+    std::cout << "Reading file " << filename << std::endl;
+
     // Read data from VTK file
     std::string comments;
     std::vector<Eigen::Vector3d> positions;    
@@ -41,18 +46,18 @@ int main(int argc, char *argv[])
     if (i == -1) return -1;
     i = getNumStr(comments, i, strb);
     if (i == -1) return -1;
-    numBins = std::stoi(stra);
-    smoothingLength = std::stod(strb);
+    smoothingLength = std::stod(stra);
+    numBins = std::stoi(strb);
 
     learnSPH::Kernel::CubicSpline::Table splineLut(smoothingLength, numBins);
 
     // Compute neighborhood
     double searchradius = learnSPH::Kernel::CubicSpline::support(smoothingLength);
     CompactNSearch::NeighborhoodSearch nsearch(searchradius);
-    size_t pid = nsearch->add_point_set(positions.front().data(),
+    size_t pid = nsearch.add_point_set(positions.front().data(),
                                         positions.size());
-    nsearch->find_neighbors();
-    CompactNSearch::PointSet const ps = mp_nsearch->point_set(pid);
+    nsearch.find_neighbors();
+    CompactNSearch::PointSet const ps = nsearch.point_set(pid);
 
     // Compute normalised densities
     std::vector<double> densities(positions.size());
@@ -61,12 +66,12 @@ int main(int argc, char *argv[])
     for (int i = 0; i < ps.n_points(); i++) {
         double normDensity = splineLut.weight(positions[i], positions[i]);
         for (size_t j = 0; j < ps.n_neighbors(pid, i); j++) {
-            const size_t k = ps.neighbor(pid, i, k);
+            const size_t k = ps.neighbor(pid, i, j);
             normDensity += splineLut.weight(positions[i], positions[k]);
         }
-        densities[i] = normDensity;
-    }
-
+        densities[i] = normDensity;        
+    }    
+    
     // Reconstruct SDF
     const double paramC = 0.6;
     const double ratioSmoothingLengthSamplingStep = 2.0;
@@ -74,8 +79,8 @@ int main(int argc, char *argv[])
     std::vector<double> gridSDF;    
     Eigen::Vector3i gridDims;
     discretizeFluidSystemSDF(
-        positions, densities, surfaceLut, smoothingLength, paramC,
-        smoothingLength() / ratioSmoothingLengthSamplingStep,
+        positions, densities, splineLut, smoothingLength,
+        smoothingLength / ratioSmoothingLengthSamplingStep, paramC,
         &gridSDF, &gridVerts, &gridDims);
 
     // Extract Surface
@@ -83,12 +88,25 @@ int main(int argc, char *argv[])
     std::vector<std::array<int, 3>> triangles;
     marchCubes(gridDims, gridSDF, gridVerts, vertices, triangles);
 
+    // Split into path and name
+    size_t m = filename.find_last_of('/');
+    std::string path = filename.substr(0, m != std::string::npos ? m : 0);
+    std::string name = filename.substr(m != std::string::npos ? m : 0, std::string::npos);
+
+    // Find optional filenumber
+    std::string filenumber = "";
+    char const* digits = "0123456789";    
+    std::size_t n = name.find_first_of(digits);
+    if (n != std::string::npos) {
+        std::size_t const m = name.find_first_not_of(digits, n);
+        filenumber = name.substr(n, m != std::string::npos ? m-n : m);
+    }    
+
+    // Output file
     std::stringstream fn;
-    fn << filename << ".surface";
-           
+    fn << path << name.substr(0, n) << "_surface" << filenumber << ".vtk";
+
     learnSPH::writeMeshToVTK(fn.str(), vertices, triangles);
     
-    
-
     return 0;
 }
