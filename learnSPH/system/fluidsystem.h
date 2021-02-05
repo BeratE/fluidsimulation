@@ -41,7 +41,6 @@ namespace learnSPH::System {
         const std::vector<double> &getPressures() const { return m_pressures; }
         const std::vector<Eigen::Vector3d>& getNormals() const { return m_normals; }
         const std::vector<Eigen::Vector3d>& getAccelerations() const { return m_accelerations; }
-        const std::vector<double> &getNormalizedDensities() const { return m_normalizedDensities; }
         
         double getC() const { return m_c; }
         double getGamma() const { return m_gamma; }

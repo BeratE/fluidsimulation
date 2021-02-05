@@ -44,7 +44,6 @@ namespace learnSPH::System {
 
         const std::vector<Vector3d>& getPositions() const { return m_positions; }
         const std::vector<Vector3d>& getVelocities() const { return m_velocities; }
-        const std::vector<double>& getNormalizedDensities() const { return m_normalizedDensities; }
         const Kernel::CubicSpline::Table getKernelLookUp() const { return m_kernelLookup;  }
         const std::shared_ptr<NeighborhoodSearch> getNSearch() const { return mp_nsearch;  }
 
@@ -58,7 +57,6 @@ namespace learnSPH::System {
         
         std::vector<Vector3d> m_positions; // Particle Positions
         std::vector<Vector3d> m_velocities; // Particle Velocities        
-        std::vector<double> m_normalizedDensities; // last normalized densities for SDF calculation
 
         std::shared_ptr<NeighborhoodSearch> mp_nsearch; // reference to neighborhood information
 

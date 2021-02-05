@@ -13,7 +13,6 @@ ParticleSystem::ParticleSystem(double radius, double density, size_t size, bool 
     
     m_positions.resize(size);
     m_velocities.resize(size);
-    m_normalizedDensities.resize(size);
     
     if (fill) {
         std::fill(m_positions.begin(), m_positions.end(), Vector3d(0.0, 0.0, 0.0));
