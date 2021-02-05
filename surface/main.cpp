@@ -25,13 +25,14 @@ int main(int argc, char *argv[])
         std::cout << "Error, .vtk input file required" << std::endl;
     }
 
-    std::string filename(argv[1]);
+    const std::string filename(argv[1]);
+
+    // Read data from VTK file
     std::string comments;
-    std::vector<Eigen::Vector3d> positions;
-    
+    std::vector<Eigen::Vector3d> positions;    
     learnSPH::readParticlesFromVTK(filename, positions, comments);
 
-    // Get Properties for lookup table    
+    // Reconstruct properties  
     size_t numBins;
     double smoothingLength;
     std::string stra, strb;
@@ -43,16 +44,50 @@ int main(int argc, char *argv[])
     numBins = std::stoi(stra);
     smoothingLength = std::stod(strb);
 
-    double searchradius = learnSPH::Kernel::CubicSpline::support(smoothingLength);
-    CompactNSearch::NeighborhoodSearch nsearch(searchradius);
     learnSPH::Kernel::CubicSpline::Table splineLut(smoothingLength, numBins);
 
-    
+    // Compute neighborhood
+    double searchradius = learnSPH::Kernel::CubicSpline::support(smoothingLength);
+    CompactNSearch::NeighborhoodSearch nsearch(searchradius);
+    size_t pid = nsearch->add_point_set(positions.front().data(),
+                                        positions.size());
+    nsearch->find_neighbors();
+    CompactNSearch::PointSet const ps = mp_nsearch->point_set(pid);
+
+    // Compute normalised densities
     std::vector<double> densities(positions.size());
-    for (size_t i = 0; i < densities.size(); i++) {
-        
+
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i < ps.n_points(); i++) {
+        double normDensity = splineLut.weight(positions[i], positions[i]);
+        for (size_t j = 0; j < ps.n_neighbors(pid, i); j++) {
+            const size_t k = ps.neighbor(pid, i, k);
+            normDensity += splineLut.weight(positions[i], positions[k]);
+        }
+        densities[i] = normDensity;
     }
 
+    // Reconstruct SDF
+    const double paramC = 0.6;
+    const double ratioSmoothingLengthSamplingStep = 2.0;
+    std::vector<Eigen::Vector3d> gridVerts;
+    std::vector<double> gridSDF;    
+    Eigen::Vector3i gridDims;
+    discretizeFluidSystemSDF(
+        positions, densities, surfaceLut, smoothingLength, paramC,
+        smoothingLength() / ratioSmoothingLengthSamplingStep,
+        &gridSDF, &gridVerts, &gridDims);
+
+    // Extract Surface
+    std::vector<Eigen::Vector3d> vertices;
+    std::vector<std::array<int, 3>> triangles;
+    marchCubes(gridDims, gridSDF, gridVerts, vertices, triangles);
+
+    std::stringstream fn;
+    fn << filename << ".surface";
+           
+    learnSPH::writeMeshToVTK(fn.str(), vertices, triangles);
+    
     
 
     return 0;

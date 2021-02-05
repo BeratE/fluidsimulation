@@ -68,7 +68,7 @@ TEST_CASE("Adhesion", "[adhesion]") {
     SECTION("Adhesion") {
         double startTime = omp_get_wtime();
         
-        const double particleDiameter = 0.02;
+        const double particleDiameter = 0.1;
         const double boundaryDiameter = particleDiameter * 1.5;
         
         FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.25, 0.75, -.25),
@@ -90,7 +90,7 @@ TEST_CASE("Adhesion", "[adhesion]") {
     
         Solver *solver;
         std::stringstream filename;
-        filename << SOURCE_DIR << "/res/simulation2/" << "waterOnBall";
+        filename << SOURCE_DIR << "/res/simulation/" << "waterOnBall";
         
         SECTION("SPH") {
             solver = new SolverSPH(particles);
