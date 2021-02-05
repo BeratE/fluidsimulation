@@ -24,26 +24,35 @@ void SolverPBF::integrationStep(double deltaT,
     mp_nsearch->find_neighbors();
 
     // preparations for the calculations in the semiImplicit Euler integration
-    m_system.updateDensities(m_boundaries);
-    if (m_tensionEnable) {
-        m_system.updateNormals();
-    }
+    #pragma omp parallel default(none) firstprivate(deltaT), shared(previousPos)
+    {
+        m_system.updateDensities(m_boundaries);
+        if (m_tensionEnable) {
+            m_system.updateNormals();
+        }
 
-    updateAccelerations(deltaT);
-    semiImplicitEulerStep(deltaT);
+        updateAccelerations(deltaT);
+        semiImplicitEulerStep(deltaT);    
 
-    // Update estimate based on constraints
-    mp_nsearch->find_neighbors(); // TODO: Maybe do for every iteration
-    
-    for (size_t iterationNr = 0; iterationNr < m_npbfIterations; iterationNr++) {
-        updatePositionsWithConstraints();
-    }
+        #pragma omp single
+        {
+            // Update estimate based on constraints
+            mp_nsearch->find_neighbors();
+        }
 
-    // Update Velocities
-    #pragma omp parallel for schedule(static) 
-    for (int i = 0; i < m_system.getSize(); i++) {
-        m_system.setParticleVel(i, (m_system.getParticlePos(i) - previousPos[i]) / deltaT);
-    }        
+        for (size_t k = 0; k < m_npbfIterations; k++) {
+            #pragma omp barrier
+            updatePositionsWithConstraints();
+        }
+
+        // Update Velocities
+        #pragma omp for schedule(static)
+        for (int i = 0; i < m_system.getSize(); i++) {
+            m_system.setParticleVel(i,
+                                    (m_system.getParticlePos(i) - previousPos[i]) /
+                                    deltaT);
+        }
+  }
 }
 
 void SolverPBF::updateAccelerations(const double deltaT)
@@ -53,21 +62,21 @@ void SolverPBF::updateAccelerations(const double deltaT)
     const size_t id = m_system.getPointSetID();
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
 
-    // Used in calculation of pressureAccelerations
-    std::vector<double> pressureDensityRatios;
+    // Precalculated density pressure ratios
+    static std::vector<double> ratios(m_system.getSize());
+    #pragma omp for schedule(static)
     for (size_t i = 0; i < m_system.getSize(); i++) {
-        pressureDensityRatios.push_back(m_system.getParticlePressure(i)
-                                        / (m_system.getParticleDensity(i)
-                                           * m_system.getParticleDensity(i)));
+        ratios[i] = (m_system.getParticlePressure(i)
+                     / (m_system.getParticleDensity(i)
+                        * m_system.getParticleDensity(i)));
     }
     
-    #pragma omp parallel for schedule(static) 
+    #pragma omp for schedule(static) 
     for (int i = 0; i < fluidPS.n_points(); i++) {
         // Iterate over fluid neighbors and add contributions to forces 
         for (size_t idx = 0; idx < fluidPS.n_neighbors(id, i); idx++) {
             const unsigned int j = fluidPS.neighbor(id, i, idx);
-            updateAccFluidContribution(i, j, pressureDensityRatios[i],
-                                       pressureDensityRatios[j]);
+            updateAccFluidContribution(i, j, ratios[i], ratios[j]);
         }
 
         // Iterate over boundaries and add contributions to forces
@@ -76,7 +85,7 @@ void SolverPBF::updateAccelerations(const double deltaT)
             const size_t boundaryID = boundary.getPointSetID();
             for (size_t idx = 0; idx < fluidPS.n_neighbors(boundaryID, i); idx++) {
                 const unsigned int k = fluidPS.neighbor(boundaryID, i, idx);
-                updateAccBoundaryContribution(i, k, pressureDensityRatios[i], boundary);
+                updateAccBoundaryContribution(i, k, ratios[i], boundary);
             }
         }
     }
@@ -112,34 +121,33 @@ void SolverPBF::updateAccBoundaryContribution(
 }
 
 
-void SolverPBF::updatePositionsWithConstraints() {
-    m_system.updateDensities(m_boundaries);
-    std::vector<int> high_density_particles;
-    high_density_particles.reserve(m_system.getSize());
-    for (size_t i = 0; i < m_system.getSize(); i++) {
-        if (m_system.getParticleDensity(i) > m_system.getRestDensity()) {
-            high_density_particles.push_back(i);
-        }
-    }
+void SolverPBF::updatePositionsWithConstraints()
+{
+    const size_t fluidID = m_system.getPointSetID();
+    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(fluidID);
+    
+    m_system.updateDensities(m_boundaries);    
 
     // Compute constraint lambdas
-    std::vector<double> lambdas(m_system.getSize(), 0.0);
+    static std::vector<double> lambdas(m_system.getSize());
 
-    #pragma omp parallel for schedule(static) 
-    for (int idx = 0; idx < high_density_particles.size(); idx++) {
-        const size_t i = high_density_particles[idx];
+    #pragma omp for schedule(static) 
+    for (int i = 0; i < m_system.getSize(); i++) {
+        if (m_system.getParticleDensity(i) <= m_system.getRestDensity()) {
+            lambdas[i] = 0.0;
+            continue;
+        }
+
         const Eigen::Vector3d pos_i = m_system.getParticlePos(i);
         const double C = m_system.getParticleDensity(i) / m_system.getRestDensity() - 1.0;
+        
         Eigen::Vector3d grad = Eigen::Vector3d::Zero();
-        double S = 0.0;
-
-            
-        CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
+        double S = 0.0;                    
             
         // Fluid neighbors
-        for (size_t nIdx = 0; nIdx < fluidPS.n_neighbors(m_system.getPointSetID(), i); nIdx++) {
-            const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, nIdx);
-            const Eigen::Vector3d C_grad_j = ( m_system.getParticleMass() / m_system.getRestDensity() ) 
+        for (size_t nIdx = 0; nIdx < fluidPS.n_neighbors(fluidID, i); nIdx++) {
+            const unsigned int j = fluidPS.neighbor(fluidID, i, nIdx);
+            const Eigen::Vector3d C_grad_j = (m_system.getParticleMass() / m_system.getRestDensity()) 
                 * m_system.getKernelLookUp().gradWeight(pos_i, m_system.getParticlePos(j));
             grad += C_grad_j;
             S += 1.0 / m_system.getParticleMass() * C_grad_j.norm() * C_grad_j.norm();
@@ -147,8 +155,9 @@ void SolverPBF::updatePositionsWithConstraints() {
 
         // Boundary neighbors
         for (BoundarySystem boundary : m_boundaries) {
-            for (size_t bIdx = 0; bIdx < fluidPS.n_neighbors(boundary.getPointSetID(), i); bIdx++) {
-                const unsigned int k = fluidPS.neighbor(boundary.getPointSetID(), i, bIdx);
+            const size_t boundaryID = boundary.getPointSetID();
+            for (size_t bIdx = 0; bIdx < fluidPS.n_neighbors(boundaryID, i); bIdx++) {
+                const unsigned int k = fluidPS.neighbor(boundaryID, i, bIdx);
                 const Eigen::Vector3d C_grad_k = boundary.getParticleVolume(k)
                     * m_system.getKernelLookUp().gradWeight(pos_i, boundary.getParticlePos(k));
                 grad += C_grad_k;
@@ -159,21 +168,26 @@ void SolverPBF::updatePositionsWithConstraints() {
     }
 
     // Calculate deltaX
-    std::vector<Eigen::Vector3d> deltaX(m_system.getSize(), Eigen::Vector3d::Zero());
-    CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
+    static std::vector<Eigen::Vector3d> deltaX(m_system.getSize());
     
-    #pragma omp parallel for schedule(static) 
+    #pragma omp for schedule(static) 
     for (int i = 0; i < fluidPS.n_points(); i++) {
+        const Eigen::Vector3d pos_i = m_system.getParticlePos(i);
+        
+        deltaX[i] = 1.0 / m_system.getRestDensity()
+            * lambdas[i]*lambdas[i]
+            * m_system.getKernelLookUp().gradWeight(pos_i,
+                                                    pos_i);
+        
         // Fluid neighbors
         Eigen::Vector3d fluidContrib = Eigen::Vector3d::Zero();
-        Eigen::Vector3d pos_i = m_system.getParticlePos(i);
-        for (size_t nIdx = 0; nIdx < fluidPS.n_neighbors(m_system.getPointSetID(), i); nIdx++) {
-            const unsigned int j = fluidPS.neighbor(m_system.getPointSetID(), i, nIdx);
-            fluidContrib += (( m_system.getParticleMass() / m_system.getParticleMass())
-                             * lambdas[i] + lambdas[j])
+        for (size_t nIdx = 0; nIdx < fluidPS.n_neighbors(fluidID, i); nIdx++) {
+            const unsigned int j = fluidPS.neighbor(fluidID, i, nIdx);
+            fluidContrib += (lambdas[i] + lambdas[j])
                 * m_system.getKernelLookUp().gradWeight(pos_i, m_system.getParticlePos(j));
         }
         deltaX[i] += 1.0 / m_system.getRestDensity() * fluidContrib;
+        
         // Boundary neighbors
         for (BoundarySystem boundary : m_boundaries) {
             for (size_t bIdx = 0; bIdx < fluidPS.n_neighbors(boundary.getPointSetID(), i); bIdx++) {
@@ -185,7 +199,7 @@ void SolverPBF::updatePositionsWithConstraints() {
     }
 
     // Update positions
-    #pragma omp parallel for schedule(static) 
+    #pragma omp for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
         m_system.addParticlePos(i, deltaX[i]);
     }
