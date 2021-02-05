@@ -156,173 +156,47 @@ TEST_CASE("Adhesion", "[adhesion]") {
 /// Bitte nochmal auf die Tests schauen
 //////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Tension on funnel", "[tension_funnel]") {
-    //omp_set_dynamic(0);
-    //omp_set_num_threads(1);
-    SECTION("Funnel") {
-        std::cout << "Funnel with tension and adhesion" << std::endl;
-
-        const double particleDiameter = 0.05;
-        const double particelDiameterBoundary = particleDiameter / 0.5;
-
-        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
-                                                         Eigen::Vector3d(1, 1, 1),
-                                                         particleDiameter);
-        particles.setGamma(0.2);
-
-        BoundarySystem plane1 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(-1, 0, -1),
-                                                              Eigen::Vector3d(0.3, -1, 0.3),
-                                                              Eigen::Vector3d(2, 0, -1),
-                                                              Eigen::Vector3d(0.7, -1, 0.3),
-                                                              particelDiameterBoundary);
-        //plane1.setViscosity(0.02);
-
-        BoundarySystem plane2 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(2, 0, -1),
-                                                              Eigen::Vector3d(0.7, -1, 0.3),
-                                                              Eigen::Vector3d(2, 0, 2),
-                                                              Eigen::Vector3d(0.7, -1, 0.7),
-                                                              particelDiameterBoundary);
-        //plane2.setViscosity(0.02);
-
-        BoundarySystem plane3 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(2, 0, 2),
-                                                              Eigen::Vector3d(0.7, -1, 0.7),
-                                                              Eigen::Vector3d(-1, 0, 2),
-                                                              Eigen::Vector3d(0.3, -1, 0.7),
-                                                              particelDiameterBoundary);
-        //plane3.setViscosity(0.02);
-
-        BoundarySystem plane4 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(-1, 0, 2),
-                                                              Eigen::Vector3d(0.3, -1, 0.7),
-                                                              Eigen::Vector3d(-1, 0, -1),
-                                                              Eigen::Vector3d(0.3, -1, 0.3),
-                                                              particelDiameterBoundary);
-        //plane4.setViscosity(0.02);
-
-        BoundarySystem box = Emitter().sampleBoundaryHollowBox(Eigen::Vector3d(-1, -1.5, 2),
-                                                               Eigen::Vector3d(2, 1.2, -1),
-                                                               particelDiameterBoundary);
-        box.setViscosity(0.08);
-        std::stringstream filename;
-        filename << SOURCE_DIR << "/res/simulation/" << "sph_funnel";
-        SECTION("SPH") {
-            SolverSPH solver(particles);
-
-            solver.setSnapShotAfterMS(40);
-            solver.setParamStiffness(3000);
-            solver.setFluidViscosity(0.1);
-            solver.enableAdhesion(false);
-            solver.enableGravity(true);
-            solver.enableSmoothing(true);
-            solver.enableTension(false);
-
-            SECTION("OFF") {
-                filename << "_no_tension_no_adhesion";
-            }
-
-            SECTION("BETA5") {
-                plane1.setBeta(5);
-                plane2.setBeta(5);
-                plane3.setBeta(5);
-                plane4.setBeta(5);
-                solver.enableAdhesion(true);
-                solver.enableTension(true);
-                filename << "_5_beta";
-            }
-
-            solver.addBoundary(plane1);
-            solver.addBoundary(plane2);
-            solver.addBoundary(plane3);
-            solver.addBoundary(plane4);
-            solver.addBoundary(box);
-            solver.run(filename.str(), 3000);
-        }
-
-        SECTION("PBF") {
-
-            std::stringstream filename;
-            filename << SOURCE_DIR << "/res/simulation/" << "pbf_funnel";
-
-            SolverPBF solver(particles);
-
-            solver.setParamSmoothing(0.25);
-            solver.setSnapShotAfterMS(40);
-            solver.setFluidViscosity(0.01);
-            solver.enableAdhesion(false);
-            solver.enableGravity(true);
-            solver.enableSmoothing(true);
-            solver.enableTension(false);
-            solver.setNumIterations(3);
-
-            SECTION("OFF") {
-                filename << "_no_tension_no_adhesion";
-            }
-
-            SECTION("BETA250") {
-                plane1.setBeta(5);
-                plane2.setBeta(5);
-                plane3.setBeta(5);
-                plane4.setBeta(5);
-                solver.enableAdhesion(true);
-                solver.enableTension(true);
-                filename << "_5_beta";
-            }
-
-            solver.addBoundary(plane1);
-            solver.addBoundary(plane2);
-            solver.addBoundary(plane3);
-            solver.addBoundary(plane4);
-            solver.addBoundary(box);
-            solver.run(filename.str(), 3000);
-        }
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////
-/// Bitte nochmal auf die Tests schauen
-//////////////////////////////////////////////////////////////////////////
-
 TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
     std::cout << "Complex scene with tension and adhesion" << std::endl;
 
     const double particleDiameter = 0.05;
     const double particelDiameterBoundary = particleDiameter / 0.5;
 
-    FluidSystem particles = Emitter().sampleFluidBox( Eigen::Vector3d(0.1, 1.1, 1.9),//Eigen::Vector3d(0.05, 1.05, 1.95),
-                                                      Eigen::Vector3d(1.9, 1.9, 0.1),
-                                                      particleDiameter);
-    particles.setGamma(0.5); // Gamma kann größer sein bei SPH
+    FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0.1, 1.1, 1.9),
+        Eigen::Vector3d(1.9, 1.9, 0.1),
+        particleDiameter);
 
     BoundarySystem bigBoundary = Emitter().sampleBoundaryHollowBox(Eigen::Vector3d(0.0, 0.0, 0.0),
-                                                                   Eigen::Vector3d(4.0, 2.0, 2.0),
-                                                                   particelDiameterBoundary);
+        Eigen::Vector3d(4.0, 2.0, 2.0),
+        particelDiameterBoundary);
     bigBoundary.setViscosity(0.02);
 
     BoundarySystem plane1 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(0.0, 1.0, 2.0),
-                                                          Eigen::Vector3d(2.0, 1.0, 2.0),
-                                                          Eigen::Vector3d(0.0, 1.0, 0.0),
-                                                          Eigen::Vector3d(2.0, 1.0, 0.0),
-                                                          particelDiameterBoundary);
+        Eigen::Vector3d(2.0, 1.0, 2.0),
+        Eigen::Vector3d(0.0, 1.0, 0.0),
+        Eigen::Vector3d(2.0, 1.0, 0.0),
+        particelDiameterBoundary);
     plane1.setViscosity(0.02);
 
     BoundarySystem plane2 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(2.0, 2.0, 2.0),
-                                                          Eigen::Vector3d(2.0, 1.5, 2.0),
-                                                          Eigen::Vector3d(2.0, 2.0, 0.0),
-                                                          Eigen::Vector3d(2.0, 1.5, 0.0),
-                                                          particelDiameterBoundary);
+        Eigen::Vector3d(2.0, 1.5, 2.0),
+        Eigen::Vector3d(2.0, 2.0, 0.0),
+        Eigen::Vector3d(2.0, 1.5, 0.0),
+        particelDiameterBoundary);
     plane2.setViscosity(0.02);
 
     BoundarySystem plane3 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(2.0, 1.5, 2.0),
-                                                          Eigen::Vector3d(2.0, 1.0, 2.0),
-                                                          Eigen::Vector3d(2.0, 1.5, 1.25),
-                                                          Eigen::Vector3d(2.0, 1.0, 1.25),
-                                                          particelDiameterBoundary);
+        Eigen::Vector3d(2.0, 1.0, 2.0),
+        Eigen::Vector3d(2.0, 1.5, 1.25),
+        Eigen::Vector3d(2.0, 1.0, 1.25),
+        particelDiameterBoundary);
     plane3.setViscosity(0.02);
 
     BoundarySystem plane4 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(2.0, 1.5, 0.75),
-                                                          Eigen::Vector3d(2.0, 1.0, 0.75),
-                                                          Eigen::Vector3d(2.0, 1.5, 0.0),
-                                                          Eigen::Vector3d(2.0, 1.0, 0.0),
-                                                          particelDiameterBoundary);
+        Eigen::Vector3d(2.0, 1.0, 0.75),
+        Eigen::Vector3d(2.0, 1.5, 0.0),
+        Eigen::Vector3d(2.0, 1.0, 0.0),
+        particelDiameterBoundary);
     plane4.setViscosity(0.02);
 
     std::stringstream filepath;
@@ -339,13 +213,12 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
     SECTION("SPH") {
         std::stringstream filename;
         filename << SOURCE_DIR << "/res/simulation/" << "sph_complex";
-
         particles.setGamma(0.5); // Gamma etwas niedriger, siehe Beispielvideo von Jose
         SolverSPH solver(particles);
 
         solver.setSnapShotAfterMS(40);
         solver.setParamStiffness(3000);
-        solver.setFluidViscosity(0.1);
+        solver.setFluidViscosity(0.07);
         solver.enableAdhesion(false);
         solver.enableGravity(true);
         solver.enableSmoothing(true);
@@ -375,7 +248,7 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
     SECTION("PBF") {
         std::stringstream filename;
         filename << SOURCE_DIR << "/res/simulation/" << "pbf_complex";
-        particles.setGamma(0.15); 
+        particles.setGamma(0.1);
         SolverPBF solver(particles);
 
         solver.setParamSmoothing(0.25);
