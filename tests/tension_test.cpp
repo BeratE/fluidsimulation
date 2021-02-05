@@ -71,8 +71,8 @@ TEST_CASE("Adhesion", "[adhesion]") {
         const double particleDiameter = 0.02;
         const double boundaryDiameter = particleDiameter * 1.5;
         
-        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.25, 1.02, -.25),
-                                                         Eigen::Vector3d( .25, 3.02,  .25),
+        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.25, 0.75, -.25),
+                                                         Eigen::Vector3d( .25, 2.75,  .25),
                                                          particleDiameter);
         
         std::stringstream filepath;
@@ -80,13 +80,6 @@ TEST_CASE("Adhesion", "[adhesion]") {
         BoundarySystem icosphere =
             System::Emitter().sampleBoundaryMesh(filepath.str(), boundaryDiameter);
         icosphere.setViscosity(0.02);
-
-        BoundarySystem box = Emitter().sampleBoundaryHollowBox(
-            Eigen::Vector3d(-2.0, -3.0, -2.0) - particleDiameter * Eigen::Vector3d(1.0, 1.0, 1.0),
-            Eigen::Vector3d( 2.0,  3.7,  2.0) + particleDiameter * Eigen::Vector3d(1.0, 1.0, 1.0),
-            boundaryDiameter);
-        box.setViscosity(0.02);
-        box.setBeta(0.5);
         
         Solver *solver;
         std::stringstream filename;
@@ -108,10 +101,9 @@ TEST_CASE("Adhesion", "[adhesion]") {
         }
 
         solver->addBoundary(icosphere);
-        // solver->addBoundary(box);
                 
         solver->setFluidTension(0.15);
-        solver->setBoundaryAdhesion(0, 2.4);        
+        solver->setBoundaryAdhesion(0, 10);        
         
         solver->setSnapShotAfterMS(1000.0/60);        
         solver->enableGravity(true);

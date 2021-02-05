@@ -186,17 +186,22 @@ void Solver::initAccelerations()
 
 void Solver::zSort()
 {
-    return;
+    std::cout << "Start zSorting..." << std::endl;
     mp_nsearch->z_sort();
     // Sort relevant information for all fluid and boundary particles
+    std::cout << "Start zSorting fluid..." << std::endl;
     auto const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
     fluidPS.sort_field(m_system.getPrevPos().data());
     fluidPS.sort_field(m_system.getPositions().data());
     fluidPS.sort_field(m_system.getVelocities().data());
+    std::cout << "Done zSorting fluid..." << std::endl;
 
     for (BoundarySystem boundary : m_boundaries) {
+        std::cout << "Start zSorting boundary..." << std::endl;
         auto const& boundaryPS = mp_nsearch->point_set(boundary.getPointSetID());
         boundaryPS.sort_field(boundary.getPositions().data());
         boundaryPS.sort_field(boundary.getVolumes().data());
+        std::cout << "Start zSorting boundary..." << std::endl;
     }
+    std::cout << "Done zSorting..." << std::endl;
 }
