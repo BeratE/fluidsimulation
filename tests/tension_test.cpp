@@ -9,7 +9,7 @@
 
 using namespace learnSPH;
 using namespace learnSPH::System;
-
+//
 //TEST_CASE("Simple surface tension, no gravity cube") {
 //    SECTION("Tension") {
 //        // omp_set_dynamic(0);
@@ -70,76 +70,76 @@ using namespace learnSPH::System;
 //        std::cout << "Runtime: " << endTime-startTime << std::endl;
 //    }        
 //}
-
-
-TEST_CASE("Adhesion", "[ahesion]") {
-    SECTION("Adhesion") {
-        double startTime = omp_get_wtime();
-        
-        const double particleDiameter = 0.1;
-
-        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.75, 1.5, -.75),
-                                                         Eigen::Vector3d( .75, 3.5,  .75),
-                                                         particleDiameter);
-
-        particles.setGamma(0.05);
-        
-        std::stringstream filepath;
-        filepath << SOURCE_DIR << "/res/" << "icosphere.obj";
-        BoundarySystem icosphere =
-            System::Emitter().sampleBoundaryMesh(filepath.str(), particleDiameter);
-
-        icosphere.setBeta(20);
-        
-        Solver *solver;
-        std::stringstream filename;
-        filename << SOURCE_DIR << "/res/simulation/" << "adhesion_two";
-        
-        SECTION("SPH") {
-            solver = new SolverSPH(particles);
-            ((SolverSPH*)solver)->setParamStiffness(3000);
-
-            filename << "_sph";
-            SECTION("ON") {
-                solver->enableTension(true);
-                solver->enableAdhesion(true);
-            }
-            
-            SECTION("OFF") {
-                solver->enableAdhesion(false);
-                filename << "_off";
-            }
-        }                
-        SECTION("PBF") {
-            solver = new SolverPBF(particles);
-            ((SolverPBF*)solver)->setNumIterations(3);
-            filename << "pbf";
-            
-            SECTION("ON") {
-                solver->enableTension(true);
-                solver->enableAdhesion(true);
-            }
-            SECTION("OFF") {
-                solver->enableAdhesion(false);
-                filename << "_off";
-            }
-        }
-
-        solver->addBoundary(icosphere);
-        solver->setSnapShotAfterMS(33);
-        solver->setFluidViscosity(0.01);
-        solver->setBoundaryViscosity(0, 0.01);
-        solver->setMaxTimeStepSeconds(0.002);
-        solver->enableGravity(true);
-        solver->enableSmoothing(true);
-
-        solver->run(filename.str(), 2000);
-
-        double endTime = omp_get_wtime();
-
-        std::cout << "Runtime: " << endTime-startTime << std::endl;
-    }
-}
+//
+//
+//TEST_CASE("Adhesion", "[ahesion]") {
+//    SECTION("Adhesion") {
+//        double startTime = omp_get_wtime();
+//        
+//        const double particleDiameter = 0.1;
+//
+//        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(-.75, 1.5, -.75),
+//                                                         Eigen::Vector3d( .75, 3.5,  .75),
+//                                                         particleDiameter);
+//
+//        particles.setGamma(0.05);
+//        
+//        std::stringstream filepath;
+//        filepath << SOURCE_DIR << "/res/" << "icosphere.obj";
+//        BoundarySystem icosphere =
+//            System::Emitter().sampleBoundaryMesh(filepath.str(), particleDiameter);
+//
+//        icosphere.setBeta(20);
+//        
+//        Solver *solver;
+//        std::stringstream filename;
+//        filename << SOURCE_DIR << "/res/simulation/" << "adhesion_two";
+//        
+//        SECTION("SPH") {
+//            solver = new SolverSPH(particles);
+//            ((SolverSPH*)solver)->setParamStiffness(3000);
+//
+//            filename << "_sph";
+//            SECTION("ON") {
+//                solver->enableTension(true);
+//                solver->enableAdhesion(true);
+//            }
+//            
+//            SECTION("OFF") {
+//                solver->enableAdhesion(false);
+//                filename << "_off";
+//            }
+//        }                
+//        SECTION("PBF") {
+//            solver = new SolverPBF(particles);
+//            ((SolverPBF*)solver)->setNumIterations(3);
+//            filename << "pbf";
+//            
+//            SECTION("ON") {
+//                solver->enableTension(true);
+//                solver->enableAdhesion(true);
+//            }
+//            SECTION("OFF") {
+//                solver->enableAdhesion(false);
+//                filename << "_off";
+//            }
+//        }
+//
+//        solver->addBoundary(icosphere);
+//        solver->setSnapShotAfterMS(33);
+//        solver->setFluidViscosity(0.01);
+//        solver->setBoundaryViscosity(0, 0.01);
+//        solver->setMaxTimeStepSeconds(0.002);
+//        solver->enableGravity(true);
+//        solver->enableSmoothing(true);
+//
+//        solver->run(filename.str(), 2000);
+//
+//        double endTime = omp_get_wtime();
+//
+//        std::cout << "Runtime: " << endTime-startTime << std::endl;
+//    }
+//}
 
 //////////////////////////////////////////////////////////////////////////
 /// Bitte nochmal auf die Tests schauen
@@ -157,7 +157,6 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
         FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
                                                          Eigen::Vector3d(1, 1, 1),
                                                          particleDiameter);
-        particles.setGamma(0.2);
 
         BoundarySystem plane1 = Emitter().sampleBoundaryPlane(Eigen::Vector3d(-1, 0, -1),
                                                               Eigen::Vector3d(0.3, -1, 0.3),
@@ -191,14 +190,15 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
                                                                Eigen::Vector3d(2, 1.2, -1),
                                                                particelDiameterBoundary);
         box.setViscosity(0.08);
-        std::stringstream filename;
-        filename << SOURCE_DIR << "/res/simulation/" << "sph_funnel";
-        SECTION("SPH") {
+        /*SECTION("SPH") {
+            std::stringstream filename;
+            filename << SOURCE_DIR << "/res/simulation/" << "sph_funnel";
+            particles.setGamma(0.5);
             SolverSPH solver(particles);
 
             solver.setSnapShotAfterMS(40);
             solver.setParamStiffness(3000);
-            solver.setFluidViscosity(0.1);
+            solver.setFluidViscosity(0.07);
             solver.enableAdhesion(false);
             solver.enableGravity(true);
             solver.enableSmoothing(true);
@@ -224,13 +224,12 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
             solver.addBoundary(plane4);
             solver.addBoundary(box);
             solver.run(filename.str(), 3000);
-        }
+        }*/
 
-        SECTION("PBF") {
-
+        /*SECTION("PBF") {
             std::stringstream filename;
             filename << SOURCE_DIR << "/res/simulation/" << "pbf_funnel";
-
+            particles.setGamma(0.1);
             SolverPBF solver(particles);
 
             solver.setParamSmoothing(0.25);
@@ -262,7 +261,7 @@ TEST_CASE("Tension on funnel", "[tension_funnel]") {
             solver.addBoundary(plane4);
             solver.addBoundary(box);
             solver.run(filename.str(), 3000);
-        }
+        }*/
     }
 }
 
@@ -279,7 +278,6 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
     FluidSystem particles = Emitter().sampleFluidBox( Eigen::Vector3d(0.1, 1.1, 1.9),//Eigen::Vector3d(0.05, 1.05, 1.95),
                                                       Eigen::Vector3d(1.9, 1.9, 0.1),
                                                       particleDiameter);
-    particles.setGamma(0.5); // Gamma kann größer sein bei SPH
 
     BoundarySystem bigBoundary = Emitter().sampleBoundaryHollowBox(Eigen::Vector3d(0.0, 0.0, 0.0),
                                                                    Eigen::Vector3d(4.0, 2.0, 2.0),
@@ -328,13 +326,12 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
     SECTION("SPH") {
         std::stringstream filename;
         filename << SOURCE_DIR << "/res/simulation/" << "sph_complex";
-
         particles.setGamma(0.5); // Gamma etwas niedriger, siehe Beispielvideo von Jose
         SolverSPH solver(particles);
 
         solver.setSnapShotAfterMS(40);
         solver.setParamStiffness(3000);
-        solver.setFluidViscosity(0.1);
+        solver.setFluidViscosity(0.07);
         solver.enableAdhesion(false);
         solver.enableGravity(true);
         solver.enableSmoothing(true);
@@ -364,7 +361,7 @@ TEST_CASE("Surface Tension Complex Scene", "[tension_complex]") {
     SECTION("PBF") {
         std::stringstream filename;
         filename << SOURCE_DIR << "/res/simulation/" << "pbf_complex";
-        particles.setGamma(0.15); 
+        particles.setGamma(0.1); 
         SolverPBF solver(particles);
 
         solver.setParamSmoothing(0.25);
