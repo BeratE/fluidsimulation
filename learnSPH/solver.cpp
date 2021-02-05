@@ -82,7 +82,7 @@ void Solver::run(std::string file, double milliseconds)
     
 
     // Required for interpolation between simulation steps
-    std::vector<Eigen::Vector3d> prevPos(m_system.getPositions());   
+    m_system.setPrevPos(m_system.getPositions());   
 
     // Controll variables
     double runTime_s = 0.0;
@@ -96,28 +96,32 @@ void Solver::run(std::string file, double milliseconds)
     
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s << std::endl;
+        if (iteration % m_zSortIntervall == 0) {
+            zSort();
+        }
         // Propagate System
         double deltaT_s = timeStepCFL();
-        integrationStep(deltaT_s, prevPos);
+        integrationStep(deltaT_s);
         runTime_s += deltaT_s;
 
         // Take Snapshot
         if (runTime_s > nextSnapShotTime_s) {
             filename.str(std::string());
-            filename << file << snapShotNr << ".vtk";            
-            interpolateVector<Eigen::Vector3d>(prevPos,
+            filename << file << snapShotNr << ".vtk";         
+            // Interpolated vector is stored in m_prevPos. This is ok, because m_prevPos is updated to the correct value at the end of run()
+            interpolateVector<Eigen::Vector3d>(m_system.getPrevPos(),
                                                m_system.getPositions(),
                                                prevTime_s,
                                                runTime_s,
                                                nextSnapShotTime_s);
             
-            save_particles_to_vtk(filename.str(), prevPos, m_system.getDensities());
+            save_particles_to_vtk(filename.str(), m_system.getPrevPos(), m_system.getDensities());
 
             nextSnapShotTime_s = (++snapShotNr) * m_snapShotMS*0.001;            
         }
         
         prevTime_s = runTime_s;
-        prevPos = m_system.getPositions();
+        m_system.setPrevPos(m_system.getPositions());
     }
 }
 
@@ -177,5 +181,21 @@ void Solver::initAccelerations()
         }
 
         m_system.setParticleAcc(i, acc);
+    }
+}
+
+void Solver::zSort()
+{
+    mp_nsearch->z_sort();
+    // Sort relevant information for all fluid and boundary particles
+    auto const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());
+    fluidPS.sort_field(m_system.getPrevPos().data());
+    fluidPS.sort_field(m_system.getPositions().data());
+    fluidPS.sort_field(m_system.getVelocities().data());
+
+    for (BoundarySystem boundary : m_boundaries) {
+        auto const& boundaryPS = mp_nsearch->point_set(boundary.getPointSetID());
+        boundaryPS.sort_field(boundary.getPositions().data());
+        boundaryPS.sort_field(boundary.getVolumes().data());
     }
 }

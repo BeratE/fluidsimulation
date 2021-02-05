@@ -14,8 +14,7 @@ namespace learnSPH {
         SolverPBF(System::FluidSystem system);
         ~SolverPBF();
 
-        void integrationStep(double deltaT,
-                               const std::vector<Eigen::Vector3d> &previousPos) override;
+        void integrationStep(double deltaT) override;
         
         void updateAccelerations(const double deltaT);
     

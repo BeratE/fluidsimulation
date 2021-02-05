@@ -18,8 +18,7 @@ SolverSPH::~SolverSPH()
 {
 }
 
-void SolverSPH::integrationStep(double deltaT,
-                                const std::vector<Eigen::Vector3d>& previousPos)
+void SolverSPH::integrationStep(double deltaT)
 {   
     mp_nsearch->find_neighbors();    
     

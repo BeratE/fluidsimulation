@@ -19,12 +19,11 @@ SolverPBF::~SolverPBF()
 {
 }
 
-void SolverPBF::integrationStep(double deltaT,
-                                  const std::vector<Eigen::Vector3d>& previousPos) {
+void SolverPBF::integrationStep(double deltaT) {
     mp_nsearch->find_neighbors();
 
     // preparations for the calculations in the semiImplicit Euler integration
-    #pragma omp parallel default(none) firstprivate(deltaT), shared(previousPos)
+    #pragma omp parallel default(none) firstprivate(deltaT)
     {
         m_system.updateDensities(m_boundaries);
         if (m_tensionEnable) {
@@ -49,7 +48,7 @@ void SolverPBF::integrationStep(double deltaT,
         #pragma omp for schedule(static)
         for (int i = 0; i < m_system.getSize(); i++) {
             m_system.setParticleVel(i,
-                                    (m_system.getParticlePos(i) - previousPos[i]) /
+                                    (m_system.getParticlePos(i) - m_system.getParticlePrevPos(i)) /
                                     deltaT);
         }
   }

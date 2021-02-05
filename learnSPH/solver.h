@@ -41,6 +41,7 @@ public:
     void setMaxTimeStepSeconds(double val) { m_maxTimeStep_s = val; }
     void setParamSmoothing(double val) { m_xsphSmoothing = val; }
     void setSnapShotAfterMS(double ms) { m_snapShotMS = ms; }   
+    void setZSortIntervall(unsigned int zSortIntervall) { m_zSortIntervall = zSortIntervall; }
     void enableGravity(bool val) { m_gravityEnable = val; }
     void enableSmoothing(bool val) { m_smoothingEnable = val; }
     void enableTension(bool val) { m_tensionEnable = val; }
@@ -48,10 +49,11 @@ public:
     
 protected:
     // Specific solvers will overwrite this function. Overhead is minimal.
-    virtual void integrationStep(double deltaT,
-                                 const std::vector<Eigen::Vector3d> &previousPos) {}
+    virtual void integrationStep(double deltaT) {}
     void semiImplicitEulerStep(double deltaT);
     void initAccelerations();
+
+    void zSort();
     
     double m_snapShotMS = 20;
     double m_maxTimeStep_s = 0.002;
@@ -61,6 +63,7 @@ protected:
     bool m_tensionEnable = true;
     bool m_adhesionEnable = true;
         
+    unsigned int m_zSortIntervall = 20;
     System::FluidSystem m_system;
     std::vector<System::BoundarySystem> m_boundaries;
     std::shared_ptr<CompactNSearch::NeighborhoodSearch> mp_nsearch; 
