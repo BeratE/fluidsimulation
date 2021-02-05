@@ -15,7 +15,7 @@ void interpolateVector(std::vector<T>& previous,
     const double alpha = (targetTime - prevTime) / (currTime - prevTime);
 
     #pragma omp parallel for schedule(static)
-    for (size_t i = 0; i < previous.size(); i++) {
+    for (int i = 0; i < previous.size(); i++) {
         previous[i] = previous[i]*(1.0 - alpha) + current[i]*alpha;
     }
 }
@@ -186,6 +186,7 @@ void Solver::initAccelerations()
 
 void Solver::zSort()
 {
+    return;
     mp_nsearch->z_sort();
     // Sort relevant information for all fluid and boundary particles
     auto const& fluidPS = mp_nsearch->point_set(m_system.getPointSetID());

@@ -171,7 +171,7 @@ void Surface::extractMesh(SurfaceInformation &surfaceInfo,
 void Surface::saveMeshSurfaceInfo(std::vector<SurfaceInformation> &surfaceInfos)
 {
     #pragma omp parallel for schedule(static)
-    for(size_t i = 0; i < surfaceInfos.size(); i++) {
+    for(int i = 0; i < surfaceInfos.size(); i++) {
         std::vector<Eigen::Vector3d> vertices;
         std::vector<std::array<int, 3>> triangles;
         Surface::extractMesh(surfaceInfos[i], vertices, triangles);
