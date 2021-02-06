@@ -11,64 +11,69 @@
 using namespace learnSPH;
 using namespace learnSPH::System;
 
-//TEST_CASE("Simple surface tension, no gravity cube") {
-//   SECTION("Tension") {
-//       // omp_set_dynamic(0);
-//       // omp_set_num_threads(1);        
-//       
-//       const double particleDiameter = 0.1;
-//
-//       FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
-//                                                        Eigen::Vector3d(1, 1, 1),
-//                                                        particleDiameter);
-//       particles.setGamma(0.15);
-//       
-//       Solver *solver;
-//       std::stringstream filename;
-//       filename << SOURCE_DIR << "/res/simulation2/" << "floating_ball";
-//       
-//       SECTION("SPH") {
-//           solver = new SolverSPH(particles);
-//           ((SolverSPH*)solver)->setParamStiffness(3000);
-//           solver->setMaxTimeStepSeconds(0.001);
-//           solver->setFluidViscosity(0.01);
-//           filename << "_sph";               
-//       }                
-//       SECTION("PBF") {
-//           solver = new SolverPBF(particles);
-//           ((SolverPBF*)solver)->setNumIterations(3);
-//           solver->setMaxTimeStepSeconds(0.002);
-//           solver->setFluidViscosity(0.001);
-//           filename << "_pbf";
-//       }
-//
-//       solver->setSnapShotAfterMS(1000.0/30.0);
-//       
-//       solver->enableGravity(false);
-//       solver->enableSmoothing(true);
-//       solver->enableAdhesion(false);
-//       solver->enableTension(true);
-//
-//       double startTime = omp_get_wtime();
-//
-//       solver->run(filename.str(), 3000);
-//
-//       double endTime = omp_get_wtime();
-//
-//       std::cout << "Runtime: " << endTime-startTime << std::endl;
-//
-//       outputParams(filename.str(), *solver, endTime-startTime);
-//
-//       delete solver;
-//   }        
-//}
+TEST_CASE("Simple surface tension, no gravity cube") {
+  SECTION("Tension") {
+      //omp_set_dynamic(0);
+      //omp_set_num_threads(1);        
+      
+      const double particleDiameter = 0.03;
+
+      FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
+                                                       Eigen::Vector3d(1, 1, 1),
+                                                       particleDiameter);
+      
+      Solver *solver;
+      std::stringstream filename;
+      filename << SOURCE_DIR << "/res/simulation2/" << "floating_ball";
+      
+      SECTION("SPH") {
+          solver = new SolverSPH(particles);
+          filename << "_sph";
+          
+          ((SolverSPH*)solver)->setParamStiffness(3000);          
+          solver->setMaxTimeStepSeconds(0.001);
+
+          solver->setFluidTension(0.15);
+          solver->setFluidViscosity(0.01);          
+      }                
+      SECTION("PBF") {
+          solver = new SolverPBF(particles);
+          filename << "_pbf";
+          
+          ((SolverPBF*)solver)->setNumIterations(3);          
+          solver->setMaxTimeStepSeconds(0.002);
+
+          solver->setFluidTension(0.05);
+          solver->setFluidViscosity(0.0008);
+      }
+
+      solver->setSnapShotAfterMS(1000.0/60.0);
+      
+      solver->enableGravity(false);
+      solver->enableSmoothing(true);
+      solver->enableAdhesion(false);
+      solver->enableTension(true);
+
+      double startTime = omp_get_wtime();
+
+      solver->run(filename.str(), 1000);
+
+      double endTime = omp_get_wtime();
+
+      std::cout << "Runtime: " << endTime-startTime << std::endl;
+
+      outputParams(filename.str(), *solver, endTime-startTime);
+
+      delete solver;
+  }        
+}
 
 
 TEST_CASE("Adhesion", "[adhesion]") {
     SECTION("Adhesion") {
         double startTime = omp_get_wtime();
 
-        const double particleDiameter = 0.03;
+        const double particleDiameter = 0.05;
         const double boundaryDiameter = particleDiameter * 1.4;
 
         FluidSystem particles = Emitter().sampleFluidBox(

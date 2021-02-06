@@ -31,17 +31,17 @@ void SolverPBF::integrationStep(double deltaT) {
         }
 
         updateAccelerations(deltaT);
-        semiImplicitEulerStep(deltaT);    
-
+        semiImplicitEulerStep(deltaT);
+    
         #pragma omp single
         {
             // Update estimate based on constraints
             mp_nsearch->find_neighbors();
         }
 
-        for (size_t k = 0; k < m_npbfIterations; k++) {            
-            updatePositionsWithConstraints();
+        for (size_t k = 0; k < m_npbfIterations; k++) {
             #pragma omp barrier
+            updatePositionsWithConstraints();           
         }
 
         // Update Velocities
@@ -134,24 +134,24 @@ void SolverPBF::updatePositionsWithConstraints()
 
     #pragma omp for schedule(static) 
     for (int i = 0; i < m_system.getSize(); i++) {
+        lambdas[i] = 0.0;
         if (m_system.getParticleDensity(i) <= m_system.getRestDensity()) {
-            lambdas[i] = 0.0;
             continue;
-        }
+        }                         
 
         const Eigen::Vector3d pos_i = m_system.getParticlePos(i);
-        const double C = m_system.getParticleDensity(i) / m_system.getRestDensity() - 1.0;
-        
-        Eigen::Vector3d grad = Eigen::Vector3d::Zero();
-        double S = 0.0;                    
-            
+        const double C = m_system.getParticleDensity(i) / m_system.getRestDensity() - 1.0;        
+                    
+        double S = 0.0;
+        Eigen::Vector3d grad = Eigen::Vector3d(0.0, 0.0, 0.0);
+
         // Fluid neighbors
         for (size_t nIdx = 0; nIdx < fluidPS.n_neighbors(fluidID, i); nIdx++) {
             const unsigned int j = fluidPS.neighbor(fluidID, i, nIdx);
             const Eigen::Vector3d C_grad_j = (m_system.getParticleMass() / m_system.getRestDensity()) 
                 * m_system.getKernelLookUp().gradWeight(pos_i, m_system.getParticlePos(j));
             grad += C_grad_j;
-            S += 1.0 / m_system.getParticleMass() * C_grad_j.norm() * C_grad_j.norm();
+            S += C_grad_j.squaredNorm();
         }
 
         // Boundary neighbors
@@ -164,7 +164,8 @@ void SolverPBF::updatePositionsWithConstraints()
                 grad += C_grad_k;
             }
         }
-        S += 1.0 / m_system.getParticleMass() * grad.norm() * grad.norm();
+        S += grad.squaredNorm();
+        S *= (1.0 / m_system.getParticleMass());
         lambdas[i] = -C / (S + m_eps);
     }
 
@@ -172,7 +173,7 @@ void SolverPBF::updatePositionsWithConstraints()
     static std::vector<Eigen::Vector3d> deltaX(m_system.getSize());
     
     #pragma omp for schedule(static) 
-    for (int i = 0; i < fluidPS.n_points(); i++) {
+    for (int i = 0; i < fluidPS.n_points(); i++) {      
         const Eigen::Vector3d pos_i = m_system.getParticlePos(i);
         
         deltaX[i] = 1.0 / m_system.getRestDensity()

@@ -102,10 +102,10 @@ void Solver::run(std::string file, double milliseconds)
     double nextSnapShotTime_s = 0.0;
     const double END_TIME_s = std::floor(milliseconds / m_snapShotMS)
         * m_snapShotMS * pow(10, -3);
-
     
     while (runTime_s <= END_TIME_s && ++iteration) {
         std::cout << iteration << " " << runTime_s << std::endl;
+        // Z Sort
         if (iteration % m_zSortIntervall == 0) {
             zSort();
         }
@@ -218,7 +218,7 @@ void Solver::zSort()
         auto const& boundaryPS = mp_nsearch->point_set(boundary.getPointSetID());
         boundaryPS.sort_field(boundary.getPositions().data());
         boundaryPS.sort_field(boundary.getVolumes().data());
-        std::cout << "Start zSorting boundary..." << std::endl;
+        std::cout << "Done zSorting boundary..." << std::endl;
     }
     std::cout << "Done zSorting..." << std::endl;
 }
