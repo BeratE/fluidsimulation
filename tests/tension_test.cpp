@@ -79,7 +79,7 @@ TEST_CASE("Adhesion", "[adhesion]") {
         filepath << SOURCE_DIR << "/res/" << "icosphere.obj";
         BoundarySystem icosphere =
             System::Emitter().sampleBoundaryMesh(filepath.str(), boundaryDiameter);
-        icosphere.setViscosity(0.05);
+        icosphere.setViscosity(0.02);
 
         Solver* solver;
         std::stringstream filename;
@@ -100,7 +100,7 @@ TEST_CASE("Adhesion", "[adhesion]") {
             ((SolverPBF*)solver)->setNumIterations(3);
             solver->setMaxTimeStepSeconds(0.002);
             solver->setFluidViscosity(0.002);
-            solver->setBoundaryAdhesion(0, 100);
+            solver->setBoundaryAdhesion(0, 0.5);
             filename << "_pbf";
         }
 
@@ -108,8 +108,8 @@ TEST_CASE("Adhesion", "[adhesion]") {
         solver->setSnapShotAfterMS(1000.0 / 60);
         solver->enableGravity(true);
         solver->enableSmoothing(true);
-        solver->enableTension(true);
-        solver->enableAdhesion(true);
+        solver->enableTension(false);
+        solver->enableAdhesion(false);
 
         solver->run(filename.str(), 1500);
 

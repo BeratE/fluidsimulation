@@ -174,7 +174,7 @@ void SolverPBF::updatePositionsWithConstraints()
         const Eigen::Vector3d pos_i = m_system.getParticlePos(i);
         
         deltaX[i] = 1.0 / m_system.getRestDensity()
-            * lambdas[i]*lambdas[i]
+            * (lambdas[i] + lambdas[i])
             * m_system.getKernelLookUp().gradWeight(pos_i,
                                                     pos_i);
         
