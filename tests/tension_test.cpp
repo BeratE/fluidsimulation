@@ -11,12 +11,13 @@
 using namespace learnSPH;
 using namespace learnSPH::System;
 
+
 TEST_CASE("Simple surface tension, no gravity cube") {
   SECTION("Tension") {
       //omp_set_dynamic(0);
       //omp_set_num_threads(1);        
       
-      const double particleDiameter = 0.03;
+      const double particleDiameter = 0.025;
 
       FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0, 0, 0),
                                                        Eigen::Vector3d(1, 1, 1),
@@ -24,26 +25,26 @@ TEST_CASE("Simple surface tension, no gravity cube") {
       
       Solver *solver;
       std::stringstream filename;
-      filename << SOURCE_DIR << "/res/simulation2/" << "floating_ball";
+      filename << SOURCE_DIR << "/res/big_simulations/" << "floating_ball";
       
       SECTION("SPH") {
           solver = new SolverSPH(particles);
-          filename << "_sph";
+          filename << "_gamma_1_smoothing_0,5_eta_1,2_sph";
           
           ((SolverSPH*)solver)->setParamStiffness(3000);          
           solver->setMaxTimeStepSeconds(0.001);
 
-          solver->setFluidTension(0.15);
+          solver->setFluidTension(1.0); 
           solver->setFluidViscosity(0.01);          
       }                
       SECTION("PBF") {
           solver = new SolverPBF(particles);
-          filename << "_pbf";
+          filename << "_gamma_1_smoothing_0,25_eta_1,2_pbf";
           
           ((SolverPBF*)solver)->setNumIterations(3);          
           solver->setMaxTimeStepSeconds(0.002);
-
-          solver->setFluidTension(0.05);
+          solver->setParamSmoothing(0.25);
+          solver->setFluidTension(1.0);
           solver->setFluidViscosity(0.0008);
       }
 
@@ -56,7 +57,7 @@ TEST_CASE("Simple surface tension, no gravity cube") {
 
       double startTime = omp_get_wtime();
 
-      solver->run(filename.str(), 1000);
+      solver->run(filename.str(), 2500);
 
       double endTime = omp_get_wtime();
 
