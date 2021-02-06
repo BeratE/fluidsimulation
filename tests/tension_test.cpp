@@ -87,20 +87,20 @@ TEST_CASE("Adhesion", "[adhesion]") {
 
         solver = new SolverSPH(particles);
         solver->addBoundary(icosphere);
-        SECTION("SPH") {
+        /*SECTION("SPH") {
             solver->setFluidTension(0.25);
             ((SolverSPH*)solver)->setParamStiffness(1000);
             solver->setMaxTimeStepSeconds(0.00005);
             solver->setFluidViscosity(0.02);
             solver->setBoundaryAdhesion(0, 500);
             filename << "_sph";
-        }
+        }*/
         SECTION("PBF") {
             solver->setFluidTension(0.1);
             ((SolverPBF*)solver)->setNumIterations(3);
-            solver->setMaxTimeStepSeconds(0.0005);
+            solver->setMaxTimeStepSeconds(0.002);
             solver->setFluidViscosity(0.002);
-            solver->setBoundaryAdhesion(0, 500);
+            solver->setBoundaryAdhesion(0, 100);
             filename << "_pbf";
         }
 

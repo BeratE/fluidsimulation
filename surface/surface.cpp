@@ -79,7 +79,7 @@ void Surface::discretizeFluidSystemSDF(
     int samplingSteps = ceil(support / samplingDistance);
 
     #pragma omp parallel for schedule(static)
-    for (size_t posIdx = 0; posIdx < positions.size(); posIdx++) {
+    for (int posIdx = 0; posIdx < positions.size(); posIdx++) {
         const Eigen::Vector3d& position = positions[posIdx];
         // TODO: Find the indiizes that belongs to the lower left vertex of the cell that the particle is positioned in 
         Eigen::Vector3d offset = position - lowerLeft;
