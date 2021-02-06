@@ -45,15 +45,13 @@ void SolverSPH::updateAccelerations(double deltaT)
     const size_t id = m_system.getPointSetID();
     CompactNSearch::PointSet const& fluidPS = mp_nsearch->point_set(id);
 
-    // Precalculated pressure density rations
-    
+    // Precalculated pressure density rations   
     static std::vector<double> ratios(m_system.getSize());
-    
     #pragma omp for schedule(static)
     for (int i = 0; i < m_system.getSize(); i++) {
         ratios[i] = (m_system.getParticlePressure(i)
-                                      / (m_system.getParticleDensity(i)
-                                         * m_system.getParticleDensity(i)));
+                     / (m_system.getParticleDensity(i)
+                        * m_system.getParticleDensity(i)));
     }
 
     // Synchronization barrier for m_pressureDensityRatios
@@ -76,11 +74,9 @@ void SolverSPH::updateAccelerations(double deltaT)
         for (BoundarySystem boundary : m_boundaries) {
             // Iterate over neighboring boundary particles
             const size_t boundaryID = boundary.getPointSetID();
-            for (size_t idx = 0; idx < fluidPS.n_neighbors(boundaryID, i);
-                 idx++) {
+            for (size_t idx = 0; idx < fluidPS.n_neighbors(boundaryID, i); idx++) {
                 const unsigned int k = fluidPS.neighbor(boundaryID, i, idx);
-                updateAccBoundaryContribution(i, k, ratios[i],
-                                              boundary);
+                updateAccBoundaryContribution(i, k, ratios[i], boundary);
             }
         }
     }

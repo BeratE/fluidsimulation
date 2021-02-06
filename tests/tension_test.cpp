@@ -69,43 +69,66 @@ TEST_CASE("Adhesion", "[adhesion]") {
         double startTime = omp_get_wtime();
 
         const double particleDiameter = 0.03;
-        const double boundaryDiameter = particleDiameter * 2.5;
+        const double boundaryDiameter = particleDiameter * 1.4;
 
-        FluidSystem particles = Emitter().sampleFluidBox(Eigen::Vector3d(0.5, 1.7, -.25),
-            Eigen::Vector3d(1, 3.7, .25),
+        FluidSystem particles = Emitter().sampleFluidBox(
+            Eigen::Vector3d(-0.8, 4.0, -.4),
+            Eigen::Vector3d(-1.8, 4.8, .4),
             particleDiameter);
 
         std::stringstream filepath;
         filepath << SOURCE_DIR << "/res/" << "icosphere.obj";
         BoundarySystem icosphere =
             System::Emitter().sampleBoundaryMesh(filepath.str(), boundaryDiameter);
-        icosphere.setViscosity(0.02);
+
+
+        filepath.str(std::string());
+        filepath << SOURCE_DIR << "/res/" << "funnel.obj";
+        BoundarySystem funnel =
+            System::Emitter().sampleBoundaryMesh(filepath.str(), boundaryDiameter);   
 
         Solver* solver;
         std::stringstream filename;
         filename << SOURCE_DIR << "/res/simulation2/" << "waterOnBall";
-
-        solver = new SolverSPH(particles);
-        solver->addBoundary(icosphere);
-        /*SECTION("SPH") {
-            solver->setFluidTension(0.25);
-            ((SolverSPH*)solver)->setParamStiffness(1000);
-            solver->setMaxTimeStepSeconds(0.00005);
-            solver->setFluidViscosity(0.02);
-            solver->setBoundaryAdhesion(0, 500);
+        
+        SECTION("SPH") {
+            solver = new SolverSPH(particles);
             filename << "_sph";
-        }*/
-        SECTION("PBF") {
-            solver->setFluidTension(0.1);
-            ((SolverPBF*)solver)->setNumIterations(3);
-            solver->setMaxTimeStepSeconds(0.002);
-            solver->setFluidViscosity(0.002);
-            solver->setBoundaryAdhesion(0, 0.5);
-            filename << "_pbf";
+            
+            ((SolverSPH*)solver)->setParamStiffness(3000);            
+            solver->setMaxTimeStepSeconds(0.0005);
+            
+            solver->setFluidViscosity(0.01);
+            solver->setFluidTension(0.2);
+
+            solver->addBoundary(icosphere);
+            solver->setBoundaryAdhesion(0, 2); // icosphere
+            solver->setBoundaryViscosity(0, 0.02);
+
+            solver->addBoundary(funnel);
+            solver->setBoundaryAdhesion(1, 0.5); // funnel
+            solver->setBoundaryViscosity(1, 0.005);
         }
+        SECTION("PBF") {
+            solver = new SolverPBF(particles);
+            filename << "_pbf";
 
+            ((SolverPBF*)solver)->setNumIterations(5);
+            solver->setMaxTimeStepSeconds(0.0005);
+            
+            solver->setFluidViscosity(0.0001);
+            solver->setFluidTension(0.05);
 
-        solver->setSnapShotAfterMS(1000.0 / 60);
+            solver->addBoundary(icosphere);
+            solver->setBoundaryAdhesion(0, 1); // icosphere
+            solver->setBoundaryViscosity(0, 0.008);
+
+            solver->addBoundary(funnel);
+            solver->setBoundaryAdhesion(1, 0.4); // funnel
+            solver->setBoundaryViscosity(1, 0.0005);                       
+        }        
+            
+        solver->setSnapShotAfterMS(1000.0 / 40);
         solver->enableGravity(true);
         solver->enableSmoothing(true);
         solver->enableTension(false);
