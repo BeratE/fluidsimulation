@@ -164,7 +164,7 @@ void Solver::semiImplicitEulerStep(double deltaT) {
             }
         }
  
-        #pragma omp barrier // synchronization of smoothingTerms
+        //#pragma omp barrier // synchronization of smoothingTerms
             
         #pragma omp for schedule(static)
         for (int i = 0; i < fluidPS.n_points(); i++) {

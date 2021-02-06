@@ -21,7 +21,7 @@ SolverPBF::~SolverPBF()
 
 void SolverPBF::integrationStep(double deltaT) {
     mp_nsearch->find_neighbors();
-
+    
     // preparations for the calculations in the semiImplicit Euler integration
     #pragma omp parallel default(none) firstprivate(deltaT)
     {

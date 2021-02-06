@@ -19,6 +19,8 @@ void outputParams(std::string filename, Solver &solver, double runTime)
     output << "Gravity Enabled: " << solver.gravityEnabled() << std::endl;
     output << "Tension Enabled: " << solver.tensionEnabled() << std::endl;
     output << "Adhesion Enabled: " << solver.adhesionEnabled() << std::endl;
+    output << "Drag Enabled: " << solver.dragEnabled() << std::endl;
+    output << "Drag : " << solver.getParamDrag() << std::endl;
 
     output << "Fluid Rest Density: " << solver.getSystem().getRestDensity() << std::endl;
     output << "Fluid Surface Tension: " << solver.getSystem().getGamma() << std::endl;

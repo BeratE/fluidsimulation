@@ -28,11 +28,13 @@ public:
     
     double getMaxTimeStepSeconds() { return m_maxTimeStep_s; }
     double getParamSmoothing() { return m_xsphSmoothing; }
+    double getParamDrag() { return m_dragCoeff; }
     double getSnapShotAfterMS() { return m_snapShotMS; }   
     bool gravityEnabled() { return m_gravityEnable; }
     bool smoothingEnabled() { return m_smoothingEnable; }
     bool tensionEnabled() { return m_tensionEnable; }
     bool adhesionEnabled() { return m_adhesionEnable; }
+    bool dragEnabled() { return m_dragEnable; }
 
     void setFluidViscosity(double val) { m_system.setViscosity(val); }
     void setFluidTension(double val) { m_system.setGamma(val); }

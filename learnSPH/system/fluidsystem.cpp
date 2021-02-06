@@ -139,7 +139,7 @@ Eigen::Vector3d FluidSystem::cohesionForce(const size_t i, const size_t j) {
     const Eigen::Vector3d diff = m_positions[i] - m_positions[j];
     const double diffNorm = diff.norm();
     return -m_gamma * m_particleMass * m_particleMass
-        * m_cohesionWeightLookup.weight(diffNorm) * diff.normalized();
+        * Cohesion::weight(diffNorm, m_c) * diff.normalized();
 }
 
 Eigen::Vector3d FluidSystem::curvatureForce(const size_t i, const size_t j) {
