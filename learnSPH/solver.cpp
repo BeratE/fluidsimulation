@@ -192,6 +192,11 @@ void Solver::initAccelerations()
             acc += VEC_GRAVITY;
         }
 
+        if (m_dragEnable) {
+            acc -= (m_dragCoeff * m_system.getParticleVel(i))
+                / m_system.getParticleMass();
+        }
+
         m_system.setParticleAcc(i, acc);
     }
 }

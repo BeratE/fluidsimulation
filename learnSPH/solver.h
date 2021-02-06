@@ -40,12 +40,14 @@ public:
     void setBoundaryAdhesion(size_t i, double val) { m_boundaries[i].setBeta(val); }
     void setMaxTimeStepSeconds(double val) { m_maxTimeStep_s = val; }
     void setParamSmoothing(double val) { m_xsphSmoothing = val; }
+    void setParamDrag(double val) {m_dragCoeff = val; }
     void setSnapShotAfterMS(double ms) { m_snapShotMS = ms; }   
     void setZSortIntervall(unsigned int zSortIntervall) { m_zSortIntervall = zSortIntervall; }
     void enableGravity(bool val) { m_gravityEnable = val; }
     void enableSmoothing(bool val) { m_smoothingEnable = val; }
     void enableTension(bool val) { m_tensionEnable = val; }
-    void enableAdhesion(bool val) { m_adhesionEnable = val; }    
+    void enableAdhesion(bool val) { m_adhesionEnable = val; }
+    void enableDrag(bool val) { m_dragEnable = val; }
     
 protected:
     // Specific solvers will overwrite this function. Overhead is minimal.
@@ -58,10 +60,12 @@ protected:
     double m_snapShotMS = 20;
     double m_maxTimeStep_s = 0.002;
     double m_xsphSmoothing = 0.5;
+    double m_dragCoeff = 0.2;
     bool m_gravityEnable = true;
     bool m_smoothingEnable = true;
     bool m_tensionEnable = true;
     bool m_adhesionEnable = true;
+    bool m_dragEnable = true;
         
     unsigned int m_zSortIntervall = 100;
     System::FluidSystem m_system;

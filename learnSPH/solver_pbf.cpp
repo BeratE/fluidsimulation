@@ -39,19 +39,18 @@ void SolverPBF::integrationStep(double deltaT) {
             mp_nsearch->find_neighbors();
         }
 
-        for (size_t k = 0; k < m_npbfIterations; k++) {
-            #pragma omp barrier
+        for (size_t k = 0; k < m_npbfIterations; k++) {            
             updatePositionsWithConstraints();
+            #pragma omp barrier
         }
 
         // Update Velocities
         #pragma omp for schedule(static)
         for (int i = 0; i < m_system.getSize(); i++) {
-            m_system.setParticleVel(i,
-                                    (m_system.getParticlePos(i) - m_system.getParticlePrevPos(i)) /
-                                    deltaT);
+            m_system.setParticleVel(
+                i, (m_system.getParticlePos(i) - m_system.getParticlePrevPos(i)) / deltaT);
         }
-  }
+    }
 }
 
 void SolverPBF::updateAccelerations(const double deltaT)
@@ -69,6 +68,9 @@ void SolverPBF::updateAccelerations(const double deltaT)
                      / (m_system.getParticleDensity(i)
                         * m_system.getParticleDensity(i)));
     }
+
+    // Synchronization barrier for m_pressureDensityRatios
+    #pragma omp barrier 
     
     #pragma omp for schedule(static) 
     for (int i = 0; i < fluidPS.n_points(); i++) {
@@ -175,8 +177,7 @@ void SolverPBF::updatePositionsWithConstraints()
         
         deltaX[i] = 1.0 / m_system.getRestDensity()
             * lambdas[i]*lambdas[i]
-            * m_system.getKernelLookUp().gradWeight(pos_i,
-                                                    pos_i);
+            * m_system.getKernelLookUp().gradWeight(pos_i, pos_i);
         
         // Fluid neighbors
         Eigen::Vector3d fluidContrib = Eigen::Vector3d::Zero();
