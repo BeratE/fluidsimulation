@@ -16,7 +16,6 @@ set(INCLUDE_DIRS
 
 ### Sources
 set(SOURCE_FILES
-  util.h
   main.cpp  
   comparison.cpp
   mc_surface.cpp

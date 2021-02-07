@@ -6,7 +6,7 @@
 #include "learnSPH/system/fluidsystem.h"
 #include "learnSPH/system/emitter.h"
 #include <omp.h>
-#include "util.h"
+
 
 using namespace learnSPH;
 using namespace learnSPH::System;
@@ -71,11 +71,9 @@ TEST_CASE("Simple surface tension, no gravity cube") {
 
 TEST_CASE("Adhesion", "[adhesion]") {
     SECTION("Adhesion") {
-        double startTime = omp_get_wtime();
-
-
-        const double particleDiameter = 0.022;
-        const double boundaryDiameter = particleDiameter *1.6;
+        
+        const double particleDiameter = 0.025;
+        const double boundaryDiameter = particleDiameter * 1.6;
 
         FluidSystem particles = Emitter().sampleFluidBox(
             Eigen::Vector3d(-0.8, 4.0, -.4),
@@ -226,44 +224,65 @@ TEST_CASE("Adhesion", "[adhesion]") {
             solver->setMaxTimeStepSeconds(0.002);
             solver->setParamSmoothing(0.1);
 
-            solver->setFluidViscosity(0.001);
+            solver->setFluidViscosity(0.0001);
             solver->setFluidTension(0.15);
 
             solver->addBoundary(icosphere);
             solver->setBoundaryAdhesion(0, 100); // icosphere
-            solver->setBoundaryViscosity(0, 0.008);
+            solver->setBoundaryViscosity(0, 0.0008);
 
             solver->addBoundary(funnel);
             solver->setBoundaryAdhesion(1, 0.5); // funnel
             solver->setBoundaryViscosity(1, 0.0005);
         }
-
         SECTION("PBF_V") {
             solver = new SolverPBF(particles);
             filename << "_pbf_V";
 
-            ((SolverPBF*)solver)->setNumIterations(7);
-            solver->setMaxTimeStepSeconds(0.002);
+            ((SolverPBF*)solver)->setNumIterations(3);
+            solver->setMaxTimeStepSeconds(0.014);
             solver->setParamSmoothing(0.1);
 
-            solver->setFluidViscosity(0.001);
+            solver->setFluidViscosity(0.0001);
             solver->setFluidTension(0.15);
 
             solver->addBoundary(icosphere);
+            solver->setBoundaryAdhesion(0, 100); // icosphere
+            solver->setBoundaryViscosity(0, 0.0008);
+
+            solver->addBoundary(funnel);
+            solver->setBoundaryAdhesion(1, 0.5); // funnel
+            solver->setBoundaryViscosity(1, 0.0005);
+        }
+        SECTION("PBF_VI") {
+            solver = new SolverPBF(particles);
+            filename << "_pbf_VI";
+
+            ((SolverPBF*)solver)->setNumIterations(4);
+            solver->setMaxTimeStepSeconds(0.014);
+            solver->setParamSmoothing(0.1);
+
+            solver->setFluidViscosity(0.0001);
+            solver->setFluidTension(0.05);
+
+            solver->addBoundary(icosphere);
             solver->setBoundaryAdhesion(0, 250); // icosphere
-            solver->setBoundaryViscosity(0, 0.008);
+            solver->setBoundaryViscosity(0, 0.0008);
 
             solver->addBoundary(funnel);
             solver->setBoundaryAdhesion(1, 0.5); // funnel
             solver->setBoundaryViscosity(1, 0.0005);
         }
         
+        solver->setParamDrag(0.1);
         solver->setSnapShotAfterMS(1000.0 / 40);
         solver->enableGravity(true);
         solver->enableSmoothing(true);
         solver->enableTension(true);
         solver->enableAdhesion(true);
 
+        double startTime = omp_get_wtime();
+        
         solver->run(filename.str(), 4000);
 
         double endTime = omp_get_wtime();
@@ -301,7 +320,7 @@ TEST_CASE("Water droplet") {
                 return std::min(sphereSDF(x), boxSDF(x));
             };
 
-        double particleDiameter = 0.04;
+        double particleDiameter = 0.042;
 	double boundaryDiameter = particleDiameter * 1.6;
         FluidSystem particles = Emitter().sampleFluidSDF(sceneSDF,
                                      Eigen::Vector3d(-2, 0, -2),
@@ -320,8 +339,8 @@ TEST_CASE("Water droplet") {
        std::stringstream filename;
        filename << SOURCE_DIR << "/res/simulation2/" << "waterdroplet";
        
-       SECTION("SPH") {
-           filename << "_sph";
+       SECTION("SPH_I") {
+           filename << "_sph_I";
            solver = new SolverSPH(particles);
 
            ((SolverSPH*)solver)->setParamStiffness(3000);
@@ -334,23 +353,54 @@ TEST_CASE("Water droplet") {
 	   solver->setBoundaryAdhesion(0, 0.8); // box
 	   solver->setBoundaryViscosity(0, 0.002);
 	   
-       }                
-       SECTION("PBF") {
-           filename << "_pbf";
-           solver = new SolverPBF(particles);
+       }
+       SECTION("SPH_II") {
+           filename << "_sph_II";
+           solver = new SolverSPH(particles);           
 
-           ((SolverPBF*)solver)->setNumIterations(3);
+           ((SolverSPH*)solver)->setParamStiffness(5000);
            solver->setMaxTimeStepSeconds(0.002);
+           solver->setParamSmoothing(0.25);
 
-	   solver->setFluidTension(0.15);
+	   solver->setFluidTension(0.50);
            solver->setFluidViscosity(0.001);
 
 	   solver->addBoundary(box);
-	   solver->setBoundaryAdhesion(0, 2); // box
-	   solver->setBoundaryViscosity(0, 0.02);
+	   solver->setBoundaryAdhesion(0, 0.2); // box
+	   solver->setBoundaryViscosity(0, 0.001);	   
+       }
+       SECTION("PBF_I") {
+           filename << "_pbf_I";
+           solver = new SolverPBF(particles);
+
+           ((SolverPBF*)solver)->setNumIterations(4);
+           solver->setMaxTimeStepSeconds(0.012);
+           solver->setParamSmoothing(0.1);
+
+	   solver->setFluidTension(0.05);
+           solver->setFluidViscosity(0.0001);
+
+	   solver->addBoundary(box);
+	   solver->setBoundaryAdhesion(0, 0.2); // box
+	   solver->setBoundaryViscosity(0, 0.0001);
+       }
+       SECTION("PBF_II") {
+           filename << "_pbf_II";
+           solver = new SolverPBF(particles);
+
+           ((SolverPBF*)solver)->setNumIterations(5);
+           solver->setMaxTimeStepSeconds(0.028);
+           solver->setParamSmoothing(0.1);
+
+	   solver->setFluidTension(0.15);
+           solver->setFluidViscosity(0.0001);
+
+	   solver->addBoundary(box);
+	   solver->setBoundaryAdhesion(0, 0.2); // box
+	   solver->setBoundaryViscosity(0, 0.0001);
        }
 	     
-       solver->setParamDrag(0.05);
+       solver->setParamDrag(0.01);
 
        solver->setSnapShotAfterMS(1000.0/60.0);
        solver->enableGravity(true);
@@ -365,10 +415,13 @@ TEST_CASE("Water droplet") {
        double endTime = omp_get_wtime();
 
        std::cout << "Runtime: " << endTime-startTime << std::endl;
-
+       
+       outputParams(filename.str(), *solver, endTime - startTime);
+       
        delete solver;
     }
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 /// Bitte nochmal auf die Tests schauen
