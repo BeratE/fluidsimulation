@@ -267,6 +267,21 @@ TEST_CASE("Water droplet") {
 	   solver->setBoundaryAdhesion(0, 0.2); // box
 	   solver->setBoundaryViscosity(0, 0.001);	   
        }
+       SECTION("SPH_III") {
+           filename << "_sph_III";
+           solver = new SolverSPH(particles);           
+
+           ((SolverSPH*)solver)->setParamStiffness(3000);
+           solver->setMaxTimeStepSeconds(0.001);
+           solver->setParamSmoothing(0.25);
+
+	   solver->setFluidTension(1.0);
+           solver->setFluidViscosity(0.01);
+
+	   solver->addBoundary(box);
+	   solver->setBoundaryAdhesion(0, 1.0); // box
+	   solver->setBoundaryViscosity(0, 0.001);	   
+       }
        SECTION("PBF_I") {
            filename << "_pbf_I";
            solver = new SolverPBF(particles);
@@ -295,6 +310,21 @@ TEST_CASE("Water droplet") {
 
 	   solver->addBoundary(box);
 	   solver->setBoundaryAdhesion(0, 0.2); // box
+	   solver->setBoundaryViscosity(0, 0.0001);
+       }
+       SECTION("PBF_III") {
+           filename << "_pbf_III";
+           solver = new SolverPBF(particles);
+
+           ((SolverPBF*)solver)->setNumIterations(5);
+           solver->setMaxTimeStepSeconds(0.016);
+           solver->setParamSmoothing(0.1);
+
+	   solver->setFluidTension(0.25);
+           solver->setFluidViscosity(0.0001);
+
+	   solver->addBoundary(box);
+	   solver->setBoundaryAdhesion(0, 5.0); // box
 	   solver->setBoundaryViscosity(0, 0.0001);
        }
 	     

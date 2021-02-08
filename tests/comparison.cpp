@@ -408,17 +408,18 @@ TEST_CASE("SmallDam") {
 TEST_CASE("ArmadilloBreak")
 {
    SECTION("ArmadilloArmy") {       
-       const double particleDiameter = 0.043;
+       const double particleDiameter = 0.03;
        const double boundaryDiameter = particleDiameter;
        
        // Sample Particles in a Box
        FluidSystem particles = System::Emitter().sampleFluidBox(
-           Eigen::Vector3d(-1.0, 0.0, -1.2), Eigen::Vector3d(1.0, 1.8, -0.2),
+           Eigen::Vector3d(-1.0, 0.0, -1.2), Eigen::Vector3d(1.0, 2.1, -0.2),
            particleDiameter);
+       std::cout << "Num Particles: " << particles.getSize() << std::endl;
 
        BoundarySystem box = System::Emitter().sampleBoundaryHollowBox(
-           Eigen::Vector3d(-1.05, -0.05, -1.25), Eigen::Vector3d(1.05, 2.00, 3.5),
-           boundaryDiameter);
+           Eigen::Vector3d(-1.05, -0.05, -1.25), Eigen::Vector3d(1.05, 2.15, 3.5),
+           boundaryDiameter * 1.1);
 
        std::stringstream filepath;
        filepath << SOURCE_DIR << "/res/" << "armadillo_low.obj";
@@ -523,6 +524,23 @@ TEST_CASE("ArmadilloBreak")
                    solver->setBoundaryAdhesion(i, 0.5 * i);
                }
            }
+           SECTION("II") {
+               filename << "_II";
+               ((SolverSPH *)solver)->setParamStiffness(3000);
+               solver->setMaxTimeStepSeconds(0.0005);
+               solver->setParamSmoothing(0.50);
+
+               solver->setFluidViscosity(0.01);
+               solver->setFluidTension(0.25);
+
+               solver->setBoundaryViscosity(0, 0.008); // box
+               solver->setBoundaryAdhesion(0, 1.4);
+
+               for (int i = 1; i < 4; i++) { // armadillos
+                   solver->setBoundaryViscosity(i, 0.04 * i);
+                   solver->setBoundaryAdhesion(i, 2.0 * i);
+               }
+           }
        }
 
        SECTION("PBF") {
@@ -563,7 +581,6 @@ TEST_CASE("ArmadilloBreak")
                    solver->setBoundaryAdhesion(i, 0.5 * i);
                }                      
            }
-
            SECTION("IV") {
                filename << "_IV";
                ((SolverPBF*)solver)->setNumIterations(3);
@@ -573,17 +590,17 @@ TEST_CASE("ArmadilloBreak")
                solver->setFluidViscosity(0.0001);
                solver->setFluidTension(0.1);
 
-               solver->setBoundaryViscosity(0, 0.0004); // box
-               solver->setBoundaryAdhesion(0, 0.2);
-
+               solver->setBoundaryViscosity(0, 0.001); // box
+               solver->setBoundaryAdhesion(0, 1.0);
+               
                for (int i = 1; i < 4; i++) {  // armadillos
-                   solver->setBoundaryViscosity(i, 0.0004 * i);
-                   solver->setBoundaryAdhesion(i, 0.5 * i);
-               }
+                   solver->setBoundaryViscosity(i, 0.004 * i);
+                   solver->setBoundaryAdhesion(i, 6.0 * i);
+               }                      
            }
        }                     
 
-       solver->setParamDrag(0.1);
+       solver->setParamDrag(0.05);
        solver->setSnapShotAfterMS(1000.0 / 40);
        solver->enableGravity(true);
        solver->enableSmoothing(true);
