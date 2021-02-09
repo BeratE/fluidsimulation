@@ -12,7 +12,7 @@ FluidSystem ParticleEmitter::sampleFluidBox(Vector3d bottomLeft,
                                             double restDensity)
 {
     const double particleRadius = samplingDistance/2;
-    samplingDistance *= 1.1;
+    samplingDistance *= 1.05;
     
     const Eigen::Vector3d diagonal = topRight - bottomLeft;
     const Eigen::Vector3d diagonalSign = diagonal.array() / diagonal.array().abs();

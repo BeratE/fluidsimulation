@@ -164,7 +164,7 @@ void Solver::semiImplicitEulerStep(double deltaT) {
             }
         }
  
-        #pragma omp barrier // synchronization of smoothingTerms
+        //#pragma omp barrier // synchronization of smoothingTerms
             
         #pragma omp for schedule(static)
         for (int i = 0; i < fluidPS.n_points(); i++) {
@@ -213,7 +213,7 @@ void Solver::zSort()
     fluidPS.sort_field(m_system.getVelocities().data());
     std::cout << "Done zSorting fluid..." << std::endl;
 
-    for (BoundarySystem boundary : m_boundaries) {
+    for (BoundarySystem &boundary : m_boundaries) {
         std::cout << "Start zSorting boundary..." << std::endl;
         auto const& boundaryPS = mp_nsearch->point_set(boundary.getPointSetID());
         boundaryPS.sort_field(boundary.getPositions().data());

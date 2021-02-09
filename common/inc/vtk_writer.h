@@ -9,8 +9,13 @@
 
 namespace learnSPH
 {
+    class Solver;
     const std::string lblDensities = "Densities";
     
+    void readDensitiesFromVTK(
+        std::string path,
+        std::vector<double>& densities);
+
     void writeParticlesToVTK(
         std::string path,
         const std::vector<Eigen::Vector3d> &positions,
@@ -26,4 +31,6 @@ namespace learnSPH
         std::string path,
         std::vector<Eigen::Vector3d> &positions,
         std::string &comments);
+
+    void outputParams(std::string filename, Solver &solver, double runTime);
 }

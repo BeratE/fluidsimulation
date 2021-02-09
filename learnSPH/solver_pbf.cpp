@@ -21,7 +21,7 @@ SolverPBF::~SolverPBF()
 
 void SolverPBF::integrationStep(double deltaT) {
     mp_nsearch->find_neighbors();
-
+    
     // preparations for the calculations in the semiImplicit Euler integration
     #pragma omp parallel default(none) firstprivate(deltaT)
     {
@@ -81,7 +81,7 @@ void SolverPBF::updateAccelerations(const double deltaT)
         }
 
         // Iterate over boundaries and add contributions to forces
-        for (BoundarySystem boundary : m_boundaries) {
+        for (BoundarySystem &boundary : m_boundaries) {
             // Iterate over neighboring boundary particles
             const size_t boundaryID = boundary.getPointSetID();
             for (size_t idx = 0; idx < fluidPS.n_neighbors(boundaryID, i); idx++) {
@@ -155,7 +155,7 @@ void SolverPBF::updatePositionsWithConstraints()
         }
 
         // Boundary neighbors
-        for (BoundarySystem boundary : m_boundaries) {
+        for (BoundarySystem &boundary : m_boundaries) {
             const size_t boundaryID = boundary.getPointSetID();
             for (size_t bIdx = 0; bIdx < fluidPS.n_neighbors(boundaryID, i); bIdx++) {
                 const unsigned int k = fluidPS.neighbor(boundaryID, i, bIdx);
@@ -192,7 +192,7 @@ void SolverPBF::updatePositionsWithConstraints()
         deltaX[i] += 1.0 / m_system.getRestDensity() * fluidContrib;
         
         // Boundary neighbors
-        for (BoundarySystem boundary : m_boundaries) {
+        for (BoundarySystem &boundary : m_boundaries) {
             for (size_t bIdx = 0; bIdx < fluidPS.n_neighbors(boundary.getPointSetID(), i); bIdx++) {
                 const unsigned int k = fluidPS.neighbor(boundary.getPointSetID(), i, bIdx);
                 deltaX[i] += (boundary.getParticleVolume(k) / m_system.getParticleMass())

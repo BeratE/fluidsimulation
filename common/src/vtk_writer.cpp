@@ -1,4 +1,5 @@
 #include "vtk_writer.h"
+#include "learnSPH/solver.h"
 
 // void VTK::writeParticlesToVTK(
 //     std::string path,
@@ -94,4 +95,55 @@ void learnSPH::readParticlesFromVTK(
 
     vtk_file.get_points_to_twice_indexable(positions);
     comments = vtk_file.get_comments();
+}
+
+void learnSPH::readDensitiesFromVTK(
+    std::string path,
+    std::vector<double>& densities)
+{
+    vtkio::VTKFile vtk_file;
+    vtk_file.read(path);
+
+    const size_t numPoints = vtk_file.get_number_of_points();
+    densities.resize(numPoints);
+
+    vtk_file.get_point_data_to_indexable("scalar", densities);
+}
+
+
+void learnSPH::outputParams(std::string filename, Solver &solver, double runTime)
+{
+    std::stringstream output;
+    output << filename << std::endl;
+    output << "Num Particles: " << solver.getSystem().getSize() << std::endl;
+    output << "Runtime: " << runTime << std::endl;
+    output << "Max Timestep: " << solver.getMaxTimeStepSeconds() << std::endl;
+    output << "XSPH Smoothing: " << solver.getParamSmoothing() << std::endl;
+    output << "Smoothing Enabled: " << solver.smoothingEnabled() << std::endl;
+    output << "Gravity Enabled: " << solver.gravityEnabled() << std::endl;
+    output << "Tension Enabled: " << solver.tensionEnabled() << std::endl;
+    output << "Adhesion Enabled: " << solver.adhesionEnabled() << std::endl;
+    output << "Drag Enabled: " << solver.dragEnabled() << std::endl;
+    output << "Drag : " << solver.getParamDrag() << std::endl;
+
+    output << "Fluid Rest Density: " << solver.getSystem().getRestDensity() << std::endl;
+    output << "Fluid Surface Tension: " << solver.getSystem().getGamma() << std::endl;
+    output << "Fluid Viscosity: " << solver.getSystem().getViscosity() << std::endl;
+    size_t i = 0;
+    for (auto const &boundary : solver.getBoundaries()) {
+        output << "Boundary " << i << " Rest Density: "  << boundary.getRestDensity() << std::endl;
+        output << "Boundary " << i << " Viscosity: "  << boundary.getViscosity() << std::endl;
+        output << "Boundary " << i << " Adhesion: " << boundary.getBeta() << std::endl;
+        i++;
+    }
+
+    std::stringstream name;
+    name << filename << ".out";
+    
+    std::ofstream outfile;
+    outfile.open(name.str());
+    outfile << output.rdbuf();
+    outfile.close();
+
+    std::cout << output.str() << std::endl;
 }

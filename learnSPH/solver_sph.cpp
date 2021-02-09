@@ -71,7 +71,7 @@ void SolverSPH::updateAccelerations(double deltaT)
         }
 
         // Iterate over boundaries and add contributions to forces
-        for (BoundarySystem boundary : m_boundaries) {
+        for (BoundarySystem &boundary : m_boundaries) {
             // Iterate over neighboring boundary particles
             const size_t boundaryID = boundary.getPointSetID();
             for (size_t idx = 0; idx < fluidPS.n_neighbors(boundaryID, i); idx++) {
