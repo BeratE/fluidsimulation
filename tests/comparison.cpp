@@ -408,8 +408,8 @@ TEST_CASE("SmallDam") {
 TEST_CASE("ArmadilloBreak")
 {
    SECTION("ArmadilloArmy") {       
-       const double particleDiameter = 0.03;
-       const double boundaryDiameter = particleDiameter;
+       const double particleDiameter = 0.036;
+       const double boundaryDiameter = particleDiameter * 1.6;
        
        // Sample Particles in a Box
        FluidSystem particles = System::Emitter().sampleFluidBox(
@@ -541,6 +541,23 @@ TEST_CASE("ArmadilloBreak")
                    solver->setBoundaryAdhesion(i, 2.0 * i);
                }
            }
+           SECTION("III") {
+               filename << "_III";
+               ((SolverSPH *)solver)->setParamStiffness(2500);
+               solver->setMaxTimeStepSeconds(0.0005);
+               solver->setParamSmoothing(0.5);
+
+               solver->setFluidViscosity(0.15);
+               solver->setFluidTension(1.0);
+
+               solver->setBoundaryViscosity(0, 0.08); // box
+               solver->setBoundaryAdhesion(0, 1.0);
+
+               for (int i = 1; i < 4; i++) { // armadillos
+                   solver->setBoundaryViscosity(i, 0.05 * i);
+                   solver->setBoundaryAdhesion(i, 0.8 * i);
+               }
+           }
        }
 
        SECTION("PBF") {
@@ -596,6 +613,23 @@ TEST_CASE("ArmadilloBreak")
                for (int i = 1; i < 4; i++) {  // armadillos
                    solver->setBoundaryViscosity(i, 0.004 * i);
                    solver->setBoundaryAdhesion(i, 6.0 * i);
+               }                      
+           }
+           SECTION("III") {
+               filename << "_III";
+               ((SolverPBF *)solver)->setNumIterations(5);
+               solver->setMaxTimeStepSeconds(0.002);
+               solver->setParamSmoothing(0.1);
+
+               solver->setFluidViscosity(0.01);
+               solver->setFluidTension(0.5);
+
+               solver->setBoundaryViscosity(0, 0.01); // box
+               solver->setBoundaryAdhesion(0, 1.0);
+               
+               for (int i = 1; i < 4; i++) {  // armadillos
+                   solver->setBoundaryViscosity(i, 0.04 * i);
+                   solver->setBoundaryAdhesion(i, 1.0 * i);
                }                      
            }
        }                     
