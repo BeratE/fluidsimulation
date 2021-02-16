@@ -45,13 +45,15 @@
     \small{Berat Ertural, Dennis Ledwon\\
       RWTH Aachen, Visual Computing Institute\\
       Supervisor: Jose Antonio Fernandez Fernandez\\}
+
+    \epigraph{Reading maketh a full man; conference a ready man; and writing an exact man.}
+{\textit{Sir Francis Bacon}}
   \end{center}
 \end{@twocolumnfalse}
 ]
 
 
-\epigraph{Reading maketh a full man; conference a ready man; and writing an exact man.}
-{\textit{Sir Francis Bacon}}
+
 
 \section{Introduction} \label{sec:introduction}
 
@@ -116,31 +118,38 @@ where \(\hat{x}\) is the collection of all particles involved in the computation
   \Delta\hat{x} = M^{-1} \nabla C \lambda.
   \label{eg:deltax}
 \end{equation}
-An approximate solution to the linear equation above is derived using a method similar to a Jacobi iteration. The velocities are derived implicitly from the differences of the positions between frames.
-In the application PBF is used to replace the computation of the pressure term in the Navier-Stokes equation. In order to avoid attractive forces, which may lead to particle clumping and unwanted behaviour, the constraint from (\ref{eg:pbfconstraint}) is changed to an inequality constraint, \(C_i > 0\).
+An approximate solution to the linear equation above is derived using a method similar to a Jacobi iteration. The velocities are then derived implicitly from the differences of the positions between frames.
+In the application PBF is used to replace the computation of the pressure term in the Navier-Stokes equation. To avoid attractive forces, which may lead to particle clumping and unwanted behaviour, the constraint from (\ref{eg:pbfconstraint}) is changed to an inequality constraint, \(C_i > 0\).
 
 \subsection{Neighborhood Search}
-A lot of computation time is used for searching the neighborhood of a particle in both WCSPH and PBF. Efficient algorithms to find the particles in direct proximity is key to stable runtime performance. The application uses the CompactNSearch algorithm by Bender et al. \cite{bender2015}, which uses the parallel, hash-based neighborhood search by Ihmsen et al. \cite{ihmsen2011}. To further enhance runtime performance, we perform a Z-index sort of particle positions after a fixed number of iterations. Sorting the particles depending on their spatial properties will decrease the number of cache misses and therefore speed up the access time.
+Most of the time the bottleneck of a particle based fluidsimulation is the neighborhood search.
+An efficient algorithm to find the particles in direct proximity is key to a stable runtime performance. The application uses the CompactNSearch algorithm by Bender et al. \cite{bender2015}, which implements the parallel, hash-based neighborhood search by Ihmsen et al. \cite{ihmsen2011}. To further enhance runtime performance, we perform a Z-index sort of particle positions after a fixed number of iterations. Sorting the particles depending on their spatial properties will decrease the number of cache misses and therefore speed up the access time significantly.
 
 \subsection{Time integration}
-The system is advanced in time using the semi-implicit euler method. It is also known as the symplectic euler, as it conserves the energy of the system. XSPH smoothing is employed which aligns velocities of neighboring particles. This results in a viscosity effect similar to that of the viscosity due to the velocity divergence and helps to keep the simulation stable. The time step \(\Delta t\) is determined by the Courant-Friedrich-Levy (CFL) condition, \( \Delta t \leq \lambda \frac{2r}{||v_{max}||}\), with particle radius \(r\) and maximum velocity of all particles \(v_{max}\). The CFL condition will reduce the timestep dynamically, so that the particles will only move a fraction of their diameter during one timestep. 
-% CFL condition
+The system is advanced in time using the semi-implicit euler method, which is also known as the symplectic euler, as it conserves the energy over time.
+Furthermore, XSPH smoothing is applied to the velocities.
+The effect is that neighboring velocities are aligned towards each other, which results in a more viscous behaviour and helps to keep the simulation more stable.
+The time step \(\Delta t\) is determined by the Courant-Friedrich-Levy (CFL) condition, \( \Delta t \leq \lambda \frac{2r}{||v_{max}||}\), with particle radius \(r\) and maximum particle velocity \(v_{max}\). The CFL condition sets the timestep dynamically, so that the particles will only move a fraction of their diameter during one iteration of the symplectic euler scheme. 
+To further enhance the stability of the methods, we implemented a simple linear drag force which causes deaccalaration proportional to the velocity;
+\begin{equation}
+  f_{drag,i} = -k_{drag} \cdot v_i.
+\end{equation}
+The drag coefficient \(k_{drag}\) should ideally be below 0.1 as to not slow down the simulation too much. The implemented drag force is not ideal and in no way realistic. Modelling realistic drag for SPH methods with multiphase coupling and liquid-air interaction remains an active research field.
 
 \subsection{Boundary Interaction}
 To realise the interaction between the fluid and rigid boundaries, we use the boundary particle method by Akinci et al. \cite{akinci2012}. By taking advantage of the particle based nature of the presented methods we are able to integrate contributions from boundary particles into the calculations of densities, forces and position corrections.
-
-As boundaries in a scene are usually represented by triangular mesh models, we sample each triangle of a given input mesh. To this end, it is reasonable to dissolve a higher resolution mesh into a low resolution mesh which still contains the shape information and use the low resoltion mesh for the simulation and keep the original high resolution mesh for rendering the final simulation. This will reduce the overall number of triangles and therefore the number of sampled particles. Figure \ref{fig:mesh} shows the mesh used for most simulations in this report.
+Boundaries in a scene are usually represented by triangle mesh models. By sampling each surface triangle, we are able to sample the whole input mesh.
+To this end is reasonable to dissolve a higher resolution mesh into a low resolution mesh which preserves the topological shape, use the low res mesh for the simulation and keep the original high resolution mesh for rendering the final simulation. This will reduce the overall number of triangles and therefore the number of sampled particles. Figure \ref{fig:mesh} shows and example of the armadillo mesh used for most simulations in this report.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{images/mesh.png}
-    \caption{High resoltuion mesh for rendering (left) and low resolution mesh for simulation (right). The mesh on the left maintains the qualitative shape of the mesh.}
+    \caption{High resoltuion mesh for rendering (left) and low resolution mesh for simulation (right). The mesh on the left maintains the topological shape of the original.}
     \label{fig:mesh}
 \end{figure}
-
-
-To sample the particles on a triangle surface we perform a variation of the Pineda algorithm \cite{pineda1988} in the local coordinate system of the triangle surface. Given a triangle specified by the three vertex points \(a, b, c \in \mathbb{R}^3\), we construct the orthonormal base vectors \(u,v,n \in \mathbb{R}^3\) defining the triangle surface. The basis transform that will yield the local triangle coordiantes \(p \in \mathbb{R^2}\) for a point in global space \(x \in \mathbb{R}^3\) is given in equation \ref{eq:localtriangle}.
-
+To sample the particles on a triangle surface we perform a variation of the Pineda algorithm \cite{pineda1988} in the local coordinate system of the triangle surface.
+% Given a triangle specified by the three vertex points \(a, b, c \in \mathbb{R}^3\), we construct the orthonormal base vectors \(u,v,n \in \mathbb{R}^3\) defining the triangle surface.
+The basis transform that will yield the local triangle coordiantes \(p \in \mathbb{R}^2\) for a point in global space \(x \in \mathbb{R}^3\) is given in (\ref{eq:localtriangle}).
 \begin{equation}
   p = 
   \begin{pmatrix}
@@ -151,37 +160,36 @@ To sample the particles on a triangle surface we perform a variation of the Pine
   \cdot x 
 \label{eq:localtriangle}
 \end{equation}
-
-Note that the projected point is in homogeneous two dimensional space, as we are only interested in sampling the surface of the triangle. Applying the pineda algorithm is now straight forward. We first enclose the triangle by a bounding box by determining the minimal and maximal coordinates in the projected space. We then go along the bounding box and check for each sample point if its inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}. We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Sample points inside the triangle are shaded oqaue blue and sample points outside are shaded transparently. Note that sample points that slightly touch the border are also taken to be in the surface of the triangle. This is achieved by allowing an offset of the particle radius and is used to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet. The oversampling is later compensated by recomputing the volume of each sample depending on the number of samples in its close neighbourhood.
+The orthonormal basis vectors of the triangle \(u, v \in \mathbb{R}^3\) are parallel to the plane. The basis vector perpendicular to the plane is not used. The origin of the local coordinate system is a triangle corner \(a \in \mathbb{R}^3\).
+Applying the pineda algorithm is now straightforward. We first enclose the triangle by an axis-aligned bounding box (AABB) in the local coordiante system.
+We then go along the bounding box and check for each sample point if its inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}.
+We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Sample points inside the triangle are shaded opaque blue and sample points outside are transparent. The borders are slightly offset as to allow more samples to be inside the triangle. This is to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet.
+The oversampling is later compensated by recomputing the volume of each boundary particle depending on the number of particles in its close neighbourhood.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.5\textwidth]{images/triangle.pdf}
+    \includegraphics[width=0.4\textwidth]{images/triangle.pdf}
     \caption{Hexagonal sampling using pineda algorithm in local triangle space.}
     \label{fig:trianglesampling}
 \end{figure}
-
-Given the sample points computed in the two dimensional surface plane, we transform the points back into three dimensional global space by multiplying them by the inverse of the matrix given in equation \ref{eq:localtriangle}. Since the matrix is orthonormal its inverse is given by simply transposing the matrix.
-
-
-The boundary particle radius should optimally be the same as the fluid particle radius. This is due to the timestep being determined by the CFL condition. If the boundary particle radius is much smaller. The fluid particles may tunnel through the boundary if the timestep is too high. If the boundaryparticle radius is too high, the boundary shape information is lost and the interaction therefore incorrect. The constant factor \(\lambda\) in the CFL is set around 0.4 in all further simulations.
+We transform the sampled points back into three dimensional global space by multiplying them by the inverse of (\ref{eq:localtriangle}). Since the matrix is orthonormal its inverse is given by simply transposing the matrix.
 
 \subsection{Tension and Adhesion}
-Surface tension effects are implemented after the method by Akinci et al. \cite{akinci2013}.
-Akinci et al. define two types of forces, namely fluid cohesion and boundary adhesion. Fluid cohesion is an attractive force between particles. Macroscopically, it acts as a force field around the surface of the fluid which keeps the particles together, causing surface tension. The adhesion force causes fluid particles to stick to solid boundaries, which results in a wetting effect.
+Surface tension effects are implemented according the method by Akinci et al. \cite{akinci2013}.
+Akinci et al. define two types of forces, namely fluid cohesion and boundary adhesion. Fluid cohesion is an attractive force between particles. Macroscopically, it acts as a force field around the surface of the fluid which keeps the particles together. In this way surface tensions is realised and effects such as waterdroplets become arise. The adhesion force causes fluid particles to stick to solid boundaries, which results in a wetting effect.
 
 \subsection{Surface Reconstruction}
-To extract an explicit representation of the fluid surface we first have construct a signed distance function (SDF) \(\Phi(\vec{x}) \) describing the isosurface. We use the SPH method to approximate the isosurface at any arbitrary point \(\vec{x}\), depending on the normalized density \(\rho_j\) of the neighborhood region \(j \in N\);
+To extract an explicit representation of the fluid surface, a signed distance function (SDF) \(\Phi(\vec{x}) \) describing the isosurface is required. We use the SPH method to approximate the isosurface at any arbitrary point \(\vec{x}\), depending on the normalized density \(\rho_j\) of the neighborhood region \(j \in N\);
 \begin{equation}
   \Phi(\vec{x})= \sum_{j \in N(\vec{x})}\frac{1}{\rho_j} W(||\vec{x} - x_j|| / h) - c.
 \end{equation}
-The parameter \(c\) controls the zero level of the isosurface and therefore the enclosed volume of the explicit representation. We set \(c = 0.6\) during the remainder of the report. Using this method, we compute \(\Phi(\vec{x})\) at points in grid and reconstruct the triangle mesh representing the surface using the Marching Cubes algorithm \cite{lorensen1987}.
+The parameter \(c\) controls the zero level of the isosurface and therefore the enclosed volume of the explicit representation. We set \(c = 0.6\) during the remainder of the report. Using this method, we compute \(\Phi(\vec{x})\) at points in a grid and extract the triangle mesh representing the surface according to the Marching Cubes algorithm \cite{lorensen1987}.
 
 % marching cubes
 
 
 \subsection{Implementation}
-The implementation uses a C-style imperative approach with the exception of a few object oriented paradigms. Data encapsulation in the form of C++ classes is applied to ensure data consistency during computation. Basic inheritance is used to be able to reuse code for different parts of the program. This style of programming allows us to be flexible enough to incrementially implement the practical assignment tasks while sacrificing little to no performance due to design overload.  
+The implementation uses a primarily imperative programming style with the exception of a few object oriented paradigms. Data encapsulation in the form of C++ classes is applied to ensure data consistency during computation. Basic inheritance is used to be able to reuse code for different parts of the program. This style of programming allows us to be flexible enough to incrementially implement the practical assignment tasks while sacrificing little to no performance due to design overload.
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{images/system.pdf}
@@ -190,16 +198,11 @@ The implementation uses a C-style imperative approach with the exception of a fe
 \end{figure}
   
 The implementation is divided into two broad categories, systems and solvers.
-What we define as a 'system', includes fluid- and boundaryparticles, their generalization as particlesystems and auxilary constructs concerning particles. These represent the creation, state and behaviour of fluid- and boundary particles.
-On the other hand, we have two seperate specific solvers for WCSPH fluids and PBF. They aggregate fluid- and particlesystems to model the progression of the given system. Figure \ref{fig:systemuml} gives a schematic UML diagram of the relation between the different parts of the implementation.
-
-
-A particlesystem is a collection of particles which are represented by basic attributes, such as mass, density, position, velocity and the accumulated external forces on the particles. Since it is vital to keep all attributes of a particlesystem consistent during computation a particlesystem object is only allowed to be created by the emitter object. The emitter object is a singleton, which means that there is always one and only one single instance of the object during the runtime of the program. During runtime a particlesystem is present in two forms, either as fluid particles or as boundary particles. These subtypes posess attributes and methods responsible for the behaviour of fluid or boundary particles in a system. For example, boundary particles possess a seperate variable volume attribute and a method to compute the volume for each particle depending on the density, e.g. the number of boundary particles in close neighbourhood.
-
-
-% demonstrate scientific reasonng
-% what were the confounding factors? how did we overcame them?
-
+What we define as a system, includes fluid- and boundaryparticles, their generalization as particlesystems and auxilary constructs concerning particles. These represent the creation, state and behaviour of fluid- and boundary particles.
+On the other hand, we have two seperate specific solvers for WCSPH and PBF. They aggregate fluid- and boundarysystems to model the progression of the given system. The specific solvers share a some functions and general parameters over their superclass. Since the function that starts a simulation run is defined over the superclass, it is possible to determine the type of solver at runtime.
+Figure \ref{fig:systemuml} gives a schematic UML diagram of the relation between the different parts of the implementation.
+A particlesystem is a collection of particles which are represented by basic attributes, such as mass, density, position, velocity, etc. Since it is vital to keep all attributes of a particlesystem consistent during computation, a particlesystem object is only allowed to be created by the emitter object. The emitter object is a singleton, which means that there is always one and only one single instance of the object during the runtime of the program. A particlesystem is present in two forms, either as fluid particles or as boundary particles. These subtypes posess attributes and methods responsible for the behaviour of fluid or boundary particles in a system. For example, boundary particles possess a seperate variable volume attribute and a method to compute the volume for each particle depending on the density, e.g. the number of boundary particles in close neighbourhood. All particlesystems make use of precomputed lookup tables of the kernels. Since the kernel is evaluated a large number of times per particle, the lookup tables provide a significant speedup.
+In addition, each solver has been parallelized using OpenMP. To reduce the overhead from excessive creation and deletion of threads, a parallel region is created once upon entering an integration step. In this case special care has to be taken to avoid race conditions due to shared memory between threads. 
 
 \section*{Results}
 \label{sec:results}
