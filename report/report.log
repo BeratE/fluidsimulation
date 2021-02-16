@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Arch Linux) (preloaded format=pdflatex 2020.11.3)  1 FEB 2021 13:36
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Arch Linux) (preloaded format=pdflatex 2020.11.3)  16 FEB 2021 14:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -390,67 +390,100 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 35.
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<images/system.pdf, id=1, 633.29597pt x 425.59pt>
-File: images/system.pdf Graphic file (type pdf)
-<use images/system.pdf>
-Package pdftex.def Info: images/system.pdf  used on input line 70.
-(pdftex.def)             Requested size: 234.8775pt x 157.84247pt.
-
-Overfull \hbox (5.0pt too wide) in paragraph at lines 70--71
- [][] 
+Underfull \hbox (badness 1603) in paragraph at lines 63--67
+\OT1/cmr/m/n/10.95 The La-grangian form de-notes the sam-pling
  []
 
-[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+
+Underfull \vbox (badness 1303) has occurred while \output is active []
+
+ [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
- <./images/system.pdf>]
-<images/mesh.png, id=41, 1176.395pt x 609.27625pt>
+] [2]
+<images/mesh.png, id=21, 1176.395pt x 609.27625pt>
 File: images/mesh.png Graphic file (type png)
 <use images/mesh.png>
-Package pdftex.def Info: images/mesh.png  used on input line 86.
+Package pdftex.def Info: images/mesh.png  used on input line 136.
 (pdftex.def)             Requested size: 234.8775pt x 121.63925pt.
 
-Overfull \hbox (5.0pt too wide) in paragraph at lines 86--87
+Overfull \hbox (5.0pt too wide) in paragraph at lines 136--137
  [][] 
  []
 
-<images/triangle.pdf, id=42, 285.01161pt x 203.26718pt>
+<images/triangle.pdf, id=22, 285.01161pt x 203.26718pt>
 File: images/triangle.pdf Graphic file (type pdf)
 <use images/triangle.pdf>
-Package pdftex.def Info: images/triangle.pdf  used on input line 109.
+Package pdftex.def Info: images/triangle.pdf  used on input line 159.
 (pdftex.def)             Requested size: 234.8775pt x 167.5176pt.
 
-Overfull \hbox (5.0pt too wide) in paragraph at lines 109--110
+Overfull \hbox (5.0pt too wide) in paragraph at lines 159--160
  [][] 
  []
 
-[2 <./images/mesh.png> <./images/triangle.pdf>] (./report.bbl) [3
+[3 <./images/mesh.png>]
+Underfull \vbox (badness 1874) has occurred while \output is active []
 
-]
-(./report.aux) ) 
+<images/system.pdf, id=27, 633.29597pt x 425.59pt>
+File: images/system.pdf Graphic file (type pdf)
+<use images/system.pdf>
+Package pdftex.def Info: images/system.pdf  used on input line 187.
+(pdftex.def)             Requested size: 234.8775pt x 157.84247pt.
+
+Overfull \hbox (5.0pt too wide) in paragraph at lines 187--188
+ [][] 
+ []
+
+[4 <./images/triangle.pdf> <./images/system.pdf
+
+pdfTeX warning: pdflatex (file ./images/system.pdf): PDF inclusion: multiple pd
+fs with page group included in a single page
+>] (./report.bbl
+Underfull \hbox (badness 10000) in paragraph at lines 16--20
+\OT1/cmr/m/n/9 free smoothed par-ti-cle hy-dro-dy-nam-ics.
+ []
+
+
+Underfull \hbox (badness 3849) in paragraph at lines 16--20
+\OT1/cmr/m/n/9 In \OT1/cmr/m/it/9 Pro-ceed-ings of the 14th ACM SIG-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 16--20
+\OT1/cmr/m/it/9 GRAPH/Eurographics sym-po-sium on
+ []
+
+
+Underfull \hbox (badness 4353) in paragraph at lines 22--26
+[]\OT1/cmr/m/n/9 Markus Ihm-sen, Nadir Ak-inci, Markus
+ []
+
+) [5] (./report.aux) ) 
 Here is how much of TeX's memory you used:
- 7983 strings out of 480478
- 154135 string characters out of 5905959
- 401580 words of memory out of 5000000
- 23914 multiletter control sequences out of 15000+600000
- 543714 words of font info for 69 fonts, out of 8000000 for 9000
+ 8007 strings out of 480478
+ 154401 string characters out of 5905959
+ 404703 words of memory out of 5000000
+ 23933 multiletter control sequences out of 15000+600000
+ 545433 words of font info for 76 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 38i,11n,46p,1285b,548s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pf
-b></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/
-share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></
-usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on report.pdf (3 pages, 454598 bytes).
+ 38i,11n,46p,1285b,550s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmb
+x10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/
+share/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
+</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pf
+b></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/share/texmf-dist/font
+s/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on report.pdf (5 pages, 501921 bytes).
 PDF statistics:
- 107 PDF objects out of 1000 (max. 8388607)
- 74 compressed objects within 1 object stream
+ 120 PDF objects out of 1000 (max. 8388607)
+ 83 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
