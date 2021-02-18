@@ -207,6 +207,71 @@ In addition, each solver has been parallelized using OpenMP. To reduce the overh
 \section*{Results}
 \label{sec:results}
 
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/smallDam_IX_X.0036.png}
+  \includegraphics[width=0.8\textwidth]{images/smallDam_XI_XII.0036.png}
+  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  xsph\_smoothing = 0.5, stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7}. The other parameters were set as noted in the panels.}
+  \label{fig:dam_comparisons}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{images/density_graphs.PNG}
+  \caption{Max. density in $kg / m^3$ during every frame of the simulations in panel 1 and panel 2 of Fig. \ref{fig:dam_comparisons}.}
+  \label{fig:max_densities}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{images/smallDam_XI_XII_tilted.0160.png}
+  \caption{Frame 160 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  xsph\_smoothing = 0.5, stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7}. The other parameters were set as noted in the panels.}
+  \label{fig:dam_comparisons_boundary_visc_adhesion}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{images/tension.0120.png}
+  \caption{Frame 160 of simulations of 19683 particles arranged in a block without gravity using the WCSPH and the PBF solver. In all simulations, smoothing was disabled. For simulations using WCSPH, \texttt{max\_timestep = 0.002, stiffness = 3000, fluid\_visc = 0.01 }. 
+  For simulations using PBF, \texttt{max\_timestep = 0.01, nr\_iterations = 5, fluid\_visc = 0.001}. \texttt{tension} is set as indicated in the panels.}
+  \label{fig:tension}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{images/iterations.0036.png}
+  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{nr\_iterations} was 
+  set as noted in the panels. The simulations in panel 1 and panel 2 were interrupted after five hours of simulation on frame 4 and 12 respectively.}
+  \label{fig:dam_comparisons_iterations}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{images/smoothing.0031.png}
+  \caption{Frame 31 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, nr\_iterations = 7}. \texttt{xsph\_smoothing} was set as noted in the panels.}
+  \label{fig:dam_comparisons_smoothing}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{images/stiffness.0036.png}
+  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.0005s, xsph\_smoothing = 0.5, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{stiffness} was 
+  set as noted in the panels.}
+  \label{fig:dam_comparisons_stiffness}
+\end{figure*}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\textwidth]{images/adhesion.0160.png}
+  \caption{Frame 160 of simulations of 67868 fluid particles falling onto an icosahedron using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.025 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  xsph\_smoothing = 0.25, stiffness = 2000, fluid\_visc = 0.01, boundary\_visc = 0.01, tension = 0.15}. For all simulations using the PBF solver \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7, fluid\_visc = 0.01, boundary\_visc = 0.005, tension = 0.1}. \texttt{adhesion} is set as noted in the panels.}
+  \label{fig:adhesion}
+\end{figure*}
+
+
 
 \section*{Conclusion}
 \label{sec:conclusion}
