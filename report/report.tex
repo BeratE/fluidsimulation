@@ -434,14 +434,16 @@ is used in the PBF solver, as a particle that has high density after a position 
 \section{Conclusion}
 \label{sec:conclusion}
 % respong to introduction and discuss implications of result
-Using our implementations of WCSPH and PBF fluid solvers we experimentally studied the behaviour of the two methods and their differences, as well as the effects of various parameters. For both methods a good and stable simulation should converge quickly to the rest density and should show preferably small and steady deviations around the rest density. Such small and steady deviations may arise from impactful events in the simulation, such as the clashing of fluidparticles.
-A sudden and inteseful spike in fluid density may be due to microexplosions due to overcompression. This is generally a bad sign for the stability of the system.
-Resistive measures, such as smoothing, drag and viscosity stabilize the system and reduce the possibility of such microexplosions. Resistance should however not be too high as to allow for a dynamic and realistic simulation.
-As the macroscopic effect of the parameters depend heaviliy on the particle count and any other involved resistances and forces, it is very hard to provide absolute values for the parameters. As the particle count increases, finding a good setting for a stable simulation without microexplosions gets increasingly hard.
-A key observation was, that large forces would lead to stiff systems which requiere small timesteps.
-Simulations using WCSPH were most stable with a large particle count when each particle had a high probability of a filled neighborhood region. 
-PBF simulations were stable with larger timesteps and at lower particle density. The highest impact on stability was due to the iteration count of the position correction. PBF required lower resistive measures to perform similar to the comparable WCSPH simulations.
+Using our implementations of the WCSPH and PBF solvers, we studied the behavior of these two approaches to fluid simulation. We demonstrated that the PBF solver is better suited for maintaining fluid incompressibility than the WCSPH solver, leading to simulations with less energy. Further, we demonstrated
+that fluid viscosity (Fig. \ref{fig:dam_comparisons}, panels 3, 4), boundary viscosity (Fig. \ref{fig:dam_comparisons}, panels 5, 6), surface tension (Fig. \ref{fig:tension}) and adhesion (Fig. \ref{fig:adhesion}) can be successfully simulated using our solver implementations. Generally, it is desirable that 
+the particle densities converge to rest density, especially in our simple dam break scenarios. Deviations from rest density during the simulations can occur during impactful events, such as collisions of fluid particles with boundary particles. However, sudden density spikes often come hand in hand with microexplosions
+in the simulations, indicating that the simulations are unstable. Resistive measures, such as smoothing, drag and viscosity stabilize the system and reduce the probability of such microexplosions. However, increasing resistance too much leads to unrealistic simulations. 
 
+The macroscopic effects of simulation parameters often depend on each other, the sampling size and even the particle count. Thus, it is hard to make reliable recommendations for suitable simulation parameters. One key observation was that large, stiff systems lead to large forces, which in turn required smaller timesteps. 
+In comparison to WCSPH, PBF required fewer resistive measures.
+
+Fast computation times of the solvers are paramount in order to run simulations with sufficiently small time steps in practice. To achieve this, we precomputed kernel weights and their derivatives, implemented parallelization using omp and used the CompactNSearch algorithm with z-sorting (see Sec. \ref{sec:methods}).
+ 
 
 \section{Outlook}
 \label{sec:future}
