@@ -11,10 +11,10 @@ compile_commands.json
 .#*
 
 # Latex
-.el
-.bbl
-.blg
-.gz
-.aux
-.log
-.pdf
+*.el
+*.bbl
+*.blg
+*.gz
+*.aux
+*.log
+*.pdf
