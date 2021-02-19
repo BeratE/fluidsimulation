@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7350 64-bit) (preloaded format=pdflatex 2020.4.14)  19 FEB 2021 03:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7350 64-bit) (preloaded format=pdflatex 2020.4.14)  19 FEB 2021 16:05
 entering extended mode
 **c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex
 (c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex
@@ -440,102 +440,106 @@ Overfull \hbox (5.0pt too wide) in paragraph at lines 197--198
 
 pdfTeX warning: pdflatex (file c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/system.pdf): PDF inclusion: multiple pdfs with page group included in a single page
 >]
-Underfull \hbox (badness 1590) in paragraph at lines 216--221
+Underfull \hbox (badness 1590) in paragraph at lines 219--224
 \OT1/cmtt/m/n/10.95 boundary[]visc, tension \OT1/cmr/m/n/10.95 and \OT1/cmtt/m/n/10.95 adhesion\OT1/cmr/m/n/10.95 , we
  []
 
 [5] [6]
-Underfull \hbox (badness 10000) in paragraph at lines 279--281
+Underfull \hbox (badness 10000) in paragraph at lines 282--284
 \OT1/cmr/m/n/10.95 When the PBF solver is used, the
  []
 
 
-Underfull \hbox (badness 5077) in paragraph at lines 279--281
+Underfull \hbox (badness 5077) in paragraph at lines 282--284
 \OT1/cmtt/m/n/10.95 nr[]iterations \OT1/cmr/m/n/10.95 that the PBF solver uses
  []
 
 
-Underfull \hbox (badness 1400) in paragraph at lines 279--281
+Underfull \hbox (badness 1400) in paragraph at lines 282--284
 \OT1/cmr/m/n/10.95 con-di-tion be-came very small and pre-vented
  []
 
 <images/smallDam_IX_X.0036.png, id=74, 1519.6775pt x 763.85374pt>
 File: images/smallDam_IX_X.0036.png Graphic file (type png)
 <use images/smallDam_IX_X.0036.png>
-Package pdftex.def Info: images/smallDam_IX_X.0036.png  used on input line 284.
+Package pdftex.def Info: images/smallDam_IX_X.0036.png  used on input line 287.
 (pdftex.def)             Requested size: 375.80544pt x 188.88829pt.
 <images/smallDam_XI_XII.0036.png, id=75, 1519.6775pt x 763.85374pt>
 File: images/smallDam_XI_XII.0036.png Graphic file (type png)
 <use images/smallDam_XI_XII.0036.png>
-Package pdftex.def Info: images/smallDam_XI_XII.0036.png  used on input line 285.
+Package pdftex.def Info: images/smallDam_XI_XII.0036.png  used on input line 288.
 (pdftex.def)             Requested size: 375.80544pt x 188.88829pt.
 <images/density_graphs.PNG, id=76, 1141.26375pt x 283.0575pt>
 File: images/density_graphs.PNG Graphic file (type png)
 <use images/density_graphs.PNG>
-Package pdftex.def Info: images/density_graphs.PNG  used on input line 293.
+Package pdftex.def Info: images/density_graphs.PNG  used on input line 296.
 (pdftex.def)             Requested size: 469.75502pt x 116.50781pt.
 <images/smallDam_XI_XII_tilted.0160.png, id=78, 1519.6775pt x 763.85374pt>
 File: images/smallDam_XI_XII_tilted.0160.png Graphic file (type png)
 <use images/smallDam_XI_XII_tilted.0160.png>
-Package pdftex.def Info: images/smallDam_XI_XII_tilted.0160.png  used on input line 300.
+Package pdftex.def Info: images/smallDam_XI_XII_tilted.0160.png  used on input line 303.
 (pdftex.def)             Requested size: 469.75502pt x 236.1162pt.
 <images/tension.0053.png, id=79, 1510.64375pt x 763.85374pt>
 File: images/tension.0053.png Graphic file (type png)
 <use images/tension.0053.png>
-Package pdftex.def Info: images/tension.0053.png  used on input line 308.
+Package pdftex.def Info: images/tension.0053.png  used on input line 311.
 (pdftex.def)             Requested size: 469.75502pt x 237.5265pt.
 <images/iterations.0036.png, id=80, 1510.64375pt x 763.85374pt>
 File: images/iterations.0036.png Graphic file (type png)
 <use images/iterations.0036.png>
-Package pdftex.def Info: images/iterations.0036.png  used on input line 316.
+Package pdftex.def Info: images/iterations.0036.png  used on input line 319.
 (pdftex.def)             Requested size: 469.75502pt x 237.5265pt.
 <images/smoothing.0031.png, id=81, 1519.6775pt x 763.85374pt>
 File: images/smoothing.0031.png Graphic file (type png)
 <use images/smoothing.0031.png>
-Package pdftex.def Info: images/smoothing.0031.png  used on input line 324.
+Package pdftex.def Info: images/smoothing.0031.png  used on input line 327.
 (pdftex.def)             Requested size: 469.75502pt x 236.1162pt.
 <images/stiffness.0036.png, id=82, 1510.64375pt x 385.44pt>
 File: images/stiffness.0036.png Graphic file (type png)
 <use images/stiffness.0036.png>
-Package pdftex.def Info: images/stiffness.0036.png  used on input line 332.
+Package pdftex.def Info: images/stiffness.0036.png  used on input line 335.
 (pdftex.def)             Requested size: 469.75502pt x 119.85568pt.
 <images/adhesion.0160.png, id=83, 1510.64375pt x 763.85374pt>
 File: images/adhesion.0160.png Graphic file (type png)
 <use images/adhesion.0160.png>
-Package pdftex.def Info: images/adhesion.0160.png  used on input line 340.
+Package pdftex.def Info: images/adhesion.0160.png  used on input line 343.
 (pdftex.def)             Requested size: 469.75502pt x 237.5265pt.
 
-LaTeX Warning: Citation `macklin2013' on page 7 undefined on input line 353.
-
-
-Underfull \vbox (badness 1412) has occurred while \output is active []
-
-
-
-LaTeX Warning: Citation `akinci2013' on page 7 undefined on input line 360.
-
-
-LaTeX Warning: Citation `akinci2012' on page 7 undefined on input line 360.
+LaTeX Warning: Citation `macklin2013' on page 7 undefined on input line 356.
 
 [7] [8 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/smallDam_IX_X.0036.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/smallDam_XI_XII.0036.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/density_graphs.PNG>] [9 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/smallDam_XI_XII_tilted.0160.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/tension.0053.png (PNG copy)>] [10 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/iterations.0036.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/smoothing.0031.png (PNG copy)>] [11 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/stiffness.0036.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/adhesion.0160.png (PNG copy)>]
 
-LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 368.
+LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 363.
 
 
-LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 377.
+LaTeX Warning: Citation `akinci2012' on page 12 undefined on input line 363.
 
 
-LaTeX Warning: Citation `solenthaler09' on page 12 undefined on input line 395.
+LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 371.
+
+
+LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 380.
 
 [12]
 
-LaTeX Warning: Citation `macklin2013' on page 13 undefined on input line 404.
+LaTeX Warning: Citation `monaghan1989' on page 13 undefined on input line 392.
+
+
+LaTeX Warning: Citation `schechter2012' on page 13 undefined on input line 395.
+
+
+LaTeX Warning: Citation `solenthaler09' on page 13 undefined on input line 403.
+
+
+LaTeX Warning: Citation `macklin2013' on page 13 undefined on input line 412.
 
 (c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.bbl
 
 LaTeX Warning: Empty `thebibliography' environment on input line 3.
 
-) [13] (c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.aux)
+) [13] [14
+
+] (c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -543,15 +547,15 @@ LaTeX Warning: There were undefined references.
 Here is how much of TeX's memory you used:
  7954 strings out of 480934
  158701 string characters out of 2899449
- 404422 words of memory out of 3000000
+ 403422 words of memory out of 3000000
  23716 multiletter control sequences out of 15000+200000
  543369 words of font info for 68 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,11n,46p,1177b,550s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.pdf (13 pages, 4626749 bytes).
+Output written on c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.pdf (14 pages, 4629261 bytes).
 PDF statistics:
- 156 PDF objects out of 1000 (max. 8388607)
+ 159 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  61 words of extra memory for PDF output out of 10000 (max. 10000000)
 

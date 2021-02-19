@@ -208,6 +208,9 @@ In addition, each solver has been parallelized using OpenMP. To reduce the overh
 
 \section{Results}
 \label{sec:results}
+In this section, we run simple simulations to illustrate the differences between the WCSPH and the PBF solver. In Sec. \ref{subsec:comparison_general}, we provide a general comparison of the effects of fluid viscosity, boundary viscosity, surface tension and adhesion on both solvers by looking at dam break scenarios with different parameters. In Sec. \ref{subsec:comparison_tension} and Sec. \ref{subsec:comparison_adhesion} we take a closer look at minimal scenarios that showcase surface tension and 
+adhesion. In Sec. \ref{subsec:comparison_smoothing}, Sec. \ref{subsec:sph_param_stiffness} and Sec. \ref{subsec:pbf_param_iterations} we return to dam break simulations to show the impact of XSPH smoothing and stiffness on the WCSPH solver and the impact of XSPH smoothing and the number of iterations on the PBF solver.  
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% General Dam Break
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -260,8 +263,8 @@ for simulations using WCSPH.
 \subsection{Comparison: Smoothing}
 \label{subsec:comparison_smoothing}
 Multiple dam break scenarios 74589 were simulated using the WCSPH and PBF solver to investigate the impact of XSPH smoothing. Fig. \ref{fig:dam_comparisons_smoothing} shows frame 31 of these simulations. It is notable, that the differences that were observed between the WCSPH and the PBF solver in panels 1 and 2 of Fig. \ref{fig:dam_comparisons} are less pronounced when XSPH smoothing
-is deactivated: Even in the simulation that used the PBF solver (panel 2), there are single particles with higher velocities than others. Increasing \texttt{xsph\_smoothing} to 1 leads to different outcomes when the WCSPH solver or the PBF solver is used (panel 3, panel 4). Increasing XSPH smoothing barely affects the behavior of the simulation at all when the WCSPH solver is used. However, when the
-PBF solver is used, increasing XSPH smoothing causes the fluid particles to lose energy and have a more viscous appearance. There are barely any fluid particles that split of from the rest of the fluid body, when \texttt{xsph\_smoothing} is set to 1 and the PBF solver is used.   
+is deactivated: Even in the simulation that used the PBF solver (panel 2), there are single particles with higher velocities than others. Increasing \texttt{xsph\_smoothing} to 1 leads to different outcomes depending on the used solver (panel 3, panel 4). Increasing XSPH smoothing only affects the behavior of the simulation to a small extent when the WCSPH solver is used. 
+However, we observed fewer particles on the left side and more particles on the right side of the container when XSPH smoothing was activated. When the PBF solver is used, increasing XSPH smoothing causes the fluid particles to lose energy and have a more viscous appearance. There are barely any fluid particles that split off from the rest of the fluid body, when \texttt{xsph\_smoothing} is set to 1 and the PBF solver is used.   
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Stiffness
@@ -386,6 +389,11 @@ of the icosahedron. Finally, if this hypothesis were true, we would expect a sim
 %% Smoothing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Comparison: Smoothing}
+According to \cite{monaghan1989}, XSPH smoothing can be used to ensure that particles that are close to each other will have nearly identical velocities. This helps preventing regions where SPH particles pass through each other without increasing fluid viscosity. In our experiments in Fig. \ref{fig:dam_comparisons_smoothing}, we observed that particles velocities 
+indeed seem to be closer to their neighbors' velocities when XSPH smoothing is used. However, this effect was much more pronounced for the PBF solver. Most likely, this can be attributed to the fact that smoothing is applied without taking pressure forces into account in PBF. Consequently, most particle velocities that are used for XSPH smoothing in the PBF solver have smaller
+magnitudes than their counterparts in the WCSPH solver. As a result, the absolute difference between velocities of neighboring particles after XSPH smoothing is much smaller for the PBF solver. If the density constraint was already minimized in the previous timestep, the $\Delta x$ that are calculated during the constraint minimization of the current timestep will be small.
+Overall, this leads to a loss in energy when PBF and XSPH smoothing are used together. In \cite{schechter2012}, XSPH smoothing is used to artificially introduce viscosity in fluid simulations using an SPH solver. We were not able to observe more viscous fluid behavior when XSPH smoothing was used with the WCSPH solver. Maybe it is worth investigating the effects of smoothing
+on the WCSPH solver in simulations with a smaller stiffness value again.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Stiffness
