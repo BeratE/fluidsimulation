@@ -68,7 +68,7 @@ In practice, absolute incompressebility is not achievable due to numerical error
 
 As with many PDE describing natural phenomena, the Navier-Stokes equation has no analytical solution. Nonetheless, numerical approximations to fluid dynamics exist and during the course of the practical lecture we were tasked to implement two such solvers, namely Weakly Compressible Smoothed Particle Hydrodynamics (WCSPH) \cite{ihmsen2014} and Position based Fluids (PBF) \cite{macklin2013}. 
 In the next section, we will give a short overview of the used methods and implementation of the application.
-We will then show the results of our experiments that were designed to demonstrate the differences between the WCSPH and the PBF solver and the impact of simulation parameters on the fluid behavior in Sec. \ref{sec:results}. In Sec. \ref{sec:discussion}, we provide interpretations for the 
+We will then show the results of our experiments that were designed to demonstrate the differences between the WCSPH and the PBF solver and the impact of various simulation parameters on the fluid behavior in Sec. \ref{sec:results}. In Sec. \ref{sec:discussion}, we provide interpretations for the 
 results of these experiments. Finally, we give concluding remarks and an outlook in Sec. \ref{sec:conclusion} and Sec. \ref{sec:future}.
 
 
@@ -206,7 +206,9 @@ The implementation uses a primarily imperative programming style with the except
 
 The implementation is divided into two broad categories, systems and solvers. Figure \ref{fig:systemuml} gives a schematic UML diagram of the relation between the different parts of the implementation.
 Systems include fluid particles and boundary particles, their generalization as particle systems and auxilary constructs. These implement the state and behaviour of fluid and boundary particles. A particlesystem is a collection of particles which are defined by their basic attributes, such as mass, density, position, velocity, etc. Particle systems are created via an Emitter object, which provides convience methods, such as creating particle systems from triangle meshes.
-Every particle system is either a fluid system or a boundary system. Fluid and boundary systems hold additional attributes that are required to model behaviors that are unique to fluids and boundaries, respectively. As an example, boundary particles store information about the particle volumes and provide a method to compute the volume for each particle. All particle systems make use of precomputed lookup tables of the kernels. Since the kernel is evaluated multiple times per particle, the lookup tables are expected to provide significant speedups. On the other hand, we have two seperate solvers for WCSPH and PBF. They aggregate fluid systems and boundary systems to model the progression of the given system. Both solvers share functions and general parameters over their superclass. Since the function that starts a simulation run is defined in the superclass, it is possible to determine the type of a solver at runtime.
+Every particle system is either a fluid system or a boundary system. Fluid and boundary systems hold additional attributes that are required to model behaviors that are unique to fluids and boundaries, respectively. As an example, boundary particles store information about the particle volumes and provide a method to compute the volume for each particle. All particle systems make use of precomputed lookup tables of the kernels. Since the kernel is evaluated multiple times per particle, the lookup tables are expected to provide significant speedups.
+
+On the other hand, we have two seperate solvers for WCSPH and PBF. They aggregate fluid systems and boundary systems to model the progression of the given system. Both solvers share functions and general parameters over their superclass. Since the function that starts a simulation run is defined in the superclass, it is possible to determine the type of a solver at runtime.
 In addition, each solver has been parallelized using OpenMP. To reduce the overhead from excessive creation and deletion of threads, a parallel region is created once upon entering an integration step. In this case, special care has to be taken to avoid race conditions due to shared memory between threads.
 
 \section{Results}
@@ -380,10 +382,11 @@ The simulation in the middle image has a reduced sitffness of 3000, higher smoot
 Figure \ref{fig:convergence_pbf} shows the same scene using three different sets of parameters for the PBF solver. The left simulation has a very high timestep of 28ms. The simulation appears to be smooth until microexplosions - as seen in the current frame - do occur. The microexplosion is noticable in the sudden and intense peaks in the maximum density plot. Decreasing the timestep to a value of 16ms, which is still very high compared to a WCSPH simulation, and increasing the viscosity by a factor of ten does stabilize the system a lot. However, the maximum density plot shows some anomalies. The right simulation has a timestep of 4ms, higher tension and adhesion forces of 1 and the viscosity again increased by a factor of ten. The parameters are now comparable to the right WCSPH simulation of figure \ref{fig:convergence_sph}, except for smoothing and timestep, which is higher by a factor of 4. While the simulation is stable and shows no anomalies, the fluid appears very viscous, slow and has lost a lot of energy.
 
 
-
 \section{Discussion}
 \label{sec:discussion}
-In this section, we discuss the results that are documented in Sec. \ref{sec:results}. The general characteristics of the WCSPH and the PBF solver are discussed in Sec. \ref{disc:comparison_general}. The results of simulations using tension and adhesion are discussed in Sec. \label{disc:comparison_tension} and \label{disc:comparison_adhesion}.
+In this section, we discuss the results that are documented in Sec. \ref{sec:results}.
+The general characteristics of the WCSPH and the PBF solver are discussed in Sec. \ref{disc:comparison_general}.
+The results of simulations using tension and adhesion are discussed in Sec. \ref{disc:comparison_tension} and \ref{disc:comparison_adhesion}.
 The impact of XSPH smoothing, stiffness (WCSPH) and iterations (PBF) on the simulations are evaluated in Sec. \ref{disc:comparison_smoothing}, Sec. \ref{disc:comparison_stiffness} and Sec. \ref{disc:comparison_iterations}, respectively. In Sec. \ref{disc:convergence} we will discuss the behaviour of the water droplet scenes. 
 
 \subsection{Comparison: General}
@@ -459,7 +462,7 @@ is used in the PBF solver, as a particle that has high density after a position 
 \label{disc:convergence}
 
 The waterdroplet scenario shown in the results showcases the behavior of the WCSPH and PBF solvers. The WCSPH solver has a strong reaction to high forces, such as caused by stiffness and tension, which make the system unstable. A measure to counteract such high forces is to introduce resistivity in the form of viscoscity, smoothing and drag into the system. As suggested in the introduction to the SPH framework in Sec. \ref{subsec:wcsph}, due to the EOS, the WCSPH simulation behaves macroscopically like a mass spring system. Without resistance impeding on high oscillations causes by the EOS, the simulation much like a driven oscillator, would explode as energy accumulates in the system.
-An even more effective approach is to decrease the maximum timestep further down to stabilize the system. The WCSPH solver is what is known in numerics as a \textit{stiff} system, which means that high forces require rather small timesteps.
+An even more effective approach is to decrease the maximum timestep further down to stabilize the system. The WCSPH solver is what is known in numerics as a \textit{stiff} system, which means that high forces require rather small timesteps \cite{bender2015}.
 
 The maximum densities can tell us about the time and intensity of impactful events in the peaks. In this scenario, it is generally desired that the density of the system converges quickly to the rest density and that small deviations around the rest density occur at a slow and steady rate. Stable simulations display this behaviour in their density, while unstable simulations show intense and sudden peaks and doe not converge quickly to the rest density.
 
@@ -494,7 +497,7 @@ through the fluid and updates the pressures such that incompressibility is achie
 Last, but not least, we would like to thank our supervisors for giving us this insightful lecture during these hard times and for their willingness to answer every nagging question asked in the meeting sessions. 
 
 
-
+\newpage
 \bibliographystyle{alpha}
 {\footnotesize
 \bibliography{references.bib}}
