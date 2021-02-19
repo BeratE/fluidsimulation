@@ -212,7 +212,8 @@ In addition, each solver has been parallelized using OpenMP. To reduce the overh
 \section{Results}
 \label{sec:results}
 In this section, we run simple simulations to illustrate the differences between the WCSPH and the PBF solver. In Sec. \ref{subsec:comparison_general}, we provide a general comparison of the effects of fluid viscosity, boundary viscosity, surface tension and adhesion on both solvers by looking at dam break scenarios with different parameters. In Sec. \ref{subsec:comparison_tension} and Sec. \ref{subsec:comparison_adhesion} we take a closer look at minimal scenarios that showcase surface tension and 
-adhesion. In Sec. \ref{subsec:comparison_smoothing}, Sec. \ref{subsec:sph_param_stiffness} and Sec. \ref{subsec:pbf_param_iterations} we return to dam break simulations to show the impact of XSPH smoothing and stiffness on the WCSPH solver and the impact of XSPH smoothing and the number of iterations on the PBF solver.  
+adhesion. In Sec. \ref{subsec:comparison_smoothing}, Sec. \ref{subsec:sph_param_stiffness} and Sec. \ref{subsec:pbf_param_iterations} we return to dam break simulations to show the impact of XSPH smoothing and stiffness on the WCSPH solver and the impact of XSPH smoothing and the number of iterations on the PBF solver.
+In Sec. \ref{subsec:convergence} we showcase a scenario to further study the convergence behaviour of the two methods.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% General Dam Break
@@ -347,12 +348,37 @@ the simulations are stable and look very similar to each other. However, increas
 \subsection{PBF Parameter: Iterations}
 \label{subsec:pbf_param_iterations}
 When the PBF solver is used, the \texttt{nr\_iterations} that the PBF solver uses to minimize the density constraint can be set as a parameter. Dam break simulation with 74589 fluid particles were run with \texttt{nr\_iterations} set to 1, 3, 5, 7, 9 and 11. When \texttt{nr\_iterations} was set to 1 and 3, the simulations were stopped after five hours on frame 4 and 12, respectively. For both of these
-simulations, the timestep that was dynamically calculated using the CFL condition became very small and prevented the simulation from progressing at a reasonble pace. When \texttt{nr\_iterations} was set to 5, 7, 9 and 11, the resulting simulations were very similar and hard to distinguish from each other. \texttt{max\_timestep} was set to 0.002s in all of the simulations in Fig. \ref{fig:dam_comparisons_iterations}. 
+simulations, the timestep that was dynamically calculated using the CFL condition became very small and prevented the simulation from progressing at a reasonble pace. When \texttt{nr\_iterations} was set to 5, 7, 9 and 11, the resulting simulations were very similar and hard to distinguish from each other. \texttt{max\_timestep} was set to 0.002s in all of the simulations in Fig. \ref{fig:dam_comparisons_iterations}.
+
+\subsection{Convergence}
+\label{subsec:convergence}
+
+To further demonstrate the effect of the various parameters on the two methods Fig. \ref{fig:convergence_sph} and Fig. \ref{fig:convergence_pbf} show snapshots of three different simulations of a waterdroplet falling into a tank of water for WCSPH and PBF respectively.
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{images/convergence_sph.png}
+  \caption{Waterdroplet simulation using WCSPH. Left, a very unstable simulation with high forces and low resistance. Middle, a stable simulation with lower stiffness and tension and higher resistance. Right, a very stable simulation with high tension forces. Maximum density against the frame time plottet at the bottom.}
+  \label{fig:convergence_sph}
+\end{figure*}
+The maximum density against the frametime is shown at the bottom of each simulation.
+Considering the WCSPH simulation in Fig. \ref{fig:convergence_sph}, the very left simulation shows a high degree of unstability. The stiffness ist set to a high value of 5000, a relatively high tension of 0.5 and low values for viscosity, smoothing and drag. The maximum timestep is 2ms. The maximum density plot shows a lot of intense and sudden peaks with a rather slow descend towards the rest density. The simulation immediately explodes at the beginning and comes to rest very slowly.
+The simulation in the middle image has a reduced sitffness of 3000, higher smoothing and drag and a reduced tension parameter. The result is a much more stable simulation with some particles bouncing around. The maximum density shows much less intenseful changes in the density, except for in the current frame, few moments after the waterdroplet landed in the watertank. The contracting watermasses in the middle cause a momentary peak in the density with causes the fluid particles to splash upwards. This is a very natural and desired behaviour. Decreasing the timestep down to 1ms, increasing tension and adhesion forces to a relatively high value of 1, as well as decreasing smoothing and increasing viscosity by a small amount leads to the simulation as shown on the right. The simulation is very stable despite the high forces on the system. The maximum density graph suggests a fast convergence rate towards the rest density. The peaks increase at a lower rate than at the other two simulations and don't arise suddenly.
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{images/convergence_pbf.png}
+  \caption{Waterdroplet simulation using PBF. Left, simulation with very high maximum timestep, microexplosions occour at the current frame. Middle, a reduced timestep keeps the system more stable, the timestep is still very high and the density plot shows minor artifacts. Right, stable but very slow and viscous simulation, lower timestep and higher tension, adhesion and viscosity. }
+  \label{fig:convergence_pbf}
+\end{figure*}
+
+Figure \ref{fig:convergence_pbf} shows the same scene using three different sets of parameters for the PBF solver. The left simulation has a very high timestep of 28ms. The simulation appears to be smooth until microexplosions - as seen in the current frame - do occur. The microexplosion is noticable in the sudden and intense peaks in the maximum density plot. Decreasing the timestep to a value of 16ms, which is still very high compared to an WCSPH simulation, and increasing the viscosity by a factor of ten does stabilize the system a lot. However, the maximum density plot shows some anomalies. The right simulation has a timestep of 4ms, higher tension and adhesion forces of 1 and the viscosity again increased by a factor of ten. The parameters are now comparable to the right WCSPH simulation of figure \ref{fig:convergence_sph}, except for smoothing and timestep, which is higher by a factor of 4. While the simulation is stable and shows no anomalies, the fluid appears very viscous, slow and has lost a lot of energy.
+
+
 
 \section{Discussion}
 \label{sec:discussion}
 In this section, we discuss the results that are documented in Sec. \ref{sec:results}. The general characteristics of the WCSPH and the PBF solver are discussed in Sec. \ref{disc:comparison_general}. The results of simulations using tension and adhesion are discussed in Sec. \label{disc:comparison_tension} and \label{disc:comparison_adhesion}.
-The impact of XSPH smoothing, stiffness (WCSPH) and iterations (PBF) on the simulations are evaluated in Sec. \ref{disc:comparison_smoothing}, Sec. \ref{disc:comparison_stiffness} and Sec. \ref{disc:comparison_iterations}, respectively.
+The impact of XSPH smoothing, stiffness (WCSPH) and iterations (PBF) on the simulations are evaluated in Sec. \ref{disc:comparison_smoothing}, Sec. \ref{disc:comparison_stiffness} and Sec. \ref{disc:comparison_iterations}, respectively. In Sec. \ref{disc:convergence} we will discuss the behaviour of the water droplet scenes. 
 
 \subsection{Comparison: General}
 \label{disc:comparison_general}
@@ -429,7 +455,17 @@ to 10000 would become instable as well.
 During every simulation step with the PBF solver, the density constraints (Eq. \ref{eg:pbfconstraint}) are minimized iteratively \cite{macklin2013}. Increasing the number of iterations trades runtime performance of the simulation for lower compressibility of the fluid. In Sec. \ref{subsec:pbf_param_iterations}, we observed
 that simulations are almost identical regardless of the exact number of iterations, as long as the number of iterations is sufficiently high. In Fig. \ref{fig:dam_comparisons_iterations}, this was the case for all simulations that used at least five iterations per simulation step. Simulations that used
 an insufficient number of iterations stopped progressing at a reasonable pace after few frames, as the timestep that was dynamically calculated using the CFL condition approached 0s. This is due to excessive particle velocities. Particle velocities are expected to explode if an insufficient number of iterations
-is used in the PBF solver, as a particle that has high density after a position update without pressure forces will have a significant position changes in the first couple of iterations. As the particle velocity directly depends on these position changes, the new particle velocity will be big as well.  
+is used in the PBF solver, as a particle that has high density after a position update without pressure forces will have a significant position changes in the first couple of iterations. As the particle velocity directly depends on these position changes, the new particle velocity will be big as well.
+
+\subsection{Convergence}
+\label{disc:convergence}
+
+The waterdroplet scenario shown in the results showcases the behavior of the WCSPH and PBF solvers. The WCSPH solver has a strong reaction to high forces, such as caused by stiffness and tension, which make the system unstable. A measure to counteract such high forces is to introduce resistivity in the form of viscoscity, smoothing and drag into the system. As suggested in the introduction to the SPH framework in Sec. \ref{subsec:wcsph}, due to the EOS, the WCSPH simulation behaves macroscopically like a mass spring system. Without resistance impeding on high oscillations causes by the EOS, the simulation much like a driven oscillator, would explode as energy accumulates in the system.
+An even more effective approach is to decrease the maximum timestep further down to stabilize the system. The WCSPH solver is what is known in numerics as a \textit{stiff} system, which means that high forces require rather small timesteps.
+
+The maximum densities can tell us about the time and intensity of impactful events in the peaks. It is generally desired, that the density of the system converges quickly to the rest density and that small deviations around the rest density occur at a slow and steady rate. Stable simulations show display this behaviour in their density, while unstable simulations show intense and sudden peaks and doe not converge quickly to the rest density.
+
+The PBF solver tolerates much higher timesteps but tends to show microexplosions as artefacts of unstability, especially at high particle counts. Parameter values equal to that of a similar WCSPH simulation tends to slow down the PBF simulation and extract a lot of energy from the system.
 
 \section{Conclusion}
 \label{sec:conclusion}
