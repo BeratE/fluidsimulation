@@ -348,6 +348,8 @@ simulations, the timestep that was dynamically calculated using the CFL conditio
 
 \section{Discussion}
 \label{sec:discussion}
+In this section, we discuss the results that are documented in Sec. \ref{sec:results}. The general characteristics of the WCSPH and the PBF solver are discussed in Sec. \ref{disc:comparison_general}. The results of simulations using tension and adhesion are discussed in Sec. \label{disc:comparison_tension} and \label{disc:comparison_adhesion}.
+The impact of XSPH smoothing, stiffness (WCSPH) and iterations (PBF) on the simulations are evaluated in Sec. \ref{disc:comparison_smoothing}, Sec. \ref{disc:comparison_stiffness} and Sec. \ref{disc:comparison_iterations}, respectively.
 
 \subsection{Comparison: General}
 \label{disc:comparison_general}
@@ -377,6 +379,7 @@ have to be tested more thoroughly, possibly by taking a closer look at particle 
 %% Adhesion
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Comparison: Adhesion}
+\label{disc:comparison_adhesion}
 As briefly discussed in Sec. \ref{disc:comparison_general}, adhesion models an attractive force between boundary and fluid particles \cite{akinci2013}. In Fig. \ref{fig:adhesion} we observed that the higher the \texttt{adhesion} value, the more fluid is attached to the icosahedron for both WCSPH and PBF, which matches our expectations. 
 Interestingly, when \texttt{adhesion} is set to 5 with the WCSPH solver, the fluid particles that touched the icosahedron became almost entirely stuck to it, even resisting gravitational forces. This suggests that adhesion forces are stronger when the WCSPH solver is used in comparison to the PBF solver. It is important to note that the opposite observation
 was made in Sec. \ref{disc:comparison_tension} while discussing surface tension. One possible hypothesis could be that fluid particles are dragged down the icosahedron by neighboring fluid particles due to stronger tension forces, which overcome even higher adhesion values when the PBF solver is used. 
@@ -389,6 +392,7 @@ of the icosahedron. Finally, if this hypothesis were true, we would expect a sim
 %% Smoothing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Comparison: Smoothing}
+\label{disc:comparison_smoothing}
 According to \cite{monaghan1989}, XSPH smoothing can be used to ensure that particles that are close to each other will have nearly identical velocities. This helps preventing regions where SPH particles pass through each other without increasing fluid viscosity. In our experiments in Fig. \ref{fig:dam_comparisons_smoothing}, we observed that particles velocities 
 indeed seem to be closer to their neighbors' velocities when XSPH smoothing is used. However, this effect was much more pronounced for the PBF solver. Most likely, this can be attributed to the fact that smoothing is applied without taking pressure forces into account in PBF. Consequently, most particle velocities that are used for XSPH smoothing in the PBF solver have smaller
 magnitudes than their counterparts in the WCSPH solver. As a result, the absolute difference between velocities of neighboring particles after XSPH smoothing is much smaller for the PBF solver. If the density constraint was already minimized in the previous timestep, the $\Delta x$ that are calculated during the constraint minimization of the current timestep will be small.
@@ -399,6 +403,7 @@ on the WCSPH solver in simulations with a smaller stiffness value again.
 %% Stiffness
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{SPH Parameter: Stiffness}
+\label{disc:comparison_stiffness}
 In the WCSPH solver, the particle pressures are computed by multiplying positive deviations in particle density from rest density with a \texttt{stiffness} constant (Eq. \ref{eq:pressure}). Thus, the higher the \texttt{stiffness} constant, the higher the resulting particle pressures, which in turn leads
 to higher particle velocities. In Sec. \ref{subsec:sph_param_stiffness} we observed that the difference between simulations with \texttt{stiffness} set to 2500 and 10000 were minor. However, if the \texttt{stiffness} is set to 25000 the simulation becomes instable. \cite{solenthaler09} suggest that 
 higher \texttt{stiffness} values require lower timesteps. It is possible that the simulation with \texttt{stiffness} set to 25000 would be stable, if the timestep was decreased accordingly. On the other hand, if the timestep was increased, it is plausible that the simulation with \texttt{stiffness} set 
@@ -409,6 +414,7 @@ to 10000 would become instable as well.
 %% Iterations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{PBF Parameter: Iterations}
+\label{disc:comparison_iterations}
 During every simulation step with the PBF solver, the density constraints (Eq. \ref{eg:pbfconstraint}) are minimized iteratively \cite{macklin2013}. Increasing the number of iterations trades runtime performance of the simulation for lower compressibility of the fluid. In Sec. \ref{subsec:pbf_param_iterations}, we observed
 that simulations are almost identical regardless of the exact number of iterations, as long as the number of iterations is sufficiently high. In Fig. \ref{fig:dam_comparisons_iterations}, this was the case for all simulations that used at least five iterations per simulation step. Simulations that used
 an insufficient number of iterations stopped progressing at a reasonable pace after few frames, as the timestep that was dynamically calculated using the CFL condition approached 0s. This is due to excessive particle velocities. Particle velocities are expected to explode if an insufficient number of iterations

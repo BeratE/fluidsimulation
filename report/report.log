@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7350 64-bit) (preloaded format=pdflatex 2020.4.14)  19 FEB 2021 16:05
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7350 64-bit) (preloaded format=pdflatex 2020.4.14)  19 FEB 2021 16:23
 entering extended mode
 **c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex
 (c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex
@@ -264,7 +264,14 @@ Package: fancyhdr 2019/01/31 v3.10 Extensive control of page headers and footers
 \f@nch@O@erf=\skip70
 \f@nch@O@olf=\skip71
 \f@nch@O@orf=\skip72
-) (c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.aux)
+) (c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.aux
+
+LaTeX Warning: Label `disc:comparison_tension' multiply defined.
+
+
+LaTeX Warning: Label `disc:comparison_adhesion' multiply defined.
+
+)
 \openout1 = `report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 35.
@@ -505,55 +512,65 @@ File: images/adhesion.0160.png Graphic file (type png)
 Package pdftex.def Info: images/adhesion.0160.png  used on input line 343.
 (pdftex.def)             Requested size: 469.75502pt x 237.5265pt.
 
-LaTeX Warning: Citation `macklin2013' on page 7 undefined on input line 356.
+LaTeX Warning: Citation `macklin2013' on page 7 undefined on input line 358.
 
 [7] [8 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/smallDam_IX_X.0036.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/smallDam_XI_XII.0036.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/density_graphs.PNG>] [9 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/smallDam_XI_XII_tilted.0160.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/tension.0053.png (PNG copy)>] [10 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/iterations.0036.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/smoothing.0031.png (PNG copy)>] [11 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/stiffness.0036.png (PNG copy)> <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/adhesion.0160.png (PNG copy)>]
 
-LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 363.
+LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 365.
 
 
-LaTeX Warning: Citation `akinci2012' on page 12 undefined on input line 363.
+LaTeX Warning: Citation `akinci2012' on page 12 undefined on input line 365.
 
 
-LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 371.
+LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 373.
 
 
-LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 380.
+LaTeX Warning: Citation `akinci2013' on page 12 undefined on input line 383.
 
 [12]
 
-LaTeX Warning: Citation `monaghan1989' on page 13 undefined on input line 392.
+LaTeX Warning: Citation `monaghan1989' on page 13 undefined on input line 396.
 
 
-LaTeX Warning: Citation `schechter2012' on page 13 undefined on input line 395.
+LaTeX Warning: Citation `schechter2012' on page 13 undefined on input line 399.
 
 
-LaTeX Warning: Citation `solenthaler09' on page 13 undefined on input line 403.
+LaTeX Warning: Citation `solenthaler09' on page 13 undefined on input line 408.
 
 
-LaTeX Warning: Citation `macklin2013' on page 13 undefined on input line 412.
+Underfull \vbox (badness 7451) has occurred while \output is active []
 
-(c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.bbl
+
+
+LaTeX Warning: Citation `macklin2013' on page 13 undefined on input line 418.
+
+
+Underfull \vbox (badness 1796) has occurred while \output is active []
+
+ [13] (c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.bbl
 
 LaTeX Warning: Empty `thebibliography' environment on input line 3.
 
-) [13] [14
+) [14
 
 ] (c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.aux)
 
 LaTeX Warning: There were undefined references.
 
+
+LaTeX Warning: There were multiply-defined labels.
+
  ) 
 Here is how much of TeX's memory you used:
- 7954 strings out of 480934
- 158701 string characters out of 2899449
- 403422 words of memory out of 3000000
- 23716 multiletter control sequences out of 15000+200000
+ 7958 strings out of 480934
+ 158809 string characters out of 2899449
+ 403505 words of memory out of 3000000
+ 23720 multiletter control sequences out of 15000+200000
  543369 words of font info for 68 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,11n,46p,1177b,550s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.pdf (14 pages, 4629261 bytes).
+Output written on c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.pdf (14 pages, 4629590 bytes).
 PDF statistics:
  159 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
