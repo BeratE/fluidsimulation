@@ -447,12 +447,17 @@ Fast computation times of the solvers are paramount in order to run simulations 
 
 \section{Outlook}
 \label{sec:future}
-The WCSPH and PBF implementation as well as the surface reconstruction offers a high level of concurency in the form of data parallelism. This means, that there are many parts in the programm where sequentially processed data can be split into independant groups which can be processed in parallel.
+Realistic simulations depend on properly selected simulation parameters. To compare different sets of parameters to each other, it is important that simulations are as fast as possible. In order to achieve this, we precomputed kernel weights and their derivatives, implemented parallelization using omp and used the CompactNSearch algorithm with z-sorting (see Sec. \ref{sec:methods}).
+In the future, quantitative analysis of the impact of these measures is required. Particularly, tuning the number of threads for omp parallelization, after how many simulation steps z-sorting is applied and how many buckets should be used for the precomputation of kernel weights is of interest. 
 
+Further, we would like to extend our solvers such that they can handle moving boundaries, as described in \cite{akinci2012}. To this end, it is required to synchronize boundary particles with rigid body state.
+
+Lastly, it would be interesting to compare our implementations of the WCSPH and PBF solvers with other solvers, such as the predictive-corrective incompressible SPH (PCISPH) \cite{solenthaler09}. Instead of using the EOS, fluid incompressibility is achieved by a prediction-correction scheme which propagates estimated density values
+through the fluid and updates the pressures such that incompressibility is achieved. PCISPH should allow for shorter simulation times, as longer timesteps will still yield stable simulations.
 % what are the next steps?
 % what did we learn from this and how could we apply this for the future?
 
-At this point we would like to thank our supervisors for giving us this insightful lecture during these hard times and their willingness to answer every nagging question asked in the meeting sessions. 
+Last, but not least, we would like to thank our supervisors for giving us this insightful lecture during these hard times and for their willingness to answer every nagging question asked in the meeting sessions. 
 
 
 
