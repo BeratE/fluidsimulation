@@ -9,3 +9,12 @@ compile_commands.json
 
 # Emacs
 .#*
+
+# Latex
+.el
+.bbl
+.blg
+.gz
+.aux
+.log
+.pdf
