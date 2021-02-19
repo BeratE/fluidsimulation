@@ -63,9 +63,9 @@ The motion of fluids is governed by the famous Navier-Stokes equation, as given 
 \begin{equation}
   \dot{v}_i = \frac{\partial v_i}{\partial t} = -\frac{1}{\rho_i}\nabla p_i +\nu \nabla^2 v_i + \frac{F^{ext}_i}{m_i}.
 \end{equation}
-The Lagrangian form denotes the sampling points as dynamic particles moving with the flow of the fluid. The above PDE describes the acceleration \( \dot{v}_i\) of such a particle \( i \) as depending on the internal pressure gradient \( \nabla p_i\) and the veloctity divergence \( \nabla^2 v_i\) of the fluid. The velocity divergence and friction coefficient \( \nu \) represent the viscoscity of the fluid due to internal friction. The pressure gradient drives the acceleration due to internal pressure differences, to achieve incompressebility. In theory the density of the fluid is said to be constant, 
+The Lagrangian form denotes the sampling points as dynamic particles moving with the flow of the fluid. The above PDE describes the acceleration \( \dot{v}_i\) of such a particle \( i \) as depending on the internal pressure gradient \( \nabla p_i\) and the veloctity divergence \( \nabla^2 v_i\) of the fluid. The velocity divergence and friction coefficient \( \nu \) represent the viscosity of the fluid due to internal friction. The pressure gradient drives the acceleration due to internal pressure differences, to achieve incompressibility. In theory the density of the fluid is said to be constant, 
 \(\frac{\delta \rho}{\delta t} = 0.\)
-In practice, absolute incompressebility is not achievable due to numerical errors. Sometimes small deviations from the rest density of the fluid is desirable. This will be discussed in the next chapters. \cite{bender2015, ihmsen2014}
+In practice, absolute incompressibility is not achievable due to numerical errors. Sometimes small deviations from the rest density of the fluid is desirable. This will be discussed in the next chapters. \cite{bender2015, ihmsen2014}
 
 As with many PDE describing natural phenomena, the Navier-Stokes equation has no analytical solution. If it had, this report would end here with a reference to the proof of someone who is now one million dollars richer. Nonetheless, numerical approximations to fluid dynamics exist and during the course of the practical lecture we were tasked to implement two such solvers, namely Weakly Compressible Smoothed Particle Hydrodynamics (WCSPH) \cite{ihmsen2014} and Position based Fluids (PBF) \cite{macklin2013}. 
 In the next section we will give a short overview of the used methods and implementation of the application.
@@ -78,6 +78,7 @@ In the following a short overview of the methodological background and implement
 For a thorough discussion of the SPH and PBF framework we refer the reader to the review of SPH fluids by Ihmsen et al. \cite{ihmsen2014} and to the original paper about PBF by Macklin et al. \cite{macklin2013}, as well as the works of Akinci et al. \cite{akinci2012, akinci2013}.
 
 \subsection{Weakly Compressible SPH}
+\label{subsec:wcsph}
 Smoothed Particle Hydrodynamics (SPH) is a class of particle based methods for fluid simulation with a long record of scientific publications.
 The core idea of SPH is to approximate any attribute \( A_i\) of a point at an arbitrary position \(\vec{x}_i\) by weighting the attributes of the immediate surrounding particles \(j \in N \);
 \begin{equation}
@@ -102,10 +103,11 @@ Weakly Compressible SPH first computes the particle density \(\rho_i\) using (\r
   p_i = max(0, B(\rho_i - \rho_0)),
   \label{eq:pressure}
 \end{equation}
-where \(B\) is a stiffness constant. Equation (\ref{eq:pressure}) is similar to hookes law, as the pressure and therefore the resulting force depends linearly on the displacement. Therefore WCSPH allows for a small degree of incompressebility of the fluid. We will later discuss the implications of this. 
-Using the formulations above we can derive expressions for the gradient and divergence field of an attribute and therefore compute the pressure and viscoscity term of the Navier-Stokes equation.
+where \(B\) is a stiffness constant. Equation (\ref{eq:pressure}) is similar to hookes law, as the pressure and therefore the resulting force depends linearly on the displacement. Therefore WCSPH allows for a small degree of incompressibility of the fluid. We will later discuss the implications of this. 
+Using the formulations above we can derive expressions for the gradient and divergence field of an attribute and therefore compute the pressure and viscosity term of the Navier-Stokes equation.
 
 \subsection{Position Based Fluids}
+\label{subsec:pbf}
 
 Position Based Fluids (PBF) is a relatively new method based on the authors previous work on Position Based Dynamics (PBD) \cite{muller2007}.
 Within this framework, a system is modelled using constraint functions, which describe the theoretical optimum or the equilibrium state. A solver will try to move the system towards the equilibrium by iteratively moving the positions of the sample points, such that the constraint violation is minimized. For fluidsimulations, PBF tries to achieve incompressibility by specifying the constraint (for a particle \(i\));
@@ -204,9 +206,79 @@ Figure \ref{fig:systemuml} gives a schematic UML diagram of the relation between
 A particlesystem is a collection of particles which are represented by basic attributes, such as mass, density, position, velocity, etc. Since it is vital to keep all attributes of a particlesystem consistent during computation, a particlesystem object is only allowed to be created by the emitter object. The emitter object is a singleton, which means that there is always one and only one single instance of the object during the runtime of the program. A particlesystem is present in two forms, either as fluid particles or as boundary particles. These subtypes posess attributes and methods responsible for the behaviour of fluid or boundary particles in a system. For example, boundary particles possess a seperate variable volume attribute and a method to compute the volume for each particle depending on the density, e.g. the number of boundary particles in close neighbourhood. All particlesystems make use of precomputed lookup tables of the kernels. Since the kernel is evaluated a large number of times per particle, the lookup tables provide a significant speedup.
 In addition, each solver has been parallelized using OpenMP. To reduce the overhead from excessive creation and deletion of threads, a parallel region is created once upon entering an integration step. In this case special care has to be taken to avoid race conditions due to shared memory between threads. 
 
-\section*{Results}
+\section{Results}
 \label{sec:results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% General Dam Break
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison: General}
+\label{subsec:comparison_general}
+In order to compare the characteristics of the WCSPH and the PBF solver and to showcase the impact of the parameters \texttt{fluid\_visc, boundary\_visc, tension} and \texttt{adhesion}, we simulated simple dam break scenarios with 74589 fluid particles using the WCSPH and the PBF solver. Fig. \ref{fig:dam_comparisons} shows frame 36 of these
+simulations. In the simulations shown in panel 1 and panel 2, \texttt{tension} and \texttt{adhesion} were turned off and \texttt{fluid\_visc} and \texttt{boundary\_visc} were set to 0.001 to prevent their impact from covering up differences between the two solvers. When the fluid system is simulated using the WCSPH solver, it can be seen that
+there are some fluid particles have higher velocities than their counterparts when the PBF solver was used. Consequently, fluid particles move up further along the y-axis - opposite to the direction of gravitational acceleration - when the WCSPH solver is used. The maximum particle densities during every frame of the simulations that are shown 
+in panel 1 and panel 2 are plotted in Fig. \ref{fig:max_densities}. Over the first sixty frames of the simulations, the maximum particle density per frame is significantly higher when the WCSPH solver was used. The biggest deviation between the respective maximum densities was observed in frame 16, with maximum densities of approx. 
+1100 $kg / m^3$ using the WCSPH solver and 1010 $kg / m^3$ using the PBF solver. 
 
+In panels 3 and 4 of Fig. \ref{fig:dam_comparisons}, \texttt{fluid\_visc} was increased from 0.001 to 0.025. Increasing \texttt{fluid\_visc} hides the differences between the WCSPH and PBF solver that were observed in panels 1 and 2. Further, it can be seen that the height of the wave is smaller in panel 3 and 4 in comparison to panels 1 and 2
+respectively, especially so for the simulations using the WCSPH solver (panel 1, panel 3).
+
+In panels 5 and 6 of Fig. \ref{fig:dam_comparisons}, \texttt{fluid\_visc} was decreased back to 0.001 and \texttt{boundary\_visc} was increased to 0.025. As \texttt{fluid\_visc} is decreased, the differences between the WCSPH and PBF solver that were observed in panel 1 and panel 3 manifest themselves again. For both the WCSPH and PBF solver, 
+there are more particles in proximity of the left boundary of the container when compared to panel 1 and panel 3. Additionally, the wave is narrower in panels 5 and 6. 
+
+In panels 7 and 8 of Fig. \ref{fig:dam_comparisons}, \texttt{fluid\_visc} and \texttt{boundary\_visc} are set to 0.001 again and \texttt{tension} and \texttt{adhesion} are set to 0.25 and 10 respectively. Compared to panel 1 and panel 3 respectively, a fluid tongue forms as the wave crashes. As indicated by the darker color of the fluid particles, 
+the densities of fluid particles at the top of the wave are higher for the WCSPH and PBF solver when \texttt{tension} and \texttt{adhesion} are turned on. Especially for the simulation using WCSPH, there are much less isolated fluid particles when \texttt{tension} is turned on. Comparing panels 5 and 6 with panels 7 and 8 respectively reveals the 
+differences between boundary viscosity and adhesion: Particles in proximity of the boundary have lower density when boundary viscosity is used than when adhesion is used. To further illustrate the difference between \texttt{boundary\_visc} and \texttt{adhesion}, frame 160 of the same simulations that are shown in panels 5 to 8 are shown with a
+different camera angle in panels 1 to 4 of Fig. \ref{fig:dam_comparisons_boundary_visc_adhesion}, respectively. It can be seen here that fluid particles that are in the proximity of the boundary sink back into the fluid again when using boundary viscosity with both the WCSPH and PBF solver. However, particles stay stuck to the container when adhesion
+is used for both solvers. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Tension
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison: Tension}
+\label{subsec:comparison_tension}
+
+We simulated fluid cubes of 54872 particles in the absence of gravity to investigate the impact of surface tension on simulations using the WCSPH and PBF solver. Frame 53 of these simulations with \texttt{tension} set to 0, 0.25 and 1 is shown in Fig. \ref{fig:tension}. For both the WCSPH and the PBF solver, the fluid cube stays in its initial configuration
+if \texttt{tension} is turned off. When \texttt{tension} is turned on, the fluid contracts into a spherical shape for both solvers. The higher the \texttt{tension} value, the faster this transition occurs. Generally, it seems like the spherical configuration is reached slightly faster when the PBF solver is used. It is important to note that when 
+\texttt{tension} is turned on, the fluid reaches a spherical configuration in all of the simulations presented in Fig. \ref{fig:tension} eventually. An earlier frame was chosen in order to show how quickly the fluid cube contracts with different \texttt{tension} values. Lastly, the densities of the fluid particles are more uniform as the spherical configuration
+is assumed when the PBF solver is used (see panels 2, 3, 5, 6).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Adhesion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison: Adhesion}
+\label{subsec:comparison_adhesion}
+
+In order to clearly demonstrate the effect of \texttt{adhesion} on the fluid simulation, we simulated a block of 67868 fluid particles falling onto an adhesive icosahedron using the WCSPH solver and the PBF solver. Fig. \ref{fig:adhesion} shows frame 160 of these simulations. For simulations using WCSPH, \texttt{adhesion} was set to 1, 2 and 5 in panels 1, 2 and 3 respectively. As the 
+\texttt{adhesion} value is increased, the amount of fluid that is stuck to the icosahedron increases. In panel 3, the \texttt{adhesion} value is high enough to cause fluid particles that directly touch the icosahedron to almost resist gravity entirely. When \texttt{adhesion} is set to 2 (panel 2), access fluid drips down the icosahedron in a stream
+that is narrower than the diameter of the icosahedron. This effect is still present when \texttt{adhesion} is set to 1 (panel 1), even though it is much less pronounced. For simulations using PBF, adhesion was set to 1, 3 and 10 in panels 4, 5 and 6, respectively. Again, more fluid particles are attached to the icosahedron as \texttt{adhesion} increases.
+The streams of liquid that drip off the icosahedron are much smaller than the icosahedron diameter when \texttt{adhesion} is set to 3 and 10. However, the stream is narrower when the \texttt{adhesion} is set to 3 instead of 10. It is important to note that fluid still drops off when PBF is used with high  \texttt{adhesion} values. This was not the cases
+for simulations using WCSPH. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Smoothing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison: Smoothing}
+\label{subsec:comparison_smoothing}
+Multiple dam break scenarios 74589 were simulated using the WCSPH and PBF solver to investigate the impact of XSPH smoothing. Fig. \ref{fig:dam_comparisons_smoothing} shows frame 31 of these simulations. It is notable, that the differences that were observed between the WCSPH and the PBF solver in panels 1 and 2 of Fig. \ref{fig:dam_comparisons} are less pronounced when XSPH smoothing
+is deactivated: Even in the simulation that used the PBF solver (panel 2), there are single particles with higher velocities than others. Increasing \texttt{xsph\_smoothing} to 1 leads to different outcomes when the WCSPH solver or the PBF solver is used (panel 3, panel 4). Increasing XSPH smoothing barely affects the behavior of the simulation at all when the WCSPH solver is used. However, when the
+PBF solver is used, increasing XSPH smoothing causes the fluid particles to lose energy and have a more viscous appearance. There are barely any fluid particles that split of from the rest of the fluid body, when \texttt{xsph\_smoothing} is set to 1 and the PBF solver is used.   
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Stiffness
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{SPH Parameter: Stiffness}
+\label{subsec:sph_param_stiffness}
+When the WCSPH solver is used, the \texttt{stiffness} parameter can be tuned to impact the behavior of the simulation. Dam break simulations with 74589 fluid particles were run with \texttt{stiffness} set to 2500, 10000 and 25000. Frame 36 of the resulting simulations is shown in panels 1, 2 and 3 of Fig. \ref{fig:dam_comparisons_stiffness}, respectively. When \texttt{stiffness} is set to 2500 and 10000
+the simulations are stable and look very similar to each other. However, increasing the stiffness to 25000 causes the simulation to become unstable.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Iterations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{PBF Parameter: Iterations}
+\label{subsec:pbf_param_iterations}
+When the PBF solver is used, the \texttt{nr\_iterations} that the PBF solver uses to minimize the density constraint can be set as a parameter. Dam break simulation with 74589 fluid particles were run with \texttt{nr\_iterations} set to 1, 3, 5, 7, 9 and 11. When \texttt{nr\_iterations} was set to 1 and 3, the simulations were stopped after five hours on frame 4 and 12, respectively. For both of these
+simulations, the timestep that was dynamically calculated using the CFL condition became very small and prevented the simulation from progressing at a reasonble pace. When \texttt{nr\_iterations} was set to 5, 7, 9 and 11, the resulting simulations were very similar and hard to distinguish from each other. \texttt{max\_timestep} was set to 0.002s in all of the simulations in Fig. \ref{fig:dam_comparisons_iterations}. 
+  
 \begin{figure*}
   \centering
   \includegraphics[width=0.8\textwidth]{images/smallDam_IX_X.0036.png}
@@ -233,9 +305,9 @@ In addition, each solver has been parallelized using OpenMP. To reduce the overh
 
 \begin{figure*}
   \centering
-  \includegraphics[width=\textwidth]{images/tension.0120.png}
-  \caption{Frame 160 of simulations of 19683 particles arranged in a block without gravity using the WCSPH and the PBF solver. In all simulations, smoothing was disabled. For simulations using WCSPH, \texttt{max\_timestep = 0.002, stiffness = 3000, fluid\_visc = 0.01 }. 
-  For simulations using PBF, \texttt{max\_timestep = 0.01, nr\_iterations = 5, fluid\_visc = 0.001}. \texttt{tension} is set as indicated in the panels.}
+  \includegraphics[width=\textwidth]{images/tension.0053.png}
+  \caption{Frame 160 of simulations of 54872 particles arranged in a block without gravity using the WCSPH and the PBF solver. In all simulations, smoothing and gravity was disabled. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s, stiffness = 2500, fluid\_visc = 0.001 }. 
+  For simulations using PBF, \texttt{max\_timestep = 0.002s, nr\_iterations = 7, fluid\_visc = 0.001}. \texttt{tension} is set as indicated in the panels.}
   \label{fig:tension}
 \end{figure*}
 
@@ -266,20 +338,81 @@ In addition, each solver has been parallelized using OpenMP. To reduce the overh
 \begin{figure*}
   \centering
   \includegraphics[width=\textwidth]{images/adhesion.0160.png}
-  \caption{Frame 160 of simulations of 67868 fluid particles falling onto an icosahedron using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.025 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  \caption{Frame 160 of simulations of 67868 fluid particles falling onto an icosahedron using the WCSPH and the PBF solver with surface reconstruction. In all simulations, a linear drag force of 0.025 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
   xsph\_smoothing = 0.25, stiffness = 2000, fluid\_visc = 0.01, boundary\_visc = 0.01, tension = 0.15}. For all simulations using the PBF solver \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7, fluid\_visc = 0.01, boundary\_visc = 0.005, tension = 0.1}. \texttt{adhesion} is set as noted in the panels.}
   \label{fig:adhesion}
 \end{figure*}
 
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Comparison: General}
+\label{disc:comparison_general}
+A solution to the Navier-Stokes equation can be numerically approximated using WCSPH (Sec. \ref{subsec:wcsph}) and PBF (Sec. \ref{subsec:pbf}). In order to showcase the differences between these two solvers, their general characteristics were investigated in Sec. \ref{subsec:comparison_general}. As described in Sec. \ref{subsec:comparison_general},
+it is more common to find single particles with a lot of energy when WCSPH is used. Hand in hand, we observed that the maximum particle density tends to be higher when the WCSPH solver is used (Fig. \ref{fig:max_densities}). As big positive deviations of the a particle's density from rest density cause big pressure terms in WCSPH (Eq. \ref{eq:pressure}), we suggest that
+the increased particle velocity in WCSPH results from violations of the fluid incompressibility during the simulation. This is in accordance with \cite{macklin2013}, where the maximum fluid density is used as a measure for fluid compressibility. On the other hand, PBF approximates a solution to the density constraint (Eq. \ref{eg:pbfconstraint}) during 
+every simulation step. This explains why the maximum densities in Fig. \ref{fig:max_densities} are smaller when the PBF solver is used. As a result, fluid incompressibility is not violated as much as when the WCSPH solver is used. Consequently, single particles with increased energy are rare with the PBF solver.  
+
+Increasing the fluid viscosity reduces the energy in the system and increases the stability of the simulation (Fig. \ref{fig:dam_comparisons}, panels 3, 4). This was to be expected, as fluid viscosity is added to model internal friction of the fluid. Especially for WCSPH, the results of the simulation change notably when fluid viscosity is increased. Due 
+to the interal friction, fluid particles move slower, consequently making it harder for fluid particles to get too close to each other during one simulation step. Thus, it is less likely that the fluid incompressibility is violated when fluid viscosity is used in the simulation, which would blow up pressure terms unreasonably (see. Eq. \ref{eq:pressure}).
+
+While investigating the difference between the effects of boundary viscosity and adhesion (Fig. \ref{fig:dam_comparisons}, panels 5, 6, 7, 8), we noticed that fluid particles that are close to the boundary have higher densities when adhesion is used in comparison to boundary viscosity. One likely explanation for this phenomenon is that adhesion models an attractive
+force between boundary and fluid particles \cite{akinci2013}, whereas boundary viscosity merely models friction between boundary and fluid particles \cite{akinci2012}. Thus, the distance between boundary and fluid particles when adhesion is used is smaller than their distance when boundary viscosity is used, leading to a higher particle density. This would be in line with the 
+observations from Fig. \ref{fig:dam_comparisons_boundary_visc_adhesion}, where fluid particles stick to boundary particles when adhesion is used, but not when boundary viscosity is used.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Tension
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison: Tension}
+\label{disc:comparison_tension}
+Surface tension is caused by cohesive forces among neighboring fluid particles \cite{akinci2013}. Fluid particles on the surface of the fluid do not have neighbors on all sides and are thus pulled inwards. This matches the observations that were made while simulating a fluid cube with surface tension in the absence of gravity (Fig. \ref{fig:tension}).
+As expected, fluid particles were not pulled inwards when surface tension was turned off, causing the cube to stay in its initial configuration. The higher the \texttt{tension} value, the faster the cube assumed a spherical configuration. The fact that the spherical configuration was assumed slower and that the particle densities were less uniform
+when using the WCSPH solver could have the same underlying cause: As discussed in Sec. \ref{disc:comparison_general}, the WCSPH is prone to violating fluid incompressibility. As surface tension draws particles closer to each other, their densities become too high and they might push particles slightly outwards again. However, this hypothesis would 
+have to be tested more thoroughly, possibly by taking a closer look at particle densities throughout the simulations using WCSPH. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Adhesion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison: Adhesion}
+As briefly discussed in Sec. \ref{disc:comparison_general}, adhesion models an attractive force between boundary and fluid particles \cite{akinci2013}. In Fig. \ref{fig:adhesion} we observed that the higher the \texttt{adhesion} value, the more fluid is attached to the icosahedron for both WCSPH and PBF, which matches our expectations. 
+Interestingly, when \texttt{adhesion} is set to 5 with the WCSPH solver, the fluid particles that touched the icosahedron became almost entirely stuck to it, even resisting gravitational forces. This suggests that adhesion forces are stronger when the WCSPH solver is used in comparison to the PBF solver. It is important to note that the opposite observation
+was made in Sec. \ref{disc:comparison_tension} while discussing surface tension. One possible hypothesis could be that fluid particles are dragged down the icosahedron by neighboring fluid particles due to stronger tension forces, which overcome even higher adhesion values when the PBF solver is used. 
+
+Further, it is remarkable that the diameter of the fluid stream that drips down the icosahedron does not decrease as \texttt{adhesion} is increased from 5 to 10 with the PBF solver. One possible explanation could be that an \texttt{adhesion} of 10 causes one layer of fluid particles to be stuck to the surface of the icosahedron entirely. The fluid particles
+in the stream that drips down the icosahedron would thus be blocked off from the boundary, leading to a smaller adhesive force. However, this would raise the question why there are areas on the surface of the icosahedron that were clearly touched by fluid before, but do not have any attached to it in the current frame. Such areas could be found e.g. at the top
+of the icosahedron. Finally, if this hypothesis were true, we would expect a similar behavior for the simulation using WCSPH and an \texttt{adhesion} of 5.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Smoothing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison: Smoothing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Stiffness
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{SPH Parameter: Stiffness}
+In the WCSPH solver, the particle pressures are computed by multiplying positive deviations in particle density from rest density with a \texttt{stiffness} constant (Eq. \ref{eq:pressure}). Thus, the higher the \texttt{stiffness} constant, the higher the resulting particle pressures, which in turn leads
+to higher particle velocities. In Sec. \ref{subsec:sph_param_stiffness} we observed that the difference between simulations with \texttt{stiffness} set to 2500 and 10000 were minor. However, if the \texttt{stiffness} is set to 25000 the simulation becomes instable. \cite{solenthaler09} suggest that 
+higher \texttt{stiffness} values require lower timesteps. It is possible that the simulation with \texttt{stiffness} set to 25000 would be stable, if the timestep was decreased accordingly. On the other hand, if the timestep was increased, it is plausible that the simulation with \texttt{stiffness} set 
+to 10000 would become instable as well.
 
 
-\section*{Conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Iterations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{PBF Parameter: Iterations}
+During every simulation step with the PBF solver, the density constraints (Eq. \ref{eg:pbfconstraint}) are minimized iteratively \cite{macklin2013}. Increasing the number of iterations trades runtime performance of the simulation for lower compressibility of the fluid. In Sec. \ref{subsec:pbf_param_iterations}, we observed
+that simulations are almost identical regardless of the exact number of iterations, as long as the number of iterations is sufficiently high. In Fig. \ref{fig:dam_comparisons_iterations}, this was the case for all simulations that used at least five iterations per simulation step. Simulations that used
+an insufficient number of iterations stopped progressing at a reasonable pace after few frames, as the timestep that was dynamically calculated using the CFL condition approached 0s. This is due to excessive particle velocities. Particle velocities are expected to explode if an insufficient number of iterations
+is used in the PBF solver, as a particle that has high density after a position update without pressure forces will have a significant position changes in the first couple of iterations. As the particle velocity directly depends on these position changes, the new particle velocity will be big as well.  
+
+\section{Conclusion}
 \label{sec:conclusion}
 
 % respong to introduction and discuss implications of result
 
 
-\section*{Outlook}
+\section{Outlook}
 \label{sec:future}
 The WCSPH and PBF implementation as well as the surface reconstruction offers a high level of concurency in the form of data parallelism. This means, that there are many parts in the programm where sequentially processed data can be split into independant groups which can be processed in parallel.
 

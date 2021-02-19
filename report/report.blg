@@ -3,7 +3,7 @@ Capacity: max_strings=4000, hash_size=5000, hash_prime=4253
 The top-level auxiliary file: report.aux
 The style file: alpha.bst
 I couldn't open database file references.bib
----line 46 of file report.aux
+---line 94 of file report.aux
  : \bibdata{references.bib
  :                        }
 I'm skipping whatever remains of this command
@@ -18,9 +18,10 @@ Warning--I didn't find a database entry for "muller2007"
 Warning--I didn't find a database entry for "ihmsen2011"
 Warning--I didn't find a database entry for "pineda1988"
 Warning--I didn't find a database entry for "lorensen1987"
+Warning--I didn't find a database entry for "solenthaler09"
 You've used 0 entries,
             2543 wiz_defined-function locations,
-            568 strings with 4550 characters,
+            569 strings with 4563 characters,
 and the built_in function-call counts, 24 in all, are:
 = -- 0
 > -- 0
