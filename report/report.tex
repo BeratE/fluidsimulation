@@ -236,7 +236,7 @@ When the fluid system is simulated using the WCSPH solver, it can be seen that
 some particles have higher velocity components, compared to the PBF simulation on the left.
 Consequently, fluid particles move up further along the y-axis - opposite to the direction of gravitational acceleration - when the WCSPH solver is used.
 
-The maximum particle densities of the simulations from panel 1 and 2 are plotted against the frametime in figure \ref{fig:max_densities}.
+The maximum particle densities of the simulations from panel 1 and 2 are plotted over the frametime in figure \ref{fig:max_densities}.
 Over the first sixty frames of the simulations, the maximum particle density is significantly higher when the WCSPH solver was used. The biggest deviation between the respective maximum densities is around frame 16, with maximum densities of approx. 1100 $kg / m^3$ using the WCSPH solver and 1010 $kg / m^3$ using the PBF solver. 
 
 \begin{figure*}[t]
@@ -309,7 +309,7 @@ More fluid particles are attached to the icosahedron as \texttt{adhesion} increa
 The streams of liquid that drip off the icosahedron are much smaller than the icosahedron diameter when \texttt{adhesion} is set to 3 and 10. However, the stream is narrower when the \texttt{adhesion} is set to 3 instead of 10. It is important to note that fluid still drops off when PBF is used with high  \texttt{adhesion} values.
 This was not the cases for simulations using WCSPH. 
 
-\begin{figure*}[!b]
+\begin{figure*}[h]
   \centering
   \includegraphics[width=0.8\textwidth]{images/smoothing.0031.png}
   \caption{Frame 31 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
@@ -317,6 +317,13 @@ This was not the cases for simulations using WCSPH.
   \label{fig:dam_comparisons_smoothing}
 \end{figure*}
 
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{images/stiffness.0036.png}
+  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.0005s, xsph\_smoothing = 0.5, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{stiffness} was 
+  set as noted in the panels.}
+  \label{fig:dam_comparisons_stiffness}
+\end{figure*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Smoothing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -328,12 +335,11 @@ However, we observed fewer particles on the left side and more particles on the 
 
 \begin{figure*}[!b]
   \centering
-  \includegraphics[width=\textwidth]{images/stiffness.0036.png}
-  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.0005s, xsph\_smoothing = 0.5, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{stiffness} was 
-  set as noted in the panels.}
-  \label{fig:dam_comparisons_stiffness}
+  \includegraphics[width=\textwidth]{images/iterations.0036.png}
+  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{nr\_iterations} was 
+  set as noted in the panels. The simulations in panel 1 and panel 2 were interrupted after five hours of simulation on frame 4 and 12 respectively.}
+  \label{fig:dam_comparisons_iterations}
 \end{figure*}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Stiffness
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -350,19 +356,19 @@ the simulations are stable and look very similar to each other. However, increas
 When the PBF solver is used, the \texttt{nr\_iterations} that the PBF solver uses to minimize the density constraint can be set as a parameter. Dam break simulation with 74589 fluid particles were run with \texttt{nr\_iterations} set to 1, 3, 5, 7, 9 and 11. When \texttt{nr\_iterations} was set to 1 and 3, the simulations were stopped after five hours on frame 4 and 12, respectively. For both of these
 simulations, the timestep that was dynamically calculated using the CFL condition became very small and prevented the simulation from progressing at a reasonble pace. When \texttt{nr\_iterations} was set to 5, 7, 9 and 11, the resulting simulations were very similar and hard to distinguish from each other. \texttt{max\_timestep} was set to 0.002s in all of the simulations in Fig. \ref{fig:dam_comparisons_iterations}.
 
-\subsection{Convergence}
-\label{subsec:convergence}
-
-To further demonstrate the effect of the various parameters on the two methods Fig. \ref{fig:convergence_sph} and Fig. \ref{fig:convergence_pbf} show snapshots of three different simulations of a waterdroplet falling into a tank of water for WCSPH and PBF respectively.
 \begin{figure*}[!b]
   \centering
   \includegraphics[width=\textwidth]{images/convergence_sph.png}
   \caption{Waterdroplet simulation using WCSPH. Left, a very unstable simulation with high forces and low resistance. Middle, a stable simulation with lower stiffness and tension and higher resistance. Right, a very stable simulation with high tension forces. Maximum density against the frame time plottet at the bottom.}
   \label{fig:convergence_sph}
 \end{figure*}
-The maximum density against the frametime is shown at the bottom of each simulation.
+
+\subsection{Convergence}
+\label{subsec:convergence}
+
+To further demonstrate the effect of the various parameters on the two methods Fig. \ref{fig:convergence_sph} and Fig. \ref{fig:convergence_pbf} show snapshots of three different simulations of a waterdroplet falling into a tank of water for WCSPH and PBF respectively. The maximum density against the frametime is shown at the bottom of each simulation.
 Considering the WCSPH simulation in Fig. \ref{fig:convergence_sph}, the very left simulation shows a high degree of unstability. The stiffness ist set to a high value of 5000, a relatively high tension of 0.5 and low values for viscosity, smoothing and drag. The maximum timestep is 2ms. The maximum density plot shows a lot of intense and sudden peaks with a rather slow descend towards the rest density. The simulation immediately explodes at the beginning and comes to rest very slowly.
-The simulation in the middle image has a reduced sitffness of 3000, higher smoothing and drag and a reduced tension parameter. The result is a much more stable simulation with some particles bouncing around. The maximum density shows much less intenseful changes in the density, except for in the current frame, few moments after the waterdroplet landed in the watertank. The contracting watermasses in the middle cause a momentary peak in the density with causes the fluid particles to splash upwards. This is a very natural and desired behaviour. Decreasing the timestep down to 1ms, increasing tension and adhesion forces to a relatively high value of 1, as well as decreasing smoothing and increasing viscosity by a small amount leads to the simulation as shown on the right. The simulation is very stable despite the high forces on the system. The maximum density graph suggests a fast convergence rate towards the rest density. The peaks increase at a lower rate than at the other two simulations and don't arise suddenly.
+The simulation in the middle image has a reduced sitffness of 3000, higher smoothing and drag and a reduced tension parameter. The result is a much more stable simulation with some particles bouncing around. The maximum density shows much less intensive changes - except for during the frame that is displayed in the figure - few moments after the waterdroplet landed in the watertank. The contracting watermasses in the middle cause a momentary peak in the density with causes the fluid particles to splash upwards. This is a very natural and desired behaviour. Decreasing the timestep down to 1ms, increasing tension and adhesion forces to a relatively high value of 1, as well as decreasing smoothing and increasing viscosity by a small amount leads to the simulation as shown on the right. The simulation is very stable despite the high forces on the system. The maximum density graph suggests a fast convergence rate towards the rest density. The peaks increase at a lower rate than at the other two simulations and do not arise suddenly.
 
 \begin{figure*}[!b]
   \centering
@@ -371,7 +377,7 @@ The simulation in the middle image has a reduced sitffness of 3000, higher smoot
   \label{fig:convergence_pbf}
 \end{figure*}
 
-Figure \ref{fig:convergence_pbf} shows the same scene using three different sets of parameters for the PBF solver. The left simulation has a very high timestep of 28ms. The simulation appears to be smooth until microexplosions - as seen in the current frame - do occur. The microexplosion is noticable in the sudden and intense peaks in the maximum density plot. Decreasing the timestep to a value of 16ms, which is still very high compared to an WCSPH simulation, and increasing the viscosity by a factor of ten does stabilize the system a lot. However, the maximum density plot shows some anomalies. The right simulation has a timestep of 4ms, higher tension and adhesion forces of 1 and the viscosity again increased by a factor of ten. The parameters are now comparable to the right WCSPH simulation of figure \ref{fig:convergence_sph}, except for smoothing and timestep, which is higher by a factor of 4. While the simulation is stable and shows no anomalies, the fluid appears very viscous, slow and has lost a lot of energy.
+Figure \ref{fig:convergence_pbf} shows the same scene using three different sets of parameters for the PBF solver. The left simulation has a very high timestep of 28ms. The simulation appears to be smooth until microexplosions - as seen in the current frame - do occur. The microexplosion is noticable in the sudden and intense peaks in the maximum density plot. Decreasing the timestep to a value of 16ms, which is still very high compared to a WCSPH simulation, and increasing the viscosity by a factor of ten does stabilize the system a lot. However, the maximum density plot shows some anomalies. The right simulation has a timestep of 4ms, higher tension and adhesion forces of 1 and the viscosity again increased by a factor of ten. The parameters are now comparable to the right WCSPH simulation of figure \ref{fig:convergence_sph}, except for smoothing and timestep, which is higher by a factor of 4. While the simulation is stable and shows no anomalies, the fluid appears very viscous, slow and has lost a lot of energy.
 
 
 
@@ -389,14 +395,6 @@ every simulation step. This explains why the maximum densities in Fig. \ref{fig:
 
 Increasing the fluid viscosity reduces the energy in the system and increases the stability of the simulation (Fig. \ref{fig:dam_comparisons}, panels 3, 4). This was to be expected, as fluid viscosity is added to model internal friction of the fluid. Especially for WCSPH, the results of the simulation change notably when fluid viscosity is increased. Due 
 to the interal friction, fluid particles move slower, consequently making it harder for fluid particles to get too close to each other during one simulation step. Thus, it is less likely that the fluid incompressibility is violated when fluid viscosity is used in the simulation, which would blow up pressure terms unreasonably (see. Eq. \ref{eq:pressure}).
-
-\begin{figure*}[!b]
-  \centering
-  \includegraphics[width=\textwidth]{images/iterations.0036.png}
-  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{nr\_iterations} was 
-  set as noted in the panels. The simulations in panel 1 and panel 2 were interrupted after five hours of simulation on frame 4 and 12 respectively.}
-  \label{fig:dam_comparisons_iterations}
-\end{figure*}
 
 While investigating the difference between the effects of boundary viscosity and adhesion (Fig. \ref{fig:dam_comparisons}, panels 5, 6, 7, 8), we noticed that fluid particles that are close to the boundary have higher densities when adhesion is used in comparison to boundary viscosity. One likely explanation for this phenomenon is that adhesion models an attractive
 force between boundary and fluid particles \cite{akinci2013}, whereas boundary viscosity merely models friction between boundary and fluid particles \cite{akinci2012}. Thus, the distance between boundary and fluid particles when adhesion is used is smaller than their distance when boundary viscosity is used, leading to a higher particle density. This would be in line with the 
@@ -463,7 +461,7 @@ is used in the PBF solver, as a particle that has high density after a position 
 The waterdroplet scenario shown in the results showcases the behavior of the WCSPH and PBF solvers. The WCSPH solver has a strong reaction to high forces, such as caused by stiffness and tension, which make the system unstable. A measure to counteract such high forces is to introduce resistivity in the form of viscoscity, smoothing and drag into the system. As suggested in the introduction to the SPH framework in Sec. \ref{subsec:wcsph}, due to the EOS, the WCSPH simulation behaves macroscopically like a mass spring system. Without resistance impeding on high oscillations causes by the EOS, the simulation much like a driven oscillator, would explode as energy accumulates in the system.
 An even more effective approach is to decrease the maximum timestep further down to stabilize the system. The WCSPH solver is what is known in numerics as a \textit{stiff} system, which means that high forces require rather small timesteps.
 
-The maximum densities can tell us about the time and intensity of impactful events in the peaks. It is generally desired, that the density of the system converges quickly to the rest density and that small deviations around the rest density occur at a slow and steady rate. Stable simulations show display this behaviour in their density, while unstable simulations show intense and sudden peaks and doe not converge quickly to the rest density.
+The maximum densities can tell us about the time and intensity of impactful events in the peaks. In this scenario, it is generally desired that the density of the system converges quickly to the rest density and that small deviations around the rest density occur at a slow and steady rate. Stable simulations display this behaviour in their density, while unstable simulations show intense and sudden peaks and doe not converge quickly to the rest density.
 
 The PBF solver tolerates much higher timesteps but tends to show microexplosions as artefacts of unstability, especially at high particle counts. Parameter values equal to that of a similar WCSPH simulation tends to slow down the PBF simulation and extract a lot of energy from the system.
 

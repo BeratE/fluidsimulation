@@ -1,12 +1,12 @@
 # Fdb version 3
-["bibtex report"] 1613762389 "report.aux" "report.bbl" "report" 1613762485
+["bibtex report"] 1613765441 "report.aux" "report.bbl" "report" 1613765441
   "C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/bibtex/bst/bibtex/alpha.bst" 1291864736 23907 a5f93555796fb564b924339521f10a7c ""
   "references.bib" 1613744711 6501 b8a0b617f563e0ff6522000be524bbff ""
-  "report.aux" 1613762484 9970 d06654b5ac924f2d8515331857d22d4d "pdflatex"
+  "report.aux" 1613765441 11242 adccf3cbf95600288ab4e2bde02d4454 "pdflatex"
   (generated)
   "report.bbl"
   "report.blg"
-["pdflatex"] 1613762483 "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex" "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.pdf" "report" 1613762485
+["pdflatex"] 1613765439 "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex" "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.pdf" "report" 1613765439
   "C:/Users/Dennis/AppData/Local/MiKTeX/2.9/miktex/data/le/pdftex/pdflatex.fmt" 1586859988 9904387 d175d2e671e3c82be23397001e6595c2 ""
   "C:/Users/Dennis/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map" 1613757039 81461 10297b352fbcf8d83f12008fe2583c1c ""
   "C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1233951848 1004 54797486969f23fa377b128694d548df ""
@@ -103,9 +103,11 @@
   "C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/tex/latex/tools/array.sty" 1580644884 12560 ce3f59ceae9d9a27bfe037d6bf1d903c ""
   "C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/tex/latex/translator/translator-basic-dictionary-English.dict" 1500798852 3435 0a4d096dde3f8fe682c2aedd33b8137d ""
   "C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/tex/latex/translator/translator.sty" 1559297644 8691 e154b4b39c7cd1cfa9301a391c44afdd ""
-  "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.aux" 1613762484 9970 d06654b5ac924f2d8515331857d22d4d ""
-  "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex" 1613762384 50770 f00b80fa8c5113209fba71f1f7ba074a ""
+  "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.aux" 1613765439 9 a94a2480d3289e625eea47cd1b285758 ""
+  "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex" 1613765436 56714 ec1eb3e4ac7a3d2724cdf04fbfbed0cb ""
   "images/adhesion.0160.png" 1613604994 495166 76eea2182e1cd6d797c89d71fa69b4c1 ""
+  "images/convergence_pbf.png" 1613763934 260981 cf4a6e29c4eb04a012692418c8d7f125 ""
+  "images/convergence_sph.png" 1613763934 566205 d2905f8e474c3ae2890ee7de4f173376 ""
   "images/density_graphs.PNG" 1613592525 34071 9dd43e0db40ce2dc1c3330f61f752fb6 ""
   "images/iterations.0036.png" 1613601944 586908 c49f18ff46da35e92ea285b6e95434dc ""
   "images/mesh.png" 1613579546 264663 a4d2edc653014fc776bcc16450035c76 ""
@@ -117,12 +119,12 @@
   "images/system.pdf" 1613579546 30581 e81c02b3f0f416dd923d294dc0fda648 ""
   "images/tension.0053.png" 1613692617 889023 3895cf743ceaf2a48b914922aac804a7 ""
   "images/triangle.pdf" 1613579546 9769 c5c4b59d47c7855584c72d9b0741e2f6 ""
-  "report.aux" 1613762484 9970 d06654b5ac924f2d8515331857d22d4d "pdflatex"
-  "report.bbl" 1613762389 52 0eba253fc001332e731e8aba3f23127b "bibtex report"
-  "report.tex" 1613762384 50770 f00b80fa8c5113209fba71f1f7ba074a ""
+  "report.aux" 0 -1 0 "pdflatex"
+  "report.bbl" 0 -1 0 "bibtex report"
+  "report.tex" 1613765436 56714 ec1eb3e4ac7a3d2724cdf04fbfbed0cb ""
   (generated)
+  "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.log"
+  "report.log"
   "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.pdf"
   "report.aux"
   "report.pdf"
-  "c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.log"
-  "report.log"
