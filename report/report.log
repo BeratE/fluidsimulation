@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7350 64-bit) (preloaded format=pdflatex 2020.4.14)  19 FEB 2021 16:23
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7350 64-bit) (preloaded format=pdflatex 2020.4.14)  19 FEB 2021 17:51
 entering extended mode
 **c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex
 (c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/report.tex
@@ -356,72 +356,78 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 35.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 
-LaTeX Warning: Citation `bender2015' on page 1 undefined on input line 68.
+LaTeX Warning: Citation `bender2015' on page 1 undefined on input line 66.
+
+
+LaTeX Warning: Citation `ihmsen2014' on page 1 undefined on input line 66.
+
+
+Underfull \hbox (badness 1603) in paragraph at lines 63--67
+\OT1/cmr/m/n/10.95 The La-grangian form de-notes the sam-pling
+ []
 
 
 LaTeX Warning: Citation `ihmsen2014' on page 1 undefined on input line 68.
 
 
-Underfull \hbox (badness 1603) in paragraph at lines 65--69
-\OT1/cmr/m/n/10.95 The La-grangian form de-notes the sam-pling
- []
+LaTeX Warning: Citation `macklin2013' on page 1 undefined on input line 68.
 
 
-LaTeX Warning: Citation `ihmsen2014' on page 1 undefined on input line 70.
+LaTeX Warning: Citation `ihmsen2014' on page 1 undefined on input line 77.
 
 
-LaTeX Warning: Citation `macklin2013' on page 1 undefined on input line 70.
+LaTeX Warning: Citation `macklin2013' on page 1 undefined on input line 77.
 
 
-LaTeX Warning: Citation `ihmsen2014' on page 1 undefined on input line 78.
+LaTeX Warning: Citation `akinci2012' on page 1 undefined on input line 77.
 
 
-LaTeX Warning: Citation `macklin2013' on page 1 undefined on input line 78.
-
-
-LaTeX Warning: Citation `akinci2012' on page 1 undefined on input line 78.
-
-
-LaTeX Warning: Citation `akinci2013' on page 1 undefined on input line 78.
+LaTeX Warning: Citation `akinci2013' on page 1 undefined on input line 77.
 
 [1{C:/Users/Dennis/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}
 
 
 ]
 
-LaTeX Warning: Citation `monaghan1992' on page 2 undefined on input line 90.
+LaTeX Warning: Citation `monaghan1992' on page 2 undefined on input line 91.
 
 
-LaTeX Warning: Citation `muller2007' on page 2 undefined on input line 112.
+LaTeX Warning: Citation `ihmsen2014' on page 2 undefined on input line 108.
 
 
-LaTeX Warning: Citation `bender2015' on page 2 undefined on input line 128.
+LaTeX Warning: Citation `muller2007' on page 2 undefined on input line 113.
 
 
-LaTeX Warning: Citation `ihmsen2011' on page 2 undefined on input line 128.
+LaTeX Warning: Citation `bender2015' on page 2 undefined on input line 129.
+
+
+LaTeX Warning: Citation `ihmsen2011' on page 2 undefined on input line 129.
 
 [2]
 
-LaTeX Warning: Citation `akinci2012' on page 3 undefined on input line 142.
+LaTeX Warning: Citation `monaghan1989' on page 3 undefined on input line 133.
+
+
+LaTeX Warning: Citation `akinci2012' on page 3 undefined on input line 143.
 
 <images/mesh.png, id=20, 1176.395pt x 609.27625pt>
 File: images/mesh.png Graphic file (type png)
 <use images/mesh.png>
-Package pdftex.def Info: images/mesh.png  used on input line 148.
+Package pdftex.def Info: images/mesh.png  used on input line 149.
 (pdftex.def)             Requested size: 234.8775pt x 121.63925pt.
 
-Overfull \hbox (5.0pt too wide) in paragraph at lines 148--149
+Overfull \hbox (5.0pt too wide) in paragraph at lines 149--150
  [][] 
  []
 
 
-LaTeX Warning: Citation `pineda1988' on page 3 undefined on input line 152.
+LaTeX Warning: Citation `pineda1988' on page 3 undefined on input line 153.
 
 
 LaTeX Warning: Citation `pineda1988' on page 3 undefined on input line 167.
 
 [3 <c:/Users/Dennis/Documents/rwth/master/ws20_21/fluid_simulation/fluidsimulation/report/images/mesh.png>]
-<images/triangle.pdf, id=25, 285.01161pt x 203.26718pt>
+<images/triangle.pdf, id=26, 285.01161pt x 203.26718pt>
 File: images/triangle.pdf Graphic file (type pdf)
 <use images/triangle.pdf>
 Package pdftex.def Info: images/triangle.pdf  used on input line 173.
@@ -431,9 +437,13 @@ Package pdftex.def Info: images/triangle.pdf  used on input line 173.
 LaTeX Warning: Citation `akinci2013' on page 4 undefined on input line 180.
 
 
+Underfull \vbox (badness 5446) has occurred while \output is active []
+
+
+
 LaTeX Warning: Citation `lorensen1987' on page 4 undefined on input line 188.
 
-<images/system.pdf, id=26, 633.29597pt x 425.59pt>
+<images/system.pdf, id=27, 633.29597pt x 425.59pt>
 File: images/system.pdf Graphic file (type pdf)
 <use images/system.pdf>
 Package pdftex.def Info: images/system.pdf  used on input line 197.
@@ -466,47 +476,47 @@ Underfull \hbox (badness 1400) in paragraph at lines 282--284
 \OT1/cmr/m/n/10.95 con-di-tion be-came very small and pre-vented
  []
 
-<images/smallDam_IX_X.0036.png, id=74, 1519.6775pt x 763.85374pt>
+<images/smallDam_IX_X.0036.png, id=75, 1519.6775pt x 763.85374pt>
 File: images/smallDam_IX_X.0036.png Graphic file (type png)
 <use images/smallDam_IX_X.0036.png>
 Package pdftex.def Info: images/smallDam_IX_X.0036.png  used on input line 287.
 (pdftex.def)             Requested size: 375.80544pt x 188.88829pt.
-<images/smallDam_XI_XII.0036.png, id=75, 1519.6775pt x 763.85374pt>
+<images/smallDam_XI_XII.0036.png, id=76, 1519.6775pt x 763.85374pt>
 File: images/smallDam_XI_XII.0036.png Graphic file (type png)
 <use images/smallDam_XI_XII.0036.png>
 Package pdftex.def Info: images/smallDam_XI_XII.0036.png  used on input line 288.
 (pdftex.def)             Requested size: 375.80544pt x 188.88829pt.
-<images/density_graphs.PNG, id=76, 1141.26375pt x 283.0575pt>
+<images/density_graphs.PNG, id=77, 1141.26375pt x 283.0575pt>
 File: images/density_graphs.PNG Graphic file (type png)
 <use images/density_graphs.PNG>
 Package pdftex.def Info: images/density_graphs.PNG  used on input line 296.
 (pdftex.def)             Requested size: 469.75502pt x 116.50781pt.
-<images/smallDam_XI_XII_tilted.0160.png, id=78, 1519.6775pt x 763.85374pt>
+<images/smallDam_XI_XII_tilted.0160.png, id=79, 1519.6775pt x 763.85374pt>
 File: images/smallDam_XI_XII_tilted.0160.png Graphic file (type png)
 <use images/smallDam_XI_XII_tilted.0160.png>
 Package pdftex.def Info: images/smallDam_XI_XII_tilted.0160.png  used on input line 303.
 (pdftex.def)             Requested size: 469.75502pt x 236.1162pt.
-<images/tension.0053.png, id=79, 1510.64375pt x 763.85374pt>
+<images/tension.0053.png, id=80, 1510.64375pt x 763.85374pt>
 File: images/tension.0053.png Graphic file (type png)
 <use images/tension.0053.png>
 Package pdftex.def Info: images/tension.0053.png  used on input line 311.
 (pdftex.def)             Requested size: 469.75502pt x 237.5265pt.
-<images/iterations.0036.png, id=80, 1510.64375pt x 763.85374pt>
+<images/iterations.0036.png, id=81, 1510.64375pt x 763.85374pt>
 File: images/iterations.0036.png Graphic file (type png)
 <use images/iterations.0036.png>
 Package pdftex.def Info: images/iterations.0036.png  used on input line 319.
 (pdftex.def)             Requested size: 469.75502pt x 237.5265pt.
-<images/smoothing.0031.png, id=81, 1519.6775pt x 763.85374pt>
+<images/smoothing.0031.png, id=82, 1519.6775pt x 763.85374pt>
 File: images/smoothing.0031.png Graphic file (type png)
 <use images/smoothing.0031.png>
 Package pdftex.def Info: images/smoothing.0031.png  used on input line 327.
 (pdftex.def)             Requested size: 469.75502pt x 236.1162pt.
-<images/stiffness.0036.png, id=82, 1510.64375pt x 385.44pt>
+<images/stiffness.0036.png, id=83, 1510.64375pt x 385.44pt>
 File: images/stiffness.0036.png Graphic file (type png)
 <use images/stiffness.0036.png>
 Package pdftex.def Info: images/stiffness.0036.png  used on input line 335.
 (pdftex.def)             Requested size: 469.75502pt x 119.85568pt.
-<images/adhesion.0160.png, id=83, 1510.64375pt x 763.85374pt>
+<images/adhesion.0160.png, id=84, 1510.64375pt x 763.85374pt>
 File: images/adhesion.0160.png Graphic file (type png)
 <use images/adhesion.0160.png>
 Package pdftex.def Info: images/adhesion.0160.png  used on input line 343.
@@ -562,17 +572,17 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 7958 strings out of 480934
- 158809 string characters out of 2899449
+ 7966 strings out of 480934
+ 158885 string characters out of 2899449
  403505 words of memory out of 3000000
- 23720 multiletter control sequences out of 15000+200000
- 543369 words of font info for 68 fonts, out of 3000000 for 9000
+ 23724 multiletter control sequences out of 15000+200000
+ 544609 words of font info for 72 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 38i,11n,46p,1177b,550s stack positions out of 5000i,500n,10000p,200000b,50000s
-<C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.pdf (14 pages, 4629590 bytes).
+ 38i,11n,46p,828b,550s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/Dennis/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on c:/Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.pdf (14 pages, 4638196 bytes).
 PDF statistics:
- 159 PDF objects out of 1000 (max. 8388607)
+ 163 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  61 words of extra memory for PDF output out of 10000 (max. 10000000)
 

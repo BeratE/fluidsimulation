@@ -55,24 +55,25 @@
 
 \section{Introduction} \label{sec:introduction}
 
-Fluids play a vital role in our lifes. Understanding the motion and behaviour of fluids is not only crucial to many fields of engineering, but it also aids us in creating beatiful virtual worlds, such as used in games and cinema. The simulation of fluids is a vast and rapidly growing field. During the course of this practical, we studied various methods, worked on simulations of our own and analysed different aspects a fluid solver.  
+Fluids play a vital role in our lifes. Understanding the motion and behaviour of fluids is not only crucial to many fields of engineering, but it also aids us in creating beautiful virtual worlds, such as used in games and cinema. The simulation of fluids is a vast and rapidly growing field. During the course of this practical, we implemented two different fluid solvers and evaluated their characteristics.
 
 The motion of fluids is governed by the famous Navier-Stokes equation, as given below in its Lagrangian form;
 \begin{equation}
   \mathbf{\dot{v}}_i = \frac{\partial v_i}{\partial t} = -\frac{1}{\rho_i}\nabla p_i +\nu \nabla^2 \mathbf{v}_i + \frac{F^{ext}_i}{m_i}.
 \end{equation}
-The Lagrangian form denotes the sampling points as dynamic particles moving with the flow of the fluid. The above PDE describes the acceleration \( \dot{v}_i\) of such a particle \( i \) as depending on the internal pressure gradient \( \nabla p_i\) and the veloctity divergence \( \nabla^2 \mathbf{v}_i\) of the fluid. The velocity divergence and friction coefficient \( \nu \) represent the viscoscity of the fluid due to internal friction. The pressure gradient drives the acceleration due to internal pressure differences, to achieve incompressebility. In theory the density of the fluid is said to be constant, 
+The Lagrangian form denotes the sampling points as dynamic particles moving with the flow of the fluid. The above partial differential equation (PDE) describes the acceleration \( \dot{v}_i\) of such a particle \( i \) as depending on the internal pressure gradient \( \nabla p_i\) and the veloctity divergence \( \nabla^2 \mathbf{v}_i\) of the fluid. The velocity divergence and friction coefficient \( \nu \) represent the viscoscity of the fluid due to internal friction. The pressure gradient drives the acceleration due to internal pressure differences, to achieve incompressebility. In theory the density of the fluid is said to be constant, 
 \(\frac{\delta \rho}{\delta t} = 0\).
-In practice, absolute incompressebility is not achievable due to numerical errors \cite{bender2015}. Sometimes small deviations from the rest density of the fluid is desirable \cite{ihmsen2014}. This will be discussed in the next chapters.
+In practice, absolute incompressebility is not achievable due to numerical errors \cite{bender2015}. Sometimes, small deviations of particle densities from the rest density of the fluid are desirable \cite{ihmsen2014}. 
 
-As with many PDE describing natural phenomena, the Navier-Stokes equation has no analytical solution. If it had, this report would end here with a reference to the proof of someone who is now one million dollars richer. Nonetheless, numerical approximations to fluid dynamics exist and during the course of the practical lecture we were tasked to implement two such solvers, namely Weakly Compressible Smoothed Particle Hydrodynamics (WCSPH) \cite{ihmsen2014} and Position based Fluids (PBF) \cite{macklin2013}. 
-In the next section we will give a short overview of the used methods and implementation of the application.
-We will then present various experiments and discuss our observations and the results.
+As with many PDE describing natural phenomena, the Navier-Stokes equation has no analytical solution. Nonetheless, numerical approximations to fluid dynamics exist and during the course of the practical lecture we were tasked to implement two such solvers, namely Weakly Compressible Smoothed Particle Hydrodynamics (WCSPH) \cite{ihmsen2014} and Position based Fluids (PBF) \cite{macklin2013}. 
+In the next section, we will give a short overview of the used methods and implementation of the application.
+We will then show the results of our experiments that were designed to demonstrate the differences between the WCSPH and the PBF solver and the impact of simulation parameters on the fluid behavior in Sec. \ref{sec:results}. In Sec. \ref{sec:discussion}, we provide interpretations for the 
+results of these experiments. Finally, we give concluding remarks and an outlook in Sec. \ref{sec:conclusion} and Sec. \ref{sec:future}.
 
 
 
 \section{Methods} \label{sec:methods}
-In the following a short overview of the methodological background and implementation will be given. In addition, certain aspects of the implementation that were done differently than from the given assignment will be presented.
+In the following, a short overview of the methodological background and implementation will be given. In addition, certain aspects of the implementation that differ from the instructions given on our assignment sheets will be presented.
 For a thorough discussion of the SPH and PBF framework we refer the reader to the review of SPH fluids by Ihmsen et al. \cite{ihmsen2014} and to the original paper about PBF by Macklin et al. \cite{macklin2013}, as well as the works of Akinci et al. \cite{akinci2012, akinci2013}.
 
 \subsection{Weakly Compressible SPH}
@@ -83,11 +84,11 @@ The core idea of SPH is to approximate any attribute \( A_i\) of a point at an a
   A_i = \sum_{j \in N} \frac{m_j}{\rho_j}  A_j \cdot  W(||\mathbf{x}_i - \mathbf{x}_j||/h).
   \label{eq:weight}
 \end{equation}
-Particle mass \(m_j\) and density \(p_j\) is used as a normalization factor.
-The weighting is performed by the so called kernel function \( W : \mathbb{R} \rightarrow \mathbb{R}\), with \(W(q) = \frac{1}{h^3}f(q)\).
-The argument is given as the ratio of the distance between two particles and the smoothing length \(h\), which is defined to be a multiple of the particle diameter; \(h = \mu \cdot 2r\).
+Here, $m_j / p_j$ is used as a normalization factor.
+The weighting is performed by the so called kernel function \( W : \mathbb{R} \rightarrow \mathbb{R}\), with \(W(q) = \frac{1}{h^3}f(q)\), 
+where $q$ is the ratio of the distance between two particles and the smoothing length \(h\), which is a multiple of the particle diameter; \(h = \mu \cdot 2r\).
 We set \(\mu = 1.2\), during the remainder of this report.
-The function for the kernel used throughout the application is the following cubic spline \cite{monaghan1992},
+The function $f$ that is used in the computation of the kernel weights is the following cubic spline \cite{monaghan1992},
 \begin{equation}
   f(q) = \frac{3}{2\pi}
   \begin{cases}
@@ -97,21 +98,20 @@ The function for the kernel used throughout the application is the following cub
   \end{cases}
   .
 \end{equation}
-It should be noted, that the effective radius of the kernel function, and therefore the number of neighbourhood particles taken into account, depends on the smoothing length.
-Weakly Compressible SPH first computes the particle density \(\rho_i\) using (\ref{eq:weight}) and then applies this to a so called Equation of State (EOS) to derive the resulting particle pressures \(p_i\). In the application the following EOS was used to derive the pressures;
+It should be noted, that the effective radius of the kernel function, and therefore the number of neighbourhood particles taken into account during the computation of a particle attribute, depends on the smoothing length.
+Weakly Compressible SPH first computes the particle density \(\rho_i\) using (\ref{eq:weight}) and then applies it to a so called Equation of State (EOS) to derive the resulting particle pressures \(p_i\). In the application the following EOS was used to derive the pressures;
 \begin{equation}
   p_i = max(0, B(\rho_i - \rho_0)),
   \label{eq:pressure}
 \end{equation}
-where \(B\) is a stiffness constant. To avoid attractive forces, we clamp the EOS to the positive range. Equation (\ref{eq:pressure}) is similar to Hook's Law, as the resulting force depends linearly on the density difference. Therefore WCSPH allows for a small degree of incompressebility of the fluid. We will later discuss the implications of this. 
-Using the formulations above we can derive expressions for the gradient and divergence field of an attribute and therefore compute the pressure and viscoscity term of the Navier-Stokes equation.
-\cite{ihmsen2014}
+where \(B\) is a stiffness constant. To avoid attractive forces, we clamp the EOS to the positive range. Equation (\ref{eq:pressure}) is similar to Hooke's Law, as the resulting force depends linearly on the density difference. Thus, WCSPH allows for a small degree of incompressebility of the fluid.
+Using the formulations above we can derive expressions for the gradient and divergence field of an attribute and therefore compute the pressure and viscoscity term of the Navier-Stokes equation \cite{ihmsen2014}.
 
 \subsection{Position Based Fluids}
 \label{subsec:pbf}
 
-Position Based Fluids (PBF) is a relatively new method based on the authors previous work on Position Based Dynamics (PBD) \cite{muller2007}.
-Within this framework, a system is modelled using constraint functions, which describe the theoretical optimum or the equilibrium state. A solver will try to move the system towards the equilibrium by iteratively moving the positions of the sample points, such that the constraint violation is minimized. For fluidsimulations, PBF tries to achieve incompressibility by specifying the constraint (for a particle \(i\));
+Position Based Fluids (PBF) is a newer method based on the authors' previous work on Position Based Dynamics (PBD) \cite{muller2007}.
+Within this framework, a system is modelled using constraint functions, which describe the theoretical optimum or the equilibrium state. A solver will try to move the system towards the equilibrium by iteratively moving the positions of the sample points such that the constraint violation is minimized. For fluidsimulations, PBF tries to achieve incompressibility by specifying the constraint (for a particle \(i\));
 \begin{equation}
   C_i(\hat{x}) = \frac{\rho_i(\hat{\mathbf{x}})}{\rho_0} - 1,
   \label{eg:pbfconstraint}
@@ -121,16 +121,16 @@ where \(\hat{\mathbf{x}}\) is the collection of all particles involved in the co
   \Delta\hat{\mathbf{x}} = M^{-1} \nabla C \lambda.
   \label{eg:deltax}
 \end{equation}
-An approximate solution to the linear equation above is derived using a method similar to a Jacobi iteration. The velocities are then derived implicitly from the differences of the positions between frames.
+An approximate solution to the linear equation above is derived using a method similar to a Jacobi iteration. The velocities are then derived implicitly from the differences of the positions between simulation steps.
 In the application PBF is used to replace the computation of the pressure term in the Navier-Stokes equation. To avoid attractive forces, which may lead to particle clumping and unwanted behaviour, the constraint from (\ref{eg:pbfconstraint}) is changed to an inequality constraint, \(C_i > 0\).
 
 \subsection{Neighborhood Search}
-For the previous compuations, the neighboring particles of all particle needs to be determined at runtime at least once per iteration. Therefore an efficient algorithm to quickly determine the neighborhood region of a particle is necessary for a good performance.
-The application uses the CompactNSearch algorithm by Bender et al. \cite{bender2015}, which implements the parallel, hash-based neighborhood search by Ihmsen et al. \cite{ihmsen2011}. To further enhance runtime performance, we perform a Z-index sort of particle positions after a fixed number of iterations. Sorting the particles depending on their spatial properties will decrease the number of cache misses and therefore speed up the access time significantly.
+For the previous compuations, for each particle, its neighboring particles need to be determined at runtime at least once per iteration. Therefore an efficient algorithm to quickly determine the neighborhood region of a particle is necessary for a good performance.
+The application uses the CompactNSearch algorithm by Bender et al. \cite{bender2015}, which implements the parallel, hash-based neighborhood search by Ihmsen et al. \cite{ihmsen2011}. To further enhance runtime performance, we perform a Z-index sort of particle positions after a fixed number of iterations. Sorting particles based on their spatial proximities is expected to decrease the number of cache misses and therefore speed up the access time significantly.
 
 \subsection{Time integration}
 The system is advanced in time using the semi-implicit euler method, which is also known as the symplectic euler, as it conserves the energy over time.
-Furthermore, XSPH smoothing is applied to the velocities.
+Furthermore, XSPH smoothing is applied to the velocities \cite{monaghan1989}.
 The effect is that neighboring velocities are aligned towards each other, resulting in a more stable simulation.
 The time step \(\Delta t\) is determined by the Courant-Friedrich-Levy (CFL) condition, \( \Delta t \leq \lambda \frac{2r}{||\mathbf{v}_{max}||}\), with particle radius \(r\) and maximum particle velocity \(v_{max}\). The CFL condition sets the timestep dynamically, so that the particles will only move a fraction of their diameter during one iteration of the symplectic euler scheme. 
 To further enhance the stability of the methods, we implemented a simple linear drag force which causes deaccalaration proportional to the velocity;
@@ -142,7 +142,7 @@ The drag coefficient \(k_{drag}\) should ideally be below 0.1 as to not slow dow
 \subsection{Boundary Interaction}
 To realise the interaction between the fluid and rigid boundaries, we use the boundary particle method by Akinci et al. \cite{akinci2012}. By taking advantage of the particle based nature of the presented methods we are able to integrate contributions from boundary particles into the calculations of densities, forces and position corrections.
 Boundaries in a scene are usually represented by triangle mesh models. By sampling each surface triangle, we are able to sample the whole input mesh.
-To this end is reasonable to dissolve a higher resolution mesh into a low resolution mesh which preserves the topological shape, use the low res mesh for the simulation and keep the original high resolution mesh for rendering the final simulation. This will reduce the overall number of triangles and therefore the number of sampled particles. Figure \ref{fig:mesh} shows and example of the armadillo mesh used for most simulations in this report.
+To this end, it is reasonable to convert a higher resolution mesh into a low resolution mesh which preserves the topological shape, use the low res mesh for the simulation and keep the original high resolution mesh for rendering the final simulation. This will reduce the overall number of triangles and therefore the number of sampled particles. Figure \ref{fig:mesh} shows a high resoltion and a low resolution model for an armadillo mesh.
 
 \begin{figure}[ht]
     \centering
@@ -163,9 +163,9 @@ The basis transform that will yield the projected point \(p \in \mathbb{R}^3\) i
 \label{eq:localtriangle}
 \end{equation}
 The orthonormal basis vectors of the triangle \(u, v \in \mathbb{R}^4\) are parallel to the plane. The basis vector perpendicular to the plane is not used. The origin of the local coordinate system is a triangle corner \(a \in \mathbb{R}^3\).
-Applying the pineda algorithm is now straightforward. We first enclose the triangle by an axis-aligned bounding box (AABB) in the local coordiante system.
-We then go along the bounding box and check for each sample point if its inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}.
-We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Sample points inside the triangle are shaded opaque blue and sample points outside are transparent. The borders are slightly offset as to allow more samples to be inside the triangle. This is to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet.
+At this stage, the Pineda algorithm is applied to sample the boundary surface. We first enclose the triangle by an axis-aligned bounding box (AABB) in the local coordiante system.
+We then go along the bounding box and check for each sample point whether it is inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}.
+We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Sample points inside the triangle are shaded opaque blue and sample points outside are transparent. The borders are slightly offset to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet.
 The oversampling is later compensated by recomputing the volume of each boundary particle depending on the number of particles in its close neighbourhood.
 
 \begin{figure}[ht]
@@ -199,12 +199,12 @@ The implementation uses a primarily imperative programming style with the except
     \label{fig:systemuml}
 \end{figure}
 
-The implementation is divided into two broad categories, systems and solvers.
-What we define as a system, includes fluid- and boundaryparticles, their generalization as particlesystems and auxilary constructs concerning particles. These represent the creation, state and behaviour of fluid- and boundary particles.
-On the other hand, we have two seperate specific solvers for WCSPH and PBF. They aggregate fluid- and boundarysystems to model the progression of the given system. The specific solvers share a some functions and general parameters over their superclass. Since the function that starts a simulation run is defined over the superclass, it is possible to determine the type of solver at runtime.
-Figure \ref{fig:systemuml} gives a schematic UML diagram of the relation between the different parts of the implementation.
-A particlesystem is a collection of particles which are represented by basic attributes, such as mass, density, position, velocity, etc. Since it is vital to keep all attributes of a particlesystem consistent during computation, a particlesystem object is only allowed to be created by the emitter object. The emitter object is a singleton, which means that there is always one and only one single instance of the object during the runtime of the program. A particlesystem is present in two forms, either as fluid particles or as boundary particles. These subtypes posess attributes and methods responsible for the behaviour of fluid or boundary particles in a system. For example, boundary particles possess a seperate variable volume attribute and a method to compute the volume for each particle depending on the density, e.g. the number of boundary particles in close neighbourhood. All particlesystems make use of precomputed lookup tables of the kernels. Since the kernel is evaluated a large number of times per particle, the lookup tables provide a significant speedup.
-In addition, each solver has been parallelized using OpenMP. To reduce the overhead from excessive creation and deletion of threads, a parallel region is created once upon entering an integration step. In this case special care has to be taken to avoid race conditions due to shared memory between threads.
+The implementation is divided into two broad categories, systems and solvers. Figure \ref{fig:systemuml} gives a schematic UML diagram of the relation between the different parts of the implementation.
+Systems include fluid particles and boundary particles, their generalization as particle systems and auxilary constructs. These implement the state and behaviour of fluid and boundary particles. A particlesystem is a collection of particles which are defined by their basic attributes, such as mass, density, position, velocity, etc. Particle systems are created via an Emitter object, which provides convience methods, such as creating particle systems from triangle meshes.
+Every particle system is either a fluid system or a boundary system. Fluid and boundary systems hold additional attributes that are required to model behaviors that are unique to fluids and boundaries, respectively. As an example, boundary particles store information about the particle volumes and provide a method to compute the volume for each particle. All particle systems make use of precomputed lookup tables of the kernels. Since the kernel is evaluated multiple times per particle, the lookup tables are expected to provide significant speedups.
+
+On the other hand, we have two seperate solvers for WCSPH and PBF. They aggregate fluid systems and boundary systems to model the progression of the given system. Both solvers share functions and general parameters over their superclass. Since the function that starts a simulation run is defined in the superclass, it is possible to determine the type of a solver at runtime.
+In addition, each solver has been parallelized using OpenMP. To reduce the overhead from excessive creation and deletion of threads, a parallel region is created once upon entering an integration step. In this case, special care has to be taken to avoid race conditions due to shared memory between threads.
 
 \section{Results}
 \label{sec:results}

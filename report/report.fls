@@ -136,6 +136,8 @@ INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfont
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msbm5.tfm
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmti10.tfm
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmr12.tfm
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx8.tfm
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx6.tfm
 OUTPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.pdf
 INPUT C:\Users\Dennis\AppData\Local\MiKTeX\2.9\pdftex\config\pdftex.map
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\mesh.png
@@ -166,6 +168,8 @@ INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimula
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\density_graphs.PNG
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\density_graphs.PNG
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\density_graphs.PNG
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx7.tfm
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx5.tfm
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\smallDam_XI_XII_tilted.0160.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\smallDam_XI_XII_tilted.0160.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\smallDam_XI_XII_tilted.0160.png
@@ -204,6 +208,8 @@ INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfo
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx10.pfb
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx12.pfb
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx12.pfb
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx8.pfb
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx8.pfb
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmex10.pfb
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmex10.pfb
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi10.pfb
