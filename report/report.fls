@@ -40,6 +40,10 @@ INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-cfg\g
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-cfg\graphics.cfg
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-def\pdftex.def
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-def\pdftex.def
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\dblfloatfix\dblfloatfix.sty
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\dblfloatfix\dblfloatfix.sty
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\fixltx2e.sty
+INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\fixltx2e.sty
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\caption\caption.sty
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\caption\caption.sty
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\tex\latex\caption\caption3.sty
@@ -180,11 +184,11 @@ INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimula
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\tension.0053.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\tension.0053.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\tension.0053.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\smoothing.0031.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\smoothing.0031.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\smoothing.0031.png
@@ -195,14 +199,12 @@ INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimula
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\stiffness.0036.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\stiffness.0036.png
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\stiffness.0036.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\adhesion.0160.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
+INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\images\iterations.0036.png
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmr9.tfm
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.bbl
-INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.bbl
 INPUT c:\Users\Dennis\Documents\rwth\master\ws20_21\fluid_simulation\fluidsimulation\report\report.aux
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx10.pfb
 INPUT C:\Users\Dennis\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx10.pfb

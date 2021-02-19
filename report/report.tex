@@ -13,6 +13,7 @@
 %xs\setmainfont{Arial}
 % Figures and Symbols
 \usepackage{graphicx}
+\usepackage{dblfloatfix}
 \usepackage{caption}
 \captionsetup[figure]{font=small}
 \usepackage{amsmath}
@@ -125,7 +126,7 @@ An approximate solution to the linear equation above is derived using a method s
 In the application PBF is used to replace the computation of the pressure term in the Navier-Stokes equation. To avoid attractive forces, which may lead to particle clumping and unwanted behaviour, the constraint from (\ref{eg:pbfconstraint}) is changed to an inequality constraint, \(C_i > 0\).
 
 \subsection{Neighborhood Search}
-For the previous compuations, for each particle, its neighboring particles need to be determined at runtime at least once per iteration. Therefore an efficient algorithm to quickly determine the neighborhood region of a particle is necessary for a good performance.
+For the previous computations, for each particle, its neighboring particles need to be determined at runtime at least once per iteration. Therefore an efficient algorithm to quickly determine the neighborhood region of a particle is necessary for a good performance.
 The application uses the CompactNSearch algorithm by Bender et al. \cite{bender2015}, which implements the parallel, hash-based neighborhood search by Ihmsen et al. \cite{ihmsen2011}. To further enhance runtime performance, we perform a Z-index sort of particle positions after a fixed number of iterations. Sorting particles based on their spatial proximities is expected to decrease the number of cache misses and therefore speed up the access time significantly.
 
 \subsection{Time integration}
@@ -139,17 +140,18 @@ To further enhance the stability of the methods, we implemented a simple linear 
 \end{equation}
 The drag coefficient \(k_{drag}\) should ideally be below 0.1 as to not slow down the simulation too much. The implemented drag force is not ideal and in no way realistic. Modelling realistic drag for SPH methods with multiphase coupling and liquid-air interaction remains an active research field.
 
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\textwidth]{images/mesh.png}
+  \caption{High resoltuion mesh for rendering (left) and low resolution mesh for simulation (right). The mesh on the left maintains the topological shape of the original.}
+  \label{fig:mesh}
+\end{figure}
+
 \subsection{Boundary Interaction}
 To realise the interaction between the fluid and rigid boundaries, we use the boundary particle method by Akinci et al. \cite{akinci2012}. By taking advantage of the particle based nature of the presented methods we are able to integrate contributions from boundary particles into the calculations of densities, forces and position corrections.
 Boundaries in a scene are usually represented by triangle mesh models. By sampling each surface triangle, we are able to sample the whole input mesh.
 To this end, it is reasonable to convert a higher resolution mesh into a low resolution mesh which preserves the topological shape, use the low res mesh for the simulation and keep the original high resolution mesh for rendering the final simulation. This will reduce the overall number of triangles and therefore the number of sampled particles. Figure \ref{fig:mesh} shows a high resoltion and a low resolution model for an armadillo mesh.
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.5\textwidth]{images/mesh.png}
-    \caption{High resoltuion mesh for rendering (left) and low resolution mesh for simulation (right). The mesh on the left maintains the topological shape of the original.}
-    \label{fig:mesh}
-\end{figure}
 To sample the particles on a triangle we perform a variation of the Pineda algorithm \cite{pineda1988} in the local coordinate system defined by the triangle surface.
 The basis transform that will yield the projected point \(p \in \mathbb{R}^3\) in two-dimensional homogenous space for a point in global homogenous space \(x \in \mathbb{R}^4\) is given in (\ref{eq:localtriangle}).
 \begin{equation}
@@ -162,11 +164,6 @@ The basis transform that will yield the projected point \(p \in \mathbb{R}^3\) i
   \cdot x 
 \label{eq:localtriangle}
 \end{equation}
-The orthonormal basis vectors of the triangle \(u, v \in \mathbb{R}^4\) are parallel to the plane. The basis vector perpendicular to the plane is not used. The origin of the local coordinate system is a triangle corner \(a \in \mathbb{R}^3\).
-At this stage, the Pineda algorithm is applied to sample the boundary surface. We first enclose the triangle by an axis-aligned bounding box (AABB) in the local coordiante system.
-We then go along the bounding box and check for each sample point whether it is inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}.
-We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Sample points inside the triangle are shaded opaque blue and sample points outside are transparent. The borders are slightly offset to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet.
-The oversampling is later compensated by recomputing the volume of each boundary particle depending on the number of particles in its close neighbourhood.
 
 \begin{figure}[ht]
     \centering
@@ -174,6 +171,14 @@ The oversampling is later compensated by recomputing the volume of each boundary
     \caption{Hexagonal sampling using pineda algorithm in local triangle space.}
     \label{fig:trianglesampling}
 \end{figure}
+
+
+The orthonormal basis vectors of the triangle \(u, v \in \mathbb{R}^4\) are parallel to the plane. The basis vector perpendicular to the plane is not used. The origin of the local coordinate system is a triangle corner \(a \in \mathbb{R}^3\).
+At this stage, the Pineda algorithm is applied to sample the boundary surface. We first enclose the triangle by an axis-aligned bounding box (AABB) in the local coordiante system.
+We then go along the bounding box and check for each sample point whether it is inside the triangle by checking against its edges, as described by Pineda \cite{pineda1988}.
+We use a hexagonal sampling pattern to ensure maximum coverage of the surface. Figure \ref{fig:trianglesampling} demonstrates the hexagonal sampling in the bounds of the rectangle enclosing the triangle in its local coordinate system. Sample points inside the triangle are shaded opaque blue and sample points outside are transparent. The borders are slightly offset to ensure that the triangle mesh of the boundary has no holes where the edges of two triangles meet.
+The oversampling is later compensated by recomputing the volume of each boundary particle depending on the number of particles in its close neighbourhood.
+
 We transform the sampled points back into global space by multiplying them by the transpose of the matrix in (\ref{eq:localtriangle}).
 
 \subsection{Tension and Adhesion}
@@ -201,9 +206,7 @@ The implementation uses a primarily imperative programming style with the except
 
 The implementation is divided into two broad categories, systems and solvers. Figure \ref{fig:systemuml} gives a schematic UML diagram of the relation between the different parts of the implementation.
 Systems include fluid particles and boundary particles, their generalization as particle systems and auxilary constructs. These implement the state and behaviour of fluid and boundary particles. A particlesystem is a collection of particles which are defined by their basic attributes, such as mass, density, position, velocity, etc. Particle systems are created via an Emitter object, which provides convience methods, such as creating particle systems from triangle meshes.
-Every particle system is either a fluid system or a boundary system. Fluid and boundary systems hold additional attributes that are required to model behaviors that are unique to fluids and boundaries, respectively. As an example, boundary particles store information about the particle volumes and provide a method to compute the volume for each particle. All particle systems make use of precomputed lookup tables of the kernels. Since the kernel is evaluated multiple times per particle, the lookup tables are expected to provide significant speedups.
-
-On the other hand, we have two seperate solvers for WCSPH and PBF. They aggregate fluid systems and boundary systems to model the progression of the given system. Both solvers share functions and general parameters over their superclass. Since the function that starts a simulation run is defined in the superclass, it is possible to determine the type of a solver at runtime.
+Every particle system is either a fluid system or a boundary system. Fluid and boundary systems hold additional attributes that are required to model behaviors that are unique to fluids and boundaries, respectively. As an example, boundary particles store information about the particle volumes and provide a method to compute the volume for each particle. All particle systems make use of precomputed lookup tables of the kernels. Since the kernel is evaluated multiple times per particle, the lookup tables are expected to provide significant speedups. On the other hand, we have two seperate solvers for WCSPH and PBF. They aggregate fluid systems and boundary systems to model the progression of the given system. Both solvers share functions and general parameters over their superclass. Since the function that starts a simulation run is defined in the superclass, it is possible to determine the type of a solver at runtime.
 In addition, each solver has been parallelized using OpenMP. To reduce the overhead from excessive creation and deletion of threads, a parallel region is created once upon entering an integration step. In this case, special care has to be taken to avoid race conditions due to shared memory between threads.
 
 \section{Results}
@@ -214,6 +217,15 @@ adhesion. In Sec. \ref{subsec:comparison_smoothing}, Sec. \ref{subsec:sph_param_
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% General Dam Break
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/smallDam_IX_X.0036.png}
+  \includegraphics[width=0.8\textwidth]{images/smallDam_XI_XII.0036.png}
+  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  xsph\_smoothing = 0.5, stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7}. The other parameters were set as noted in the panels.}
+  \label{fig:dam_comparisons}
+\end{figure*}
+
 \subsection{Comparison: General}
 \label{subsec:comparison_general}
 In order to compare the characteristics of the WCSPH and the PBF solver and to showcase the impact of the parameters \texttt{fluid\_visc, boundary\_visc, tension} and \texttt{adhesion}, we simulated simple dam break scenarios with 74.589 fluid particles using both the WCSPH and the PBF solver.
@@ -222,8 +234,25 @@ In the snapshots shown in panel 1 and panel 2, the parameters \texttt{tension} a
 When the fluid system is simulated using the WCSPH solver, it can be seen that
 some particles have higher velocity components, compared to the PBF simulation on the left.
 Consequently, fluid particles move up further along the y-axis - opposite to the direction of gravitational acceleration - when the WCSPH solver is used.
+
 The maximum particle densities of the simulations from panel 1 and 2 are plotted against the frametime in figure \ref{fig:max_densities}.
 Over the first sixty frames of the simulations, the maximum particle density is significantly higher when the WCSPH solver was used. The biggest deviation between the respective maximum densities is around frame 16, with maximum densities of approx. 1100 $kg / m^3$ using the WCSPH solver and 1010 $kg / m^3$ using the PBF solver. 
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{images/density_graphs.PNG}
+  \caption{Max. density in $kg / m^3$ during every frame of the simulations in panel 1 and panel 2 of Fig. \ref{fig:dam_comparisons}.}
+  \label{fig:max_densities}
+\end{figure*}
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/smallDam_XI_XII_tilted.0160.png}
+  \caption{Frame 160 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  xsph\_smoothing = 0.5, stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7}. The other parameters were set as noted in the panels.}
+  \label{fig:dam_comparisons_boundary_visc_adhesion}
+\end{figure*}
+
 
 In panels 3 and 4 of Fig. \ref{fig:dam_comparisons}, the parameter \texttt{fluid\_visc} was increased from 0.001 to 0.025. Increasing \texttt{fluid\_visc} hides the observable differences between the WCSPH and PBF simulation that were observed in panels 1 and 2.
 Furthermore, it can be seen that the height of the wave is smaller compared to the previous simulations. This attenuation of the wave is stronger in the WCSPH simulation.
@@ -231,6 +260,14 @@ Furthermore, it can be seen that the height of the wave is smaller compared to t
 In panels 5 and 6 of Fig. \ref{fig:dam_comparisons}, the parameter \texttt{fluid\_visc} was decreased back to 0.001 and \texttt{boundary\_visc} was increased to 0.025.
 As \texttt{fluid\_visc} is decreased, the differences between the WCSPH and PBF simulation become visible again.
 For both the WCSPH and PBF solver,  there are more particles in proximity of the left boundary of the container when compared to panel 1 and panel 3. Additionally, the wave is narrower in panels 5 and 6. 
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{images/tension.0053.png}
+  \caption{Frame 160 of simulations of 54872 particles arranged in a block without gravity using the WCSPH and the PBF solver. In all simulations, smoothing and gravity was disabled. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s, stiffness = 2500, fluid\_visc = 0.001 }. 
+  For simulations using PBF, \texttt{max\_timestep = 0.002s, nr\_iterations = 7, fluid\_visc = 0.001}. \texttt{tension} is set as indicated in the panels.}
+  \label{fig:tension}
+\end{figure*}
 
 In panels 7 and 8 of Fig. \ref{fig:dam_comparisons}, the parameters \texttt{fluid\_visc} and \texttt{boundary\_visc} are set to 0.001 again and \texttt{tension} and \texttt{adhesion} are set to 0.25 and 10 respectively. A wave tongue forms as the wave crashes. As indicated by the darker color of the fluid particles,  the densities of fluid particles at the top of the wave are higher for both simulations  when \texttt{tension} and \texttt{adhesion} are turned on.
 Note that, for the simulation using WCSPH, there are much less isolated fluid particles when \texttt{tension} is turned on. Comparing panels 5 and 6 with panels 7 and 8 respectively reveals the 
@@ -256,12 +293,28 @@ is assumed when the PBF solver is used (see panels 2, 3, 5, 6).
 \subsection{Comparison: Adhesion}
 \label{subsec:comparison_adhesion}
 
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{images/adhesion.0160.png}
+  \caption{Frame 160 of simulations of 67868 fluid particles falling onto an icosahedron using the WCSPH and the PBF solver with surface reconstruction. In all simulations, a linear drag force of 0.025 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  xsph\_smoothing = 0.25, stiffness = 2000, fluid\_visc = 0.01, boundary\_visc = 0.01, tension = 0.15}. For all simulations using the PBF solver \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7, fluid\_visc = 0.01, boundary\_visc = 0.005, tension = 0.1}. \texttt{adhesion} is set as noted in the panels.}
+  \label{fig:adhesion}
+\end{figure*}
+
 In order to clearly demonstrate the effect of \texttt{adhesion} on the fluid simulation, we simulated a block of 67868 fluid particles falling onto an adhesive icosahedron using the WCSPH solver and the PBF solver. Fig. \ref{fig:adhesion} shows frame 160 of these simulations. For simulations using WCSPH, \texttt{adhesion} was set to 1, 2 and 5 in panels 1, 2 and 3 respectively. As the 
 \texttt{adhesion} value is increased, the amount of fluid particles that stick to the icosahedron increases. In panel 3, the \texttt{adhesion} value is high enough to cause fluid particles that directly touch the icosahedron to almost resist gravity entirely. When \texttt{adhesion} is set to 2 (panel 2), access fluid drips down the icosahedron in a stream
 that is narrower than the diameter of the icosahedron. This effect is still present when \texttt{adhesion} is set to 1 (panel 1), even though it is much less pronounced. For simulations using PBF, adhesion was set to 1, 3 and 10 in panels 4, 5 and 6, respectively.
 More fluid particles are attached to the icosahedron as \texttt{adhesion} increases.
 The streams of liquid that drip off the icosahedron are much smaller than the icosahedron diameter when \texttt{adhesion} is set to 3 and 10. However, the stream is narrower when the \texttt{adhesion} is set to 3 instead of 10. It is important to note that fluid still drops off when PBF is used with high  \texttt{adhesion} values.
 This was not the cases for simulations using WCSPH. 
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/smoothing.0031.png}
+  \caption{Frame 31 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
+  stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, nr\_iterations = 7}. \texttt{xsph\_smoothing} was set as noted in the panels.}
+  \label{fig:dam_comparisons_smoothing}
+\end{figure*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Smoothing
@@ -271,6 +324,14 @@ This was not the cases for simulations using WCSPH.
 Multiple dam break scenarios 74589 were simulated using the WCSPH and PBF solver to investigate the impact of XSPH smoothing. Fig. \ref{fig:dam_comparisons_smoothing} shows frame 31 of these simulations. It is notable, that the differences that were observed between the WCSPH and the PBF solver in panels 1 and 2 of Fig. \ref{fig:dam_comparisons} are less pronounced when XSPH smoothing
 is deactivated: Even in the simulation that used the PBF solver (panel 2), there are single particles with higher velocities than others. Increasing \texttt{xsph\_smoothing} to 1 leads to different outcomes depending on the used solver (panel 3, panel 4). Increasing XSPH smoothing only affects the behavior of the simulation to a small extent when the WCSPH solver is used. 
 However, we observed fewer particles on the left side and more particles on the right side of the container when XSPH smoothing was activated. When the PBF solver is used, increasing XSPH smoothing causes the fluid particles to lose energy and have a more viscous appearance. There are barely any fluid particles that split off from the rest of the fluid body, when \texttt{xsph\_smoothing} is set to 1 and the PBF solver is used.   
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{images/stiffness.0036.png}
+  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.0005s, xsph\_smoothing = 0.5, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{stiffness} was 
+  set as noted in the panels.}
+  \label{fig:dam_comparisons_stiffness}
+\end{figure*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Stiffness
@@ -287,70 +348,6 @@ the simulations are stable and look very similar to each other. However, increas
 \label{subsec:pbf_param_iterations}
 When the PBF solver is used, the \texttt{nr\_iterations} that the PBF solver uses to minimize the density constraint can be set as a parameter. Dam break simulation with 74589 fluid particles were run with \texttt{nr\_iterations} set to 1, 3, 5, 7, 9 and 11. When \texttt{nr\_iterations} was set to 1 and 3, the simulations were stopped after five hours on frame 4 and 12, respectively. For both of these
 simulations, the timestep that was dynamically calculated using the CFL condition became very small and prevented the simulation from progressing at a reasonble pace. When \texttt{nr\_iterations} was set to 5, 7, 9 and 11, the resulting simulations were very similar and hard to distinguish from each other. \texttt{max\_timestep} was set to 0.002s in all of the simulations in Fig. \ref{fig:dam_comparisons_iterations}. 
-  
-\begin{figure*}
-  \centering
-  \includegraphics[width=0.8\textwidth]{images/smallDam_IX_X.0036.png}
-  \includegraphics[width=0.8\textwidth]{images/smallDam_XI_XII.0036.png}
-  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
-  xsph\_smoothing = 0.5, stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7}. The other parameters were set as noted in the panels.}
-  \label{fig:dam_comparisons}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{images/density_graphs.PNG}
-  \caption{Max. density in $kg / m^3$ during every frame of the simulations in panel 1 and panel 2 of Fig. \ref{fig:dam_comparisons}.}
-  \label{fig:max_densities}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{images/smallDam_XI_XII_tilted.0160.png}
-  \caption{Frame 160 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
-  xsph\_smoothing = 0.5, stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7}. The other parameters were set as noted in the panels.}
-  \label{fig:dam_comparisons_boundary_visc_adhesion}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{images/tension.0053.png}
-  \caption{Frame 160 of simulations of 54872 particles arranged in a block without gravity using the WCSPH and the PBF solver. In all simulations, smoothing and gravity was disabled. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s, stiffness = 2500, fluid\_visc = 0.001 }. 
-  For simulations using PBF, \texttt{max\_timestep = 0.002s, nr\_iterations = 7, fluid\_visc = 0.001}. \texttt{tension} is set as indicated in the panels.}
-  \label{fig:tension}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{images/iterations.0036.png}
-  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{nr\_iterations} was 
-  set as noted in the panels. The simulations in panel 1 and panel 2 were interrupted after five hours of simulation on frame 4 and 12 respectively.}
-  \label{fig:dam_comparisons_iterations}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{images/smoothing.0031.png}
-  \caption{Frame 31 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH and the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
-  stiffness = 2500}. For simulations using PBF, \texttt{max\_timestep = 0.002s, nr\_iterations = 7}. \texttt{xsph\_smoothing} was set as noted in the panels.}
-  \label{fig:dam_comparisons_smoothing}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{images/stiffness.0036.png}
-  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the WCSPH solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.0005s, xsph\_smoothing = 0.5, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{stiffness} was 
-  set as noted in the panels.}
-  \label{fig:dam_comparisons_stiffness}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \includegraphics[width=\textwidth]{images/adhesion.0160.png}
-  \caption{Frame 160 of simulations of 67868 fluid particles falling onto an icosahedron using the WCSPH and the PBF solver with surface reconstruction. In all simulations, a linear drag force of 0.025 was applied. For simulations using WCSPH, \texttt{max\_timestep = 0.0005s,
-  xsph\_smoothing = 0.25, stiffness = 2000, fluid\_visc = 0.01, boundary\_visc = 0.01, tension = 0.15}. For all simulations using the PBF solver \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, nr\_iterations = 7, fluid\_visc = 0.01, boundary\_visc = 0.005, tension = 0.1}. \texttt{adhesion} is set as noted in the panels.}
-  \label{fig:adhesion}
-\end{figure*}
 
 \section{Discussion}
 \label{sec:discussion}
@@ -366,6 +363,14 @@ every simulation step. This explains why the maximum densities in Fig. \ref{fig:
 
 Increasing the fluid viscosity reduces the energy in the system and increases the stability of the simulation (Fig. \ref{fig:dam_comparisons}, panels 3, 4). This was to be expected, as fluid viscosity is added to model internal friction of the fluid. Especially for WCSPH, the results of the simulation change notably when fluid viscosity is increased. Due 
 to the interal friction, fluid particles move slower, consequently making it harder for fluid particles to get too close to each other during one simulation step. Thus, it is less likely that the fluid incompressibility is violated when fluid viscosity is used in the simulation, which would blow up pressure terms unreasonably (see. Eq. \ref{eq:pressure}).
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{images/iterations.0036.png}
+  \caption{Frame 36 of simulations of 74589 fluid particles in a dam break scenario using the PBF solver. In all simulations, a linear drag force of 0.02 was applied and \texttt{max\_timestep = 0.002s, xsph\_smoothing = 0.1, fluid\_visc = 0.001, boundary\_visc = 0.001, tension = 0, adhesion = 0}. \texttt{nr\_iterations} was 
+  set as noted in the panels. The simulations in panel 1 and panel 2 were interrupted after five hours of simulation on frame 4 and 12 respectively.}
+  \label{fig:dam_comparisons_iterations}
+\end{figure*}
 
 While investigating the difference between the effects of boundary viscosity and adhesion (Fig. \ref{fig:dam_comparisons}, panels 5, 6, 7, 8), we noticed that fluid particles that are close to the boundary have higher densities when adhesion is used in comparison to boundary viscosity. One likely explanation for this phenomenon is that adhesion models an attractive
 force between boundary and fluid particles \cite{akinci2013}, whereas boundary viscosity merely models friction between boundary and fluid particles \cite{akinci2012}. Thus, the distance between boundary and fluid particles when adhesion is used is smaller than their distance when boundary viscosity is used, leading to a higher particle density. This would be in line with the 
